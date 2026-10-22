@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "412: continuous progress, pause and external rewind",
+    "412: scrub preview, word fill, cancel, seek acknowledgement and rejection",
+    "412: offset-aware line tap, manual reading, follow and song change",
+    "412: instrumental hold, untimed text and wrapped final verse",
+    "1280: continuous progress, pause and external rewind",
+    "1280: scrub preview, word fill, cancel, seek acknowledgement and rejection",
+    "1280: offset-aware line tap, manual reading, follow and song change",
+    "1280: instrumental hold, untimed text and wrapped final verse",
+    "reduced motion: hold inside verse, follow at verse boundary"
+  ],
+  "errors": [],
+  "passed": true
+}

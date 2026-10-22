@@ -1,0 +1,47 @@
+{
+  "viewports": [
+    {
+      "width": 360,
+      "height": 740,
+      "scroll": 360,
+      "bottom": 708,
+      "metadataBottom": 196.390625,
+      "playerTop": 561,
+      "webgl": true
+    },
+    {
+      "width": 412,
+      "height": 915,
+      "scroll": 412,
+      "bottom": 883,
+      "metadataBottom": 196.390625,
+      "playerTop": 736,
+      "webgl": true
+    },
+    {
+      "width": 812,
+      "height": 375,
+      "scroll": 812,
+      "bottom": 357,
+      "metadataBottom": 142.359375,
+      "playerTop": 227,
+      "webgl": true
+    }
+  ],
+  "checks": [
+    "native bridge",
+    "overlapping vocals",
+    "true/estimated timing",
+    "word modes",
+    "loading state",
+    "transport capability bits",
+    "paused seek + offset",
+    "lyric injection text",
+    "provider setting",
+    "manual search + result selection",
+    "2000-line document"
+  ],
+  "errors": [],
+  "longLyricsBuildMs": 26,
+  "passed": true
+}

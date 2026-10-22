@@ -1,0 +1,25 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'io.betterlyrics.mobile'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'io.betterlyrics.mobile'
+        minSdk 26
+        targetSdk 36
+        versionCode 7
+        versionName '0.3.0'
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
+    if (rootProject.file('.signing/development.p12').exists()) {
+        signingConfigs {
+            development {
+                storeFile rootProject.file('.signing/development.p12')
+                storePassword 'android'
+                keyAlias 'mobile'
+                keyPassword 'android'
+                storeType 'PKCS12'
+            }
+        }
+        buildTypes { debug { signingConfig signingConfigs.development } }
+    }
+}

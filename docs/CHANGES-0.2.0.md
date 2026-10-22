@@ -1,0 +1,13 @@
+# 0.2.0 — 사운드 반응 배경
+
+기본 배경을 앨범색 기반의 유체 그라데이션으로 바꾸고 실제 분석 신호의 저음·중음·고음으로 확대·흐름·빛 입자와 파동을 제어합니다. 텍스트와 재생 버튼은 흔들지 않습니다. 입력이 끊기거나 일시정지하면 효과를 감쇠합니다. 고정 배경, 일반 그라데이션, 강도 조절, 입자 끄기, 5초 합성 미리보기를 제공합니다.
+
+AudioSignal은 2048점 PCM FFT 또는 Visualizer의 FFT/파형을 16개 밴드와 음량·비트 특징으로 바꿉니다. DC 제거, 노이즈 게이트, 공격/감쇠, 적응 임계값과 비트 간 최소 간격을 사용합니다. 일정한 저음을 고정 템포로 오인하지 않습니다.
+
+기본 입력은 Android Visualizer(session 0), 대체 입력은 AudioPlaybackCapture/MediaProjection입니다. 오디오 권한과 대체 경로의 시스템 동의는 사용자가 버튼을 누른 뒤 요청합니다. 마이크 입력, 파일 저장, 오디오 전송, 화면 영상 캡처는 구현하지 않습니다. 화면을 벗어나면 자원과 전경 서비스를 해제하며 캡처 토큰을 재사용하지 않습니다. 재생 앱의 정책이나 기기 구현으로 입력을 얻지 못할 수 있습니다.
+
+참고: https://developer.android.com/reference/android/media/audiofx/Visualizer
+https://developer.android.com/media/platform/av-capture
+https://developer.android.com/develop/background-work/services/fgs/service-types#media-projection
+
+176개 Java/저장소 검사와 25개 브라우저 검증 그룹을 통과했습니다. 실제 Android 오디오 연결·권한·서비스 동작은 기기에서 추가 검증해야 합니다. 특정 Apple Music 효과의 바이너리나 원본 영상을 복제한 것은 아닙니다.

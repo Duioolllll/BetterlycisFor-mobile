@@ -1,0 +1,9 @@
+{
+  "apk": "BetterLyrics-Mobile-0.2.1.apk",
+  "bytes": 99040,
+  "sha256": "19a99fbb153b620f0b6a0a42371df41ead3622759868e0998ff84b941c3db597",
+  "minSdk": 26,
+  "targetSdk": 36,
+  "signing": "local-development-key",
+  "abi": "universal (no native .so)"
+}

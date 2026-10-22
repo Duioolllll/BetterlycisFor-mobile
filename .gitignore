@@ -1,0 +1,22 @@
+**/build/
+.gradle/
+.idea/
+*.iml
+local.properties
+.signing/
+*.p12
+*.jks
+*.keystore
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+dist/
+node_modules/
+__pycache__/
+*.pyc
+# Generated browser QA captures and reports; reviewed records live in docs/.
+tests/ui/
+tests/flow/
+tests/player/
