@@ -47,18 +47,26 @@ jobs:
             "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "emulator"
           fi
           "$ANDROID_HOME/emulator/emulator" -version
+          test -c /dev/kvm
+          sudo chown "$(id -u)" /dev/kvm
+          "$ANDROID_HOME/emulator/emulator" -accel-check
           image_ready=false
           for attempt in 1 2 3; do
             if "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "system-images;android-36;google_apis;x86_64"; then image_ready=true; break; fi
             sleep 3
           done
           test "$image_ready" = true
-          test -c /dev/kvm
-          sudo chown "$(id -u)" /dev/kvm
           printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n betterlyrics_install -k "system-images;android-36;google_apis;x86_64" --force
-          "$ANDROID_HOME/emulator/emulator" -avd betterlyrics_install -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$RUNNER_TEMP/emulator.log" 2>&1 &
+          trap 'result=$?; if [ "$result" -ne 0 ] && [ -f "$RUNNER_TEMP/emulator.log" ]; then tail -100 "$RUNNER_TEMP/emulator.log"; fi' EXIT
+          "$ANDROID_HOME/emulator/emulator" -avd betterlyrics_install -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu software -memory 2048 -cores 2 > "$RUNNER_TEMP/emulator.log" 2>&1 &
+          emulator_pid=$!
           export PATH="$ANDROID_HOME/platform-tools:$PATH"
-          timeout 240 adb -s emulator-5554 wait-for-device
+          connection_deadline=$((SECONDS + 180))
+          until [ "$(adb -s emulator-5554 get-state 2>/dev/null)" = device ]; do
+            kill -0 "$emulator_pid"
+            if [ "$SECONDS" -ge "$connection_deadline" ]; then exit 1; fi
+            sleep 2
+          done
           boot_deadline=$((SECONDS + 420))
           until [ "$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ]; do
             if [ "$SECONDS" -ge "$boot_deadline" ]; then tail -80 "$RUNNER_TEMP/emulator.log"; exit 1; fi
