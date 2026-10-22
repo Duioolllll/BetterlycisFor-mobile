@@ -1,0 +1,7 @@
+{
+  "name": "betterlyrics-mobile-preview",
+  "private": true,
+  "scripts": {
+    "dev": "node tools/preview.cjs"
+  }
+}

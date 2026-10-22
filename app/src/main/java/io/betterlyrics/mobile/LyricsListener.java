@@ -38,7 +38,7 @@ public final class LyricsListener extends NotificationListenerService {
         try{manager.addOnActiveSessionsChangedListener(active,new ComponentName(this,LyricsListener.class),handler);registered=true;}catch(SecurityException ignored){}
         refreshSessions();state.emit();
     }
-    @Override public void onListenerDisconnected(){cleanup();super.onListenerDisconnected();}
+    @Override public void onListenerDisconnected(){cleanup();super.onListenerDisconnected();refresh(this);}
     @Override public void onDestroy(){cleanup();super.onDestroy();}
     private void cleanup(){
         if(registered&&manager!=null)try{manager.removeOnActiveSessionsChangedListener(active);}catch(Exception ignored){}

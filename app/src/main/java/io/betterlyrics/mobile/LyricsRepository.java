@@ -43,7 +43,7 @@ public final class LyricsRepository {
     private static String request(String address,String body) throws Exception {
         HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();
         c.setConnectTimeout(8000);c.setReadTimeout(8000);c.setInstanceFollowRedirects(false);
-        c.setRequestProperty("User-Agent","BetterLyricsMobile/0.3.0 (Android; https://github.com/jayfunc/BetterLyrics)");
+        c.setRequestProperty("User-Agent","BetterLyricsMobile/0.4.0 (Android; https://github.com/sdcom1214/BetterlycisFor-mobile)");
         c.setRequestProperty("Accept","application/json");
         c.setRequestProperty("Referer","https://music.163.com/");
         try {
@@ -51,7 +51,7 @@ public final class LyricsRepository {
             int status=c.getResponseCode();if(status==404)return "";
             if(status!=200)throw new IOException("HTTP "+status);
             try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()) {
-                byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){if(out.size()+n>3*1024*1024)throw new IOException("응답이 너무 큽니다.");out.write(b,0,n);}
+                long deadline=System.nanoTime()+20_000_000_000L;byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){if(Thread.currentThread().isInterrupted()||System.nanoTime()>deadline)throw new InterruptedIOException("가사 응답 시간 초과");if(out.size()+n>3*1024*1024)throw new IOException("응답이 너무 큽니다.");out.write(b,0,n);}
                 return out.toString("UTF-8");
             }
         }finally{c.disconnect();}

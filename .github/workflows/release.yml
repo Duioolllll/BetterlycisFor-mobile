@@ -1,0 +1,52 @@
+name: Publish verified APK
+on:
+  push:
+    branches: [main]
+    paths: ['downloads/release.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: betterlyrics-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify source regressions and public package
+        run: |
+          python3 tools/test.py
+          python3 tools/verify-release.py
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;36.0.0"
+          java -jar "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" verify --verbose --print-certs downloads/BetterLyrics-Mobile-0.4.0.apk > "$RUNNER_TEMP/signature.txt"
+          python3 - "$RUNNER_TEMP/signature.txt" <<'PY'
+          import json, sys
+          from pathlib import Path
+          meta=json.loads(Path('downloads/release.json').read_text())
+          assert meta['certificateSha256'] in Path(sys.argv[1]).read_text()
+          PY
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging downloads/BetterLyrics-Mobile-0.4.0.apk > "$RUNNER_TEMP/manifest.txt"
+          python3 - "$RUNNER_TEMP/manifest.txt" <<'PY'
+          import sys
+          from pathlib import Path
+          s=Path(sys.argv[1]).read_text()
+          assert "name='io.betterlyrics.mobile'" in s and "versionCode='8'" in s and "versionName='0.4.0'" in s
+          assert "sdkVersion:'26'" in s and "targetSdkVersion:'36'" in s
+          assert 'application-debuggable' not in s
+          PY
+      - name: Create release with APK and checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag=v0.4.0
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release already exists; refusing to replace published assets."
+            exit 1
+          fi
+          gh release create "$tag" downloads/BetterLyrics-Mobile-0.4.0.apk downloads/SHA256SUMS --target "$GITHUB_SHA" --title 'BetterLyrics Mobile 0.4.0' --notes-file docs/RELEASE-0.4.0.md --draft
+          gh release edit "$tag" --draft=false --latest

@@ -1,28 +1,23 @@
-# Player design comparison — 0.3.0
+# Design QA — BetterLyrics Mobile 0.4.0
 
-Date: 2026-10-22
-Target: Existing Android BetterLyrics Mobile player, using the official Apple Music references listed in docs/APPLE-UI-REFERENCE.md.
+Reference: user-provided BetterLyrics README collage and upstream v1.3.527.0 std/narrow/fs2/fs3 screenshots. Examined original LyricsStyleSettings, LyricsEffectSettings and LayoutProfile. Implementation retains the app's existing playback/lyric features; mobile adaptation is not a pixel-exact WinUI clone.
 
-Reference and rendered player screenshots were inspected directly. Phone comparisons use the app content inside the pictured phone; wide comparisons use the full-screen player content rather than browser chrome. Comparison fixtures use original sample lyrics and cover art, so this is a structural/typographic comparison rather than a pixel match of a copyrighted song screenshot.
+Evidence inspected together: `build/ui-qa/reference-comparison.png` puts the cropped std window (source pixels 240,106–1712,910; resized to736×402) beside the1280×800 implementation (736×460). Content and aspect ratios differ and are explicitly labelled. Raw references remain outside this public repository. Published original fixture captures: docs/images/lyrics-phone.webp and lyrics-wide.webp.
 
-## Checked
+## Comparison and fixes
 
-- Phone: small artwork and compact metadata, no app name, top handle, large active lyric, softened previous/upcoming lyrics, seek/remaining-time row, double-triangle transport icons, volume and bottom action row.
-- Wide: larger artwork and controls on the left, lyrics on the right, aligned metadata, volume and bottom actions. Short landscape uses a smaller cover without overlap.
-- Both lyric and album states: tested at 360×740, 412×915, 812×375, 1280×800 and 800×1280. No horizontal overflow or metadata/control overlap.
-- Actual menu, volume, source, transport, sound and view-toggle interactions are connected to the existing Android bridge. No decorative fake playback controls were added.
+- P1: artwork layout container extended through footer. Visible cover/metadata now reserve footer space; player test checks content bounds at five sizes.
+- P1: late appearance CSS could obscure manually browsed lyrics. `.lyrics-viewport.exploring` overrides keep them sharp; regression passed.
+- P1: modal preview's background could remain keyboard interactive. App subtree now inert while settings are open; dialog focus/return tested.
+- P1: initial QA host lacked Korean glyphs. Installed QA-only Noto Sans KR and recaptured; shipped APK continues using device fonts.
+- P2 remaining: font rasterization, reference artwork/language/aspect ratio, line lengths and platform effects differ. Original shader/animation timing was not measured dynamically; do not claim exact motion identity.
 
-## Resolved
+## Five visual surfaces
 
-P1: Utility metadata and search/overlay/import actions competed with the reference layout. Moved them to the menu while retaining access.
-P1: The old player lacked the reference volume row and remaining-time display. Added a real native-volume bridge and a preview-aware remaining-time label.
-P2: Previous/next icons and cover/player proportions differed. Replaced selected controls with licensed filled icons and resized spacing/artwork.
-P2: Returning from nested menu search could focus a hidden button. Focus now returns to a visible control.
+Typography: bold left-aligned verse, faded surrounding lines, adjustable weight/size/alignment; Korean glyphs visible in final captures. Spacing/layout: mobile compact cover, landscape album/lyric split, readable active verse and bounded footer; five viewport geometry checks pass. Colors: album-derived multicolor gradient and neutral controls, with configurable brightness/foreground; reference color differences follow different artwork. Assets: real runtime cover path preserved; public QA uses a synthetic sample cover, no copied upstream album. Copy: app title removed from player header, Korean control labels and synthetic original lyric text; translations documented as installation guides only.
 
-## Expected differences
+Additional regression: auto/immersive/reverse layouts all retain usable album-view geometry at four sizes.
 
-P3: Android glyph shapes and open-source icons differ from Apple fonts/SF Symbols. The sound connection button and source selector reflect this app's capabilities. Apple-specific routing, favorites and vocal-removal controls are not faked. These differences are documented rather than described as exact copies.
+Interaction coverage: original/focus/album presets, align/blur/cover changes, reset, auto-hide/reveal, modal keyboard isolation, time/offset preservation and demo reload. Automated tests:29 UI +9 flow +7 player +5 appearance groups, zero page errors. Viewports360×740,412×915,812×375,1280×800,800×1280 (appearance first four).
 
-Browser/native-bridge verification passes. Hardware playback and volume remain unverified on an Android device. This report concerns the bundled production WebView frontend and does not claim a deployed Product Design prototype or a frame-for-frame Apple animation reproduction.
-
-final result: passed
+Result: automated geometry/function gates passed; static comparison reviewed with explicit P2 differences. Manual cloud-browser session could not be completed (connection/policy block); physical Android UI remains unverified. This is a reviewed mobile adaptation, not an assertion of exact visual/animation equivalence.

@@ -20,3 +20,12 @@ __pycache__/
 tests/ui/
 tests/flow/
 tests/player/
+# Private archives, credentials and local diagnostics
+*.pfx
+*.p8
+*.idsig
+*.log
+*.zip
+*.tar.gz
+credentials*.json
+secrets*.json

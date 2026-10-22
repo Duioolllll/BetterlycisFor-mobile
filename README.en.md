@@ -1,85 +1,40 @@
 # BetterLyrics Mobile
 
-[한국어](README.md) · [English installation](docs/INSTALL.en.md) · [한국어 설치 안내](docs/INSTALL.ko.md) · [中文安装说明](docs/INSTALL.zh-CN.md)
+An independent, unofficial Android lyric companion based on analysis of BetterLyrics. It is not an official product of BetterLyrics, Apple or any music service.
 
-An **unofficial experimental Android port** of BetterLyrics' music detection, lyric lookup and synchronization behavior. The original project is by [Zhe Fang / BetterLyrics contributors](https://github.com/jayfunc/BetterLyrics/tree/v1.3.527.0), licensed under GPL-3.0. This project is independent of the official BetterLyrics project and Apple.
+**0.4.0 · Android8.0+(API26) · target Android16(API36) · versionCode8**
 
-## Download and install
+**[Download APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.0/BetterLyrics-Mobile-0.4.0.apk)** · [Latest Release / Assets](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest) · [Fallback download](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.0.apk) · [SHA-256](downloads/SHA256SUMS)
 
-**[Download BetterLyrics-Mobile-0.3.0.apk](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.3.0.apk)** · Android 8.0+ · Universal APK · versionCode 7
+[한국어 README](README.md) · Installation: [한국어](docs/INSTALL_KO.md) / [English](docs/INSTALL_EN.md) / [简体中文](docs/INSTALL_ZH.md)
 
-1. Download and open the APK. If Android prompts, review **Allow from this source** for the browser/file app that opened it.
-2. Open **··· → 음악 감지** (Music detection) and grant notification access to BetterLyrics.
-3. Play a song in your music app, then return. The bottom-right list button opens **재생 앱 선택** (Select player).
-4. Optionally enable floating lyrics or connect the sound-reactive background with the center waveform button.
+![Landscape lyric UI](docs/images/lyrics-wide.webp)
 
-See the [installation guide](docs/INSTALL.en.md) for permissions, Play Protect blocks, updates and synchronization troubleshooting. The app interface is currently Korean; translated documentation does not change the interface language.
+Actual bundled web UI rendered with synthetic metadata and original sample text; a browser capture, not an Android hardware capture. Runtime album art comes from your music app.
 
-## Features and scope
+## Features
 
-- Android MediaSession detection, artwork, transport/seek controls and Android media-volume control
-- LRCLIB / NetEase lookup with candidate selection, title/artist/version/duration checks and local caching
-- Line/word timing, progress-driven lyric flow, seek preview and per-song timing correction
-- LRC, Enhanced LRC, ESLRC, TTML, decoded QRC/KRC/YRC and binary KRC import
-- Album-color fluid gradients, optional sound response, portrait/landscape layouts and floating lyrics
-- Hidden Chinese auxiliary translations/transliterations while preserving original lyrics; preference for available unmasked source text
+MediaSession detection, album art, transport/seek/volume; LRCLIB and unofficial NetEase lyrics; Korean aliases/version matching; local lyric import; real word/line timing; continuous progress, scrub preview and per-song offset. Original/focus/album presets and persistent appearance controls cover layout, type, spacing, blur, color, brightness, cover and auto-hiding controls. Album-color gradients, optional sound-reactive backgrounds, reduced-motion fallback and floating lyrics remain available.
 
-Playback stays in another music app. Detection, artwork and transport depend on the metadata and controls that app exposes. Lyrics without word timing use line highlighting by default; missing words are not invented. A music app's capture restrictions can prevent sound-reactive effects. Windows plugins, QQ/Kugou/Apple Music online lyric sources and Apple Music Sing vocal removal are outside this version's scope. Encrypted QRC import is unsupported.
+The interface is currently Korean. See the translated installation guides for its control labels. Allow notification access only after reading the system prompt, play music in a compatible app, then return. Audio and overlay permissions are optional. Read Play Protect warnings and stop if the app is identified as harmful; do not disable protection to force installation.
 
-## Permissions and data
+## Verification and limits
 
-Notification access is used to connect music sessions. This implementation uses matching music-notification information and does not store or send ordinary message bodies. Online lookup sends title, artist, album and duration to the chosen lyric provider. HTTPS artwork URLs are downloaded from their image hosts. No music-account login or API key is required.
+Linux debug/release builds, APK v2/v3 signature and previous signing-certificate match, two identical same-environment builds, 190 offline JVM assertions and browser regression suites were checked. Three Korean songs returned timed Hangul lyrics from live providers; this does not establish listening synchronization on a phone. Intermittent LRCLIB HTTP503 was observed.
 
-Sound response is optional. Android may request audio permission, but this implementation does not open microphone input. It uses Visualizer or, with user consent on Android 10+, AudioPlaybackCapture. Audio features are computed locally, are not stored or transmitted, and analysis stops when the activity leaves the foreground.
+No physical Android device or emulator was tested. Android16 runtime, permissions, real media/capture integration, reconnection, performance and battery use remain unverified. NetEase is unofficial and its usage/distribution terms are not cleared. Missing source words are not invented. QQ/Kugou/Apple online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded. Existing development-certificate lineage is retained for updates; this is not Google security certification.
 
-## Clone, pull and push
+## Development and references
+
+Java8 source/target, JDK17, SDK36 / Build Tools36.0.0, local HTML/CSS/JS WebView + WebGL, Python3 builder. No external Android runtime framework. AGP8.10.1 configuration exists, but Gradle execution was not verified.
 
 ```sh
 git clone https://github.com/sdcom1214/BetterlycisFor-mobile.git
 cd BetterlycisFor-mobile
-git pull --ff-only origin main
-```
-
-Review changes, stage only the intended files, commit and push. Pushing requires repository write access and GitHub authentication.
-
-```sh
-git status
-git add README.en.md
-git commit -m "docs: update installation guide"
-git push origin main
-```
-
-## Build
-
-Install Python 3, **JDK 17**, **Android SDK Platform 36 and Build Tools 36**. The verified build path uses a local SDK without downloading Gradle dependencies:
-
-```sh
-python3 tools/build.py --sdk /absolute/path/to/android-sdk
-```
-
-Output: `dist/BetterLyrics-Mobile-0.3.0.apk`. The first build generates `.signing/development.p12`. The public repository contains no private signing key, so your fresh build will have a different certificate from the downloadable APK. Updating an installed app requires the same package and signing key. Back up your own key privately; never commit it or use the development key for production distribution.
-
-You can also open the Gradle project in Android Studio. The Python script above is the verified build path; a Gradle Wrapper is not included.
-
-## Validation and references
-
-```sh
+python3 tools/build.py --variant debug --sdk /path/to/Android/Sdk
 python3 tools/test.py
-python3 tools/network-test.py --sdk /absolute/path/to/android-sdk --json-jar /path/to/json-20250517.jar --offline
 ```
 
-Optional browser checks require Playwright and Chromium. Set `BETTERLYRICS_CHROME` to use a specific Chrome executable.
+[Build/sign/ADB/reproducibility](docs/BUILD.md) · [Development](docs/DEVELOPMENT.md) · [API](docs/API_REFERENCE.md) · [Reverse engineering](docs/REVERSE_ENGINEERING.md) · [Validation](docs/VALIDATION.md) · [Release notes](docs/RELEASE-0.4.0.md) · [Security/licenses](docs/SECURITY_AND_LICENSES.md).
 
-```sh
-node tools/ui-smoke.cjs
-node tools/flow-smoke.cjs
-node tools/player-smoke.cjs
-```
-
-Public repository preparation reran **176 offline Java/repository assertions** and rechecked the existing APK's v2/v3 signatures. The earlier 0.3.0 record includes 29 UI groups, 9 flow groups and 7 player groups with a mock native bridge, plus APK compilation. Browser suites were not rerun for this documentation/packaging change; application code is unchanged. **Installation, permissions and music-app integration have not been validated on physical Android hardware.**
-
-- [Validation record](docs/VALIDATION.md) · [0.3.0 changes](docs/CHANGES-0.3.0.md)
-- [Original source/package analysis](docs/ORIGINAL_ANALYSIS.md) · [UI references and differences](docs/APPLE-UI-REFERENCE.md)
-- [GPL-3.0 license](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [APK checksum](downloads/SHA256SUMS)
-
-No Apple fonts, images or code are bundled. The app uses Android system fonts and Bootstrap Icons under the MIT license.
+Original: [Zhe Fang / BetterLyrics contributors](https://github.com/jayfunc/BetterLyrics/tree/v1.3.527.0). Android changes: BetterLyrics Mobile contributors, 2026. [GPL-3.0](LICENSE), no warranty. Corresponding source/build scripts are available at the release tag; private signing keys are excluded. Bootstrap Icons1.13.1: MIT. [Third-party notices](THIRD_PARTY_NOTICES.md). Lyrics, artwork and trademarks retain their separate rights; software licensing does not grant content redistribution rights.

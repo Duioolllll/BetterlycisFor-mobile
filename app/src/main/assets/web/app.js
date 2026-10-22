@@ -9,7 +9,7 @@
   let state = {
     track: {key:'', title:'', artist:'', album:'', duration:0, position:0, speed:1, playing:false, positionKnown:false},
     lyrics: {lines:[], provider:'', status:'waiting'},
-    settings: {offset:0, fontSize:32, wordMode:'auto', provider:'auto', searchMode:'best', keepScreen:false, overlay:false},
+    settings: {offset:0, fontSize:28, wordMode:'auto', provider:'auto', searchMode:'best', keepScreen:false, overlay:false},
     permissions: {notifications:false, overlay:false}, audio:{status:'off'}, volume:{available:false,level:0,max:0}, sources:[]
   };
   let clock = {base:0, at:performance.now(), playing:false, speed:1, correction:0};
@@ -18,6 +18,7 @@
   let flowGroups = [], flowLayoutDirty = true, snapFollow = true;
   let seekPreview = null, pendingSeek = null;
   let lyricsVisible=true,volumeSeeking=false,lastVolumeSent=0;
+  let controlsUntil=performance.now()+3500,keyboardNavigation=false,controlsHidden=false;
   let seeking = false, lastVisual = 0, lastCover = '', lastSheet = null, toastTimer = 0, lastFocus = null;
   let wasPreview=false,audioStatusSignature='';
   let demoTime = performance.now(), demoPosition = 14500, demoPlaying = true;
@@ -165,9 +166,19 @@
     flowLayoutDirty=true;manualUntil=0;currentAnchor=-1;scrollMotion=null;snapFollow=true;
   }
 
+  function updateControlVisibility(now) {
+    const mode=window.Appearance.get().controls;
+    const hidden=lyricsVisible && lineModels.length>0 && !lastSheet && !seeking && !volumeSeeking && !keyboardNavigation && (mode==='minimal'?now>=controlsUntil:mode==='auto'&&state.track.playing&&now>=controlsUntil);
+    if(hidden!==controlsHidden){controlsHidden=hidden;$('app').classList.toggle('controls-hidden',hidden);document.querySelector('.player').inert=hidden;document.querySelector('.player').setAttribute('aria-hidden',String(hidden));}
+    $('controlsToggle').setAttribute('aria-expanded',String(!hidden));
+    $('controlsToggle').setAttribute('aria-label',hidden?'재생 컨트롤 펼치기':'재생 컨트롤 숨기기');
+    $('controlsToggle').hidden=mode==='always'||!lyricsVisible||!lineModels.length;
+  }
+
   function updateSettings() {
     const s=state.settings;
-    const size=clamp(number(s.fontSize,32),22,46);
+    const size=clamp(number(s.fontSize,28),22,46);
+    if(window.Appearance.apply(s.appearance)){flowLayoutDirty=true;currentAnchor=-1;scrollMotion=null;snapFollow=true;}
     document.documentElement.style.setProperty('--line-size',size+'px');
     $('offset').value=clamp(number(s.offset),-5000,5000);
     $('offsetValue').textContent=(number(s.offset)>0?'+':'')+number(s.offset)+' ms';
@@ -320,7 +331,7 @@
     const viewport=$('lyricsViewport'),index=flowIndex(p);
     if(index<0)return null;
     const group=flowGroups[index],next=flowGroups[index+1];let focus=group.focus;
-    if(!reducedMotion){
+    if(!reducedMotion && window.Appearance.get().flow==='continuous'){
       if(next){
         const gap=next.start-Math.max(group.start,group.end);
         // A long instrumental holds the previous verse until the next entrance.
@@ -331,7 +342,7 @@
         focus+=(group.tail-group.focus)*clamp((p-group.start)/Math.max(1,group.end-group.start),0,1);
       }
     }
-    return clamp(focus-viewport.clientHeight*.43,0,Math.max(0,viewport.scrollHeight-viewport.clientHeight));
+    return clamp(focus-viewport.clientHeight*(window.Appearance.get().focusPosition/100),0,Math.max(0,viewport.scrollHeight-viewport.clientHeight));
   }
 
   function scrollToAnchor(anchor, immediate=false) {
@@ -354,6 +365,7 @@
       const p=seeking && seekPreview!==null?seekPreview:position(now),lp=p+number(state.settings.offset),anchor=selectAnchor(lp);
       if(flowLayoutDirty)measureFlow();
       if(currentAnchor<0 && anchor>=0)snapFollow=true;
+      if(anchor!==currentAnchor && window.Appearance.get().flow==='line' && !snapFollow)scrollToAnchor(anchor);
       currentAnchor=anchor;
       if(manualUntil && now>=manualUntil && !dragging){manualUntil=0;scrollToAnchor(anchor);}
       const browsing=dragging || manualUntil>now;
@@ -402,6 +414,7 @@
         }
       }
       if(seeking)updateTimeLabels(p);
+      updateControlVisibility(now);
       paintAmbient(now);
     }
     requestAnimationFrame(frame);
@@ -426,8 +439,9 @@
   }
 
   function openSheet(id) {
-    lastFocus=document.activeElement;
-    for(const name of ['settingsSheet','searchSheet','sourcesSheet'])$(name).hidden=name!==id;
+    lastFocus=document.activeElement;$('app').inert=true;
+    document.body.classList.toggle('appearance-open',id==='appearanceSheet');
+    for(const name of ['settingsSheet','searchSheet','sourcesSheet','appearanceSheet'])$(name).hidden=name!==id;
     $('sheetBackdrop').hidden=false;document.body.classList.add('sheet-open');lastSheet=id;
     if(id==='searchSheet') {
       $('searchTrack').value=state.track.title || '';$('searchArtist').value=state.track.artist || '';
@@ -438,8 +452,9 @@
   }
 
   function closeSheet() {
-    if(!lastSheet)return false;
-    $(lastSheet).hidden=true;lastSheet=null;$('sheetBackdrop').hidden=true;document.body.classList.remove('sheet-open');
+    if(!lastSheet)return false;$('app').inert=false;
+    $(lastSheet).hidden=true;lastSheet=null;$('sheetBackdrop').hidden=true;document.body.classList.remove('sheet-open','appearance-open');
+    controlsUntil=performance.now()+3500;flowLayoutDirty=true;snapFollow=true;
     const focusTarget=lastFocus&&lastFocus.getClientRects().length?lastFocus:$('settingsButton');
     focusTarget.focus({preventScroll:true});return true;
   }
@@ -473,6 +488,13 @@
   }
 
   function attachEvents() {
+    window.Appearance.mount(next=>{state.settings.appearance=next;updateSettings();command('setAppearance',{appearance:next});});
+    $('appearanceButton').addEventListener('click',()=>openSheet('appearanceSheet'));
+    $('controlsToggle').addEventListener('click',()=>{controlsUntil=controlsHidden?performance.now()+6000:0;updateControlVisibility(performance.now());});
+    document.addEventListener('pointerdown',()=>{keyboardNavigation=false;if(window.Appearance.get().controls==='auto')controlsUntil=performance.now()+3500;},{passive:true});
+    document.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&window.Appearance.get().controls==='auto')controlsUntil=performance.now()+3500;},{passive:true});
+    document.addEventListener('keydown',e=>{if(e.key==='Tab'){keyboardNavigation=true;controlsUntil=performance.now()+3500;}});
+    if(window.ResizeObserver)new ResizeObserver(()=>{flowLayoutDirty=true;snapFollow=true;}).observe($('lyricsViewport'));
     $('settingsButton').addEventListener('click',()=>openSheet('settingsSheet'));
     $('sourceButton').addEventListener('click',()=>openSheet('sourcesSheet'));
     $('searchButton').addEventListener('click',()=>openSheet('searchSheet'));
@@ -554,12 +576,13 @@
       receive({tick:true,track:{key:'browser-demo',position:demoPosition,playing:demoPlaying,speed:1,positionKnown:true}});
     } else if(action==='search')setTimeout(()=>searchResults({items:[],error:'브라우저 데모에서는 온라인 검색을 실행하지 않아요.'}),500);
     else if(action==='refresh')toast('브라우저 미리보기입니다. 실제 음악 연결은 Android 앱에서 사용해 주세요.');
+    else if(action==='setAppearance'){try{localStorage.setItem('betterlyrics.appearance.v1',JSON.stringify(data.appearance));}catch(_){}}
     else if(action!=='setSetting')toast('Android 앱에서 사용할 수 있는 기능이에요.');
   }
 
   window.App={receive,audio:audioFrame,searchResults,toast,back:closeSheet,handleBack:closeSheet,position:()=>position(),getState:()=>state};
   attachEvents();initAmbient();
   if(native){try{receive(window.Android.getBootstrap());}catch(_){updateSettings();updateEmpty();toast('음악 연결 정보를 읽지 못했어요. 설정에서 음악 감지를 확인해 주세요.');}}
-  else {document.body.classList.add('demo-mode');$('demoBanner').hidden=false;receive(demoState());}
+  else {document.body.classList.add('demo-mode');$('demoBanner').hidden=false;const demo=demoState();try{demo.settings={appearance:window.Appearance.sanitize(JSON.parse(localStorage.getItem('betterlyrics.appearance.v1')||'null'))};}catch(_){}receive(demo);}
   requestAnimationFrame(frame);
 })();

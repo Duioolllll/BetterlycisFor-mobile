@@ -21,9 +21,9 @@ const state={track:{key:'player-qa',title:'밤의 여백',artist:'화면 미리�
     if(mode!=='lyrics'||await page.locator('#lyricsButton').getAttribute('aria-pressed')==='false')await page.locator('#lyricsButton').click();
     await page.waitForTimeout(180);
     const artwork=await page.locator('#lyricsButton').getAttribute('aria-pressed')==='false';
-    const geometry=await page.evaluate(()=>{const b=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};return {player:b('.player'),track:b('.track-card'),cover:b('.cover'),width:innerWidth,height:innerHeight,scroll:document.documentElement.scrollWidth};});
+    const geometry=await page.evaluate(()=>{const b=s=>{const r=document.querySelector(s).getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height};};return {player:b('.player'),track:b('.track-info'),cover:b('.cover'),width:innerWidth,height:innerHeight,scroll:document.documentElement.scrollWidth};});
     assert(geometry.player.bottom<=viewport.height+1&&geometry.scroll<=viewport.width+1,'player fits viewport in both views');
-    assert(geometry.track.bottom<=geometry.player.top+1,'album and metadata stay clear of the player');
+    assert(geometry.track.bottom<=geometry.player.top+1,'album and metadata stay clear of the player '+JSON.stringify({viewport,mode,geometry}));
     assert.equal(await page.locator('.lyrics-shell').isVisible(),!artwork);
     if(viewport.width===412||viewport.width===1280)await page.screenshot({path:path.join(out,`player-${artwork?'album':'lyrics'}-${viewport.width}.png`)});
     result.viewports.push({...viewport,mode:artwork?'album':'lyrics',...geometry});

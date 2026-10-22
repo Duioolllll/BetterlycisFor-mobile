@@ -67,6 +67,7 @@ public final class MainActivity extends Activity {
             case "toggleOverlay":if(!state.granted()){toast("음악 감지 권한을 먼저 켜 주세요.");startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));}else if(!Settings.canDrawOverlays(this))startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,Uri.parse("package:"+getPackageName())));else state.set("overlay",!state.prefs.getBoolean("overlay",false));break;
             case "refresh":LyricsListener.refresh(this);state.fetch(true);break;
             case "clearCache":state.network.execute(()->{state.repository.clear();handler.post(()->{toast("저장된 가사를 지웠어요.");state.fetch(true);});});break;
+            case "setAppearance":state.prefs.edit().putString("appearance",UiAppearance.sanitize(data.optJSONObject("appearance")).toString()).apply();publish();break;
             case "setSetting":state.set(data.optString("key"),data.get("value"));if(data.optString("key").equals("backgroundMode"))reconcileAudio();break;
             case "audioConnect":if(state.audio.packet().optBoolean("connected")){state.prefs.edit().putBoolean("audioEnabled",false).apply();state.audio.stop();publish();}else requestAudio(false);break;
             case "audioCapture":requestAudio(true);break;
@@ -86,7 +87,7 @@ public final class MainActivity extends Activity {
             case "chooseResult":state.choose(data.optString("id"));break;
             case "importLyrics":if(state.song.key.isEmpty()){toast("음악을 먼저 재생해 주세요.");break;}Intent file=new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*");file.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);startActivityForResult(file,100);break;
             case "openPlayer":openPlayer();break;
-            case "about":new AlertDialog.Builder(this).setTitle("BetterLyrics Mobile 0.3.0").setMessage("BetterLyrics v1.3.527.0을 분석하여 Android에 맞게 구현한 비공식 이식판입니다.\n\n원작: Zhe Fang / BetterLyrics contributors\nGPL-3.0\n\n음악 감지는 미디어 세션만 사용합니다. 가사 검색 시 제목·가수·앨범 정보를 선택한 가사 제공처로 전송합니다.\n\nWindows DLL 플러그인, Wallpaper Engine, Windows 오디오 기능은 이 버전에 포함되지 않습니다. 재생 소리 분석은 별도 연결 시 기기에서만 수행합니다.\n아이콘: Bootstrap Icons (MIT).").setPositiveButton("확인",null).show();break;
+            case "about":new AlertDialog.Builder(this).setTitle("BetterLyrics Mobile 0.4.0").setMessage("BetterLyrics v1.3.527.0을 분석하여 Android에 맞게 구현한 비공식 이식판입니다.\n\n원작: Zhe Fang / BetterLyrics contributors\nGPL-3.0 · 보증 없음 · 같은 라이선스로 재배포 가능\n소스와 라이선스: github.com/sdcom1214/BetterlycisFor-mobile\n\n음악 감지는 미디어 세션만 사용합니다. 가사 검색 시 제목·가수·앨범 정보를 선택한 가사 제공처로 전송합니다.\n\nWindows DLL 플러그인, Wallpaper Engine, Windows 오디오 기능은 이 버전에 포함되지 않습니다. 재생 소리 분석은 별도 연결 시 기기에서만 수행합니다.\n아이콘: Bootstrap Icons (MIT).").setPositiveButton("확인",null).show();break;
         }
     }
     private void reconcileAudio(){

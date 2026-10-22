@@ -7,7 +7,9 @@
   <meta name="theme-color" content="#141b20">
   <title>BetterLyrics Mobile</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="appearance.css">
   <script defer src="ambient.js"></script>
+  <script defer src="appearance.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -56,21 +58,23 @@
     <footer class="player" aria-label="재생 제어">
       <div class="seek-wrap"><input id="seek" class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="재생 위치" disabled><div class="time-row"><span id="positionLabel">0:00</span><span id="durationLabel">—:—</span></div></div>
       <div class="transport"><div class="transport-main"><button id="previousButton" class="icon-button" aria-label="이전 곡" disabled><svg class="filled-icon"><use href="#i-previous"/></svg></button><button id="playButton" class="play-button" aria-label="재생" disabled><svg class="filled-icon"><use id="playIcon" href="#i-play"/></svg></button><button id="nextButton" class="icon-button" aria-label="다음 곡" disabled><svg class="filled-icon"><use href="#i-next"/></svg></button></div></div>
-      <div class="volume-row"><svg class="filled-icon volume-icon" aria-hidden="true"><use href="#i-volume-low"/></svg><input id="volume" class="volume" type="range" min="0" max="1000" step="1" value="0" aria-label="미디어 음량" disabled><svg class="filled-icon volume-icon" aria-hidden="true"><use href="#i-volume-high"/></svg></div>
+
       <div class="player-actions">
         <button id="lyricsButton" class="player-action selected" aria-label="가사 화면" aria-pressed="true"><svg class="filled-icon"><use href="#i-lyrics"/></svg></button>
         <button id="audioQuick" class="player-action audio-quick" aria-label="사운드 반응 배경 연결"><svg class="filled-icon"><use href="#i-sound"/></svg><span class="audio-dot" aria-hidden="true"></span><span id="audioQuickLabel" class="sr-only">소리 연결</span></button>
         <button id="sourceButton" class="player-action source-button" aria-label="재생 앱 선택"><svg class="filled-icon"><use href="#i-sources"/></svg><span id="sourceDot" class="sr-only"></span><span id="sourceName" class="sr-only">음악 연결 대기</span></button>
       </div>
     </footer>
+    <button id="controlsToggle" class="controls-toggle icon-button" aria-label="재생 컨트롤 펼치기" aria-expanded="true"><svg class="filled-icon"><use href="#i-more"/></svg></button>
   </main>
 
   <div id="sheetBackdrop" class="sheet-backdrop" hidden></div>
   <section id="settingsSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
     <div class="sheet-handle" aria-hidden="true"></div><header class="sheet-header"><div><span class="eyebrow">MAKE IT YOURS</span><h2 id="settingsTitle">나의 가사 화면</h2></div><button class="icon-button close-sheet" aria-label="닫기"><svg><use href="#i-close"/></svg></button></header>
     <div class="sheet-body">
+      <button id="appearanceButton" class="appearance-entry setting-action"><div><strong>화면 꾸미기</strong><small id="appearanceSummary">원본 스타일</small></div><svg><use href="#i-settings"/></svg></button>
       <div class="setting-section current-lyrics"><h3>현재 가사</h3><span id="lyricsBadge" class="lyrics-badge"><span></span>가사 대기 중</span><p id="syncCaption" class="sync-caption">음악에 맞춰, 한 줄씩.</p><button id="searchButton" class="setting-action"><div><strong>가사 직접 검색</strong><small>현재 곡에 맞는 가사를 찾아요.</small></div><svg><use href="#i-search"/></svg></button></div>
-      <div class="setting-section"><h3>음악과 연결</h3><button id="notificationAccess" class="setting-action"><div><strong>음악 감지</strong><small>재생 중인 앱의 곡과 시간을 가져와요.</small></div><span id="notificationState" class="pill">연결</span></button><p class="permission-note">알림 접근 권한이 필요해요. 이 앱은 음악 재생 정보만 사용하며, 메시지 알림 내용은 수집하지 않아요.</p><button id="overlayAccess" class="setting-action"><div><strong>플로팅 가사</strong><small>다른 앱을 보면서 가사를 띄워요.</small></div><span id="overlayState" class="pill">설정</span></button><button id="openPlayer" class="setting-action"><div><strong>음악 앱 열기</strong><small>현재 연결된 플레이어로 이동</small></div><span aria-hidden="true">↗</span></button></div>
+      <div class="setting-section"><h3>음악과 연결</h3><div class="settings-volume"><label for="volume">미디어 음량</label><div class="volume-row"><svg class="filled-icon volume-icon" aria-hidden="true"><use href="#i-volume-low"/></svg><input id="volume" class="volume" type="range" min="0" max="1000" step="1" value="0" aria-label="미디어 음량" disabled><svg class="filled-icon volume-icon" aria-hidden="true"><use href="#i-volume-high"/></svg></div></div><button id="notificationAccess" class="setting-action"><div><strong>음악 감지</strong><small>재생 중인 앱의 곡과 시간을 가져와요.</small></div><span id="notificationState" class="pill">연결</span></button><p class="permission-note">알림 접근 권한이 필요해요. 이 앱은 음악 재생 정보만 사용하며, 메시지 알림 내용은 수집하지 않아요.</p><button id="overlayAccess" class="setting-action"><div><strong>플로팅 가사</strong><small>다른 앱을 보면서 가사를 띄워요.</small></div><span id="overlayState" class="pill">설정</span></button><button id="openPlayer" class="setting-action"><div><strong>음악 앱 열기</strong><small>현재 연결된 플레이어로 이동</small></div><span aria-hidden="true">↗</span></button></div>
       <div class="setting-section"><h3>사운드와 배경</h3>
         <div class="setting-select"><label for="backgroundMode">배경 모드</label><select id="backgroundMode"><option value="sound">소리에 반응하는 그라데이션</option><option value="ambient">부드럽게 흐르는 그라데이션</option><option value="static">고정 그라데이션</option></select></div>
         <button id="audioConnect" class="setting-action"><div><strong id="audioConnectLabel">재생 소리에 연결</strong><small>저음은 파동으로, 고음은 빛으로.</small></div><span aria-hidden="true">↗</span></button>
@@ -81,12 +85,24 @@
         <label class="toggle-row"><div><strong>빛 입자</strong><small>비트가 칠 때 작은 빛이 퍼져요.</small></div><input id="backgroundParticles" type="checkbox" role="switch" checked><span class="toggle" aria-hidden="true"></span></label>
         <button id="backgroundPreview" class="secondary-button">5초 효과 미리보기</button>
       </div>
-      <div class="setting-section"><h3>타이밍과 글자</h3><div class="setting-range"><div class="label-row"><label for="offset">이 곡의 가사 시간 보정</label><output id="offsetValue">0 ms</output></div><div class="offset-controls"><button id="offsetMinus" class="step-button" aria-label="가사를 250밀리초 늦추기">−</button><input id="offset" type="range" min="-5000" max="5000" step="50" value="0"><button id="offsetPlus" class="step-button" aria-label="가사를 250밀리초 앞당기기">+</button></div><small>+는 더 일찍, −는 더 늦게 보여줘요. 보정은 현재 곡에만 저장돼요.</small><button id="resetOffset" class="mini-button">보정 초기화</button></div><div class="setting-range"><div class="label-row"><label for="fontSize">가사 글자 크기</label><output id="fontSizeValue">32</output></div><input id="fontSize" type="range" min="22" max="46" step="1" value="32"></div><div class="setting-select"><label for="wordMode">단어별 하이라이트</label><select id="wordMode"><option value="auto">정확한 타이밍이 있을 때</option><option value="always">항상 · 없으면 추정</option><option value="never">줄 단위로 표시</option></select><small>추정 하이라이트는 실제 발음 시간과 다를 수 있어요.</small></div><label class="toggle-row"><div><strong>화면 켜짐 유지</strong><small>가사 화면을 보고 있을 때 적용</small></div><input id="keepScreen" type="checkbox" role="switch"><span class="toggle" aria-hidden="true"></span></label></div>
+      <div class="setting-section"><h3>타이밍과 글자</h3><div class="setting-range"><div class="label-row"><label for="offset">이 곡의 가사 시간 보정</label><output id="offsetValue">0 ms</output></div><div class="offset-controls"><button id="offsetMinus" class="step-button" aria-label="가사를 250밀리초 늦추기">−</button><input id="offset" type="range" min="-5000" max="5000" step="50" value="0"><button id="offsetPlus" class="step-button" aria-label="가사를 250밀리초 앞당기기">+</button></div><small>+는 더 일찍, −는 더 늦게 보여줘요. 보정은 현재 곡에만 저장돼요.</small><button id="resetOffset" class="mini-button">보정 초기화</button></div><div class="setting-select"><label for="wordMode">단어별 하이라이트</label><select id="wordMode"><option value="auto">정확한 타이밍이 있을 때</option><option value="always">항상 · 없으면 추정</option><option value="never">줄 단위로 표시</option></select><small>추정 하이라이트는 실제 발음 시간과 다를 수 있어요.</small></div><label class="toggle-row"><div><strong>화면 켜짐 유지</strong><small>가사 화면을 보고 있을 때 적용</small></div><input id="keepScreen" type="checkbox" role="switch"><span class="toggle" aria-hidden="true"></span></label></div>
       <div class="setting-section"><h3>가사 찾기</h3><div class="setting-select"><label for="provider">가사 소스</label><select id="provider"><option value="auto">자동 · 여러 소스에서 검색</option><option value="lrclib">LRCLIB</option><option value="netease">NetEase</option></select></div><div class="setting-select"><label for="searchMode">자동 검색 방식</label><select id="searchMode"><option value="sequential">빠르게 · 먼저 일치한 가사</option><option value="best">정확하게 · 일치도가 높은 가사</option></select></div><button id="settingsImport" class="setting-action"><div><strong>내 가사 불러오기</strong><small>LRC · ESLRC · TTML · 텍스트</small></div><svg><use href="#i-import"/></svg></button><button id="retryLyrics" class="setting-action"><div><strong>현재 곡 가사 다시 찾기</strong><small>저장된 결과를 새로 확인해요.</small></div><svg><use href="#i-refresh"/></svg></button><button id="clearCache" class="setting-action"><div><strong>가사 캐시 비우기</strong><small>직접 가져온 파일은 별도로 보관하세요.</small></div><span aria-hidden="true">↗</span></button><p class="permission-note">온라인 검색에는 곡 제목·가수·앨범·곡 길이가 가사 소스로 전송돼요.</p></div>
-      <button id="about" class="about-button">BetterLyrics Mobile 0.3.0 <span>원본과 라이선스 보기 ↗</span></button>
+      <button id="about" class="about-button">BetterLyrics Mobile 0.4.0 <span>원본과 라이선스 보기 ↗</span></button>
     </div>
   </section>
 
+  <section id="appearanceSheet" class="sheet appearance-sheet" role="dialog" aria-modal="true" aria-labelledby="appearanceTitle" hidden>
+    <header class="sheet-header"><div><span class="eyebrow">APPEARANCE</span><h2 id="appearanceTitle">화면 꾸미기</h2></div><button class="icon-button close-sheet" aria-label="꾸미기 완료"><svg><use href="#i-check"/></svg></button></header>
+    <div class="sheet-body">
+      <p class="appearance-help">위 화면을 보면서 나만의 가사 화면을 만들어 보세요.</p>
+      <div class="preset-list" aria-label="화면 프리셋"><button data-preset="original" aria-pressed="true"><strong>원본 스타일</strong><small>커버와 가사, 균형 있게</small></button><button data-preset="focus" aria-pressed="false"><strong>가사 집중</strong><small>가운데에서 크게</small></button><button data-preset="album" aria-pressed="false"><strong>앨범 중심</strong><small>좋아하는 커버와 함께</small></button></div>
+      <div class="setting-range"><div class="label-row"><label for="fontSize">가사 글자 크기</label><output id="fontSizeValue">32</output></div><input id="fontSize" type="range" min="22" max="46" step="1" value="32"></div>
+      <div id="appearanceFields"></div>
+      <button id="appearanceReset" class="secondary-button">화면 스타일 초기화</button>
+      <p id="appearanceStatus" class="permission-note" role="status">변경 사항이 자동으로 저장돼요</p>
+      <p class="permission-note">이 설정은 전체 화면에 적용돼요. 플로팅 가사는 별도 표시를 사용해요. 초기화해도 가사 시간 보정과 연결 설정은 유지돼요.</p>
+    </div>
+  </section>
   <section id="searchSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle" hidden>
     <div class="sheet-handle" aria-hidden="true"></div><header class="sheet-header"><div><span class="eyebrow">FIND THE RIGHT WORDS</span><h2 id="searchTitle">가사 직접 찾기</h2></div><button class="icon-button close-sheet" aria-label="닫기"><svg><use href="#i-close"/></svg></button></header><div class="sheet-body"><form id="searchForm" class="search-form"><label for="searchTrack">곡 제목</label><input id="searchTrack" autocomplete="off" placeholder="찾고 싶은 노래"><label for="searchArtist">가수</label><input id="searchArtist" autocomplete="off" placeholder="가수 이름"><button id="submitSearch" class="primary-button" type="submit"><svg><use href="#i-search"/></svg>검색</button></form><p id="searchStatus" class="search-status">현재 곡과 같은 버전인지 곡 길이도 확인해 주세요.</p><div id="searchResults" class="search-results"></div></div>
   </section>
