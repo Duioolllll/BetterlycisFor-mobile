@@ -41,7 +41,16 @@ jobs:
           PY
       - name: Android 16 installation and update regression
         run: |
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "emulator" "system-images;android-36;google_apis;x86_64"
+          if [ ! -x "$ANDROID_HOME/emulator/emulator" ]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "emulator"
+          fi
+          "$ANDROID_HOME/emulator/emulator" -version
+          image_ready=false
+          for attempt in 1 2 3; do
+            if "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "system-images;android-36;google_apis;x86_64"; then image_ready=true; break; fi
+            sleep 3
+          done
+          test "$image_ready" = true
           test -c /dev/kvm
           sudo chown "$(id -u)" /dev/kvm
           printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n betterlyrics_install -k "system-images;android-36;google_apis;x86_64" --force
