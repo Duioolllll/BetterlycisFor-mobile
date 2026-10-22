@@ -24,7 +24,7 @@ Windows에서는 `sdkmanager.bat`, `python`을 사용해도 된다. 실제 빌�
 ## 2. Clone과 환경변수
 
 ```sh
-git clone https://github.com/sdcom1214/BetterlycisFor-mobile.git
+git clone https://github.com/Duioolllll/BetterlycisFor-mobile.git
 cd BetterlycisFor-mobile
 git checkout v0.4.1
 ```

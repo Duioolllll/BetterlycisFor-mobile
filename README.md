@@ -4,7 +4,7 @@
 
 **최신 배포: 0.4.1 · Android8.0 이상 · target Android16 · versionCode9**
 
-**[APK 다운로드](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk)** · [최신 Release / Assets](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest) · [다운로드 대체 경로](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk) · [SHA-256](downloads/SHA256SUMS)
+**[APK 다운로드](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk)** · [최신 Release / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [다운로드 대체 경로](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk) · [SHA-256](downloads/SHA256SUMS)
 
 **설치:** [한국어](docs/INSTALL_KO.md) · [English](docs/INSTALL_EN.md) · [简体中文](docs/INSTALL_ZH.md) · [English README](README.en.md)
 
@@ -51,7 +51,7 @@ Play Protect가 위험 앱으로 차단하면 경고를 확인하고 설치를 �
 Java8 source/target, Android SDK36, JDK17, HTML/CSS/JavaScript WebView + WebGL, Python3 수동 빌드. 외부 Android 프레임워크 의존성은 없습니다. AGP8.10.1 설정은 있지만 Gradle 실행은 검증하지 않았습니다.
 
 ```sh
-git clone https://github.com/sdcom1214/BetterlycisFor-mobile.git
+git clone https://github.com/Duioolllll/BetterlycisFor-mobile.git
 cd BetterlycisFor-mobile
 python3 tools/build.py --variant debug --sdk /path/to/Android/Sdk
 python3 tools/test.py

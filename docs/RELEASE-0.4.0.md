@@ -1,10 +1,10 @@
 # BetterLyrics Mobile 0.4.0
 
-> **설치 오류 확인 / Confirmed installation defect:** resources.arsc 패키징 오류가 있습니다. [0.4.1](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/tag/v0.4.1)을 사용하세요. Use 0.4.1 or later.
+> **설치 오류 확인 / Confirmed installation defect:** resources.arsc 패키징 오류가 있습니다. [0.4.1](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.4.1)을 사용하세요. Use 0.4.1 or later.
 
 릴리스 날짜 / Release date: **2026-10-23**
 
-**[APK 다운로드 / Download](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.0/BetterLyrics-Mobile-0.4.0.apk)**
+**[APK 다운로드 / Download](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.0/BetterLyrics-Mobile-0.4.0.apk)**
 
 `BetterLyrics-Mobile-0.4.0.apk` · 111,554 bytes · versionCode8 · `io.betterlyrics.mobile`
 
@@ -44,10 +44,10 @@ This independent unofficial release adds an upstream-inspired mobile UI, appeara
 
 ## Guides / 안내
 
-- [한국어 설치](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/INSTALL_KO.md)
-- [English installation](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/INSTALL_EN.md)
-- [简体中文安装](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/INSTALL_ZH.md)
-- [Build](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/BUILD.md) · [Validation](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/VALIDATION.md)
-- [API](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/API_REFERENCE.md) · [Reverse engineering](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/REVERSE_ENGINEERING.md) · [Licenses](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.0/docs/SECURITY_AND_LICENSES.md)
+- [한국어 설치](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/INSTALL_KO.md)
+- [English installation](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/INSTALL_EN.md)
+- [简体中文安装](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/INSTALL_ZH.md)
+- [Build](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/BUILD.md) · [Validation](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/VALIDATION.md)
+- [API](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/API_REFERENCE.md) · [Reverse engineering](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/REVERSE_ENGINEERING.md) · [Licenses](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.0/docs/SECURITY_AND_LICENSES.md)
 
 Original BetterLyrics: Zhe Fang / contributors. Mobile adaptation: BetterLyrics Mobile contributors,2026. GPL-3.0, no warranty. Icons: Bootstrap Icons(MIT). The tag contains corresponding source/build scripts; private signing keys and third-party lyric/artwork content are excluded.

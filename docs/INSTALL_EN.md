@@ -7,14 +7,14 @@ The app interface is Korean; translated installation guides do not add English/C
 
 ## A. Download and verify
 
-1. Open the [GitHub repository](https://github.com/sdcom1214/BetterlycisFor-mobile).
+1. Open the [GitHub repository](https://github.com/Duioolllll/BetterlycisFor-mobile).
 2. Choose **Releases**.
-3. Open **Latest Release**, or use [this link](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest).
+3. Open **Latest Release**, or use [this link](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest).
 4. Expand **Assets** and download the APK. `Source code.zip/tar.gz` is not an installer.
 5. This release's filename is `BetterLyrics-Mobile-0.4.1.apk`. For later versions, follow that release's version and filename.
 6. If possible, compare the downloaded file's SHA-256 with the accompanying `SHA256SUMS`. Do not install a mismatch; download again.
 
-[0.4.1 APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [checksums](../downloads/SHA256SUMS). If Releases is temporarily unavailable, use the [repository APK](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk). Do not rename HTML pages or source ZIPs to APK.
+[0.4.1 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [checksums](../downloads/SHA256SUMS). If Releases is temporarily unavailable, use the [repository APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk). Do not rename HTML pages or source ZIPs to APK.
 
 On a computer:
 

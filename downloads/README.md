@@ -2,7 +2,7 @@
 
 Current version: **0.4.1**, versionCode9, package `io.betterlyrics.mobile`, Android8.0+(API26), target Android16(API36).
 
-[Latest Release](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest) · [0.4.1 APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [Repository fallback](BetterLyrics-Mobile-0.4.1.apk) · [SHA256SUMS](SHA256SUMS)
+[Latest Release](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [0.4.1 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [Repository fallback](BetterLyrics-Mobile-0.4.1.apk) · [SHA256SUMS](SHA256SUMS)
 
 Size:111,554 bytes. SHA-256:`1af5849e88074fa84688f31c2f2926df950bb55145d3eaf2f95d33bac14ff6fd`.
 

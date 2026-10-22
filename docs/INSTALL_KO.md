@@ -7,14 +7,14 @@
 
 ## A. 다운로드와 확인
 
-1. [GitHub 저장소](https://github.com/sdcom1214/BetterlycisFor-mobile)에 접속한다.
+1. [GitHub 저장소](https://github.com/Duioolllll/BetterlycisFor-mobile)에 접속한다.
 2. **Releases** 메뉴를 선택한다.
-3. **Latest Release**를 연다. [최신 릴리스 바로가기](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest).
+3. **Latest Release**를 연다. [최신 릴리스 바로가기](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest).
 4. 아래 **Assets**를 펼쳐 APK를 다운로드한다. `Source code.zip/tar.gz`는 설치 파일이 아니다.
 5. 이번 버전 파일명은 `BetterLyrics-Mobile-0.4.1.apk`다. 이후 버전은 해당 Release의 버전·파일명을 따른다.
 6. 가능하면 함께 제공하는 `SHA256SUMS`의 SHA-256과 실제 파일을 비교한다. 일치하지 않으면 설치하지 말고 다시 다운로드한다.
 
-[0.4.1 APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [체크섬](../downloads/SHA256SUMS). Release가 일시적으로 열리지 않으면 [저장소 APK](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk)를 사용한다. HTML 페이지나 ZIP의 확장자를 APK로 바꾸지 않는다.
+[0.4.1 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [체크섬](../downloads/SHA256SUMS). Release가 일시적으로 열리지 않으면 [저장소 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk)를 사용한다. HTML 페이지나 ZIP의 확장자를 APK로 바꾸지 않는다.
 
 컴퓨터에서 확인하는 방법:
 

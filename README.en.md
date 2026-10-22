@@ -4,7 +4,7 @@ An independent, unofficial Android lyric companion based on analysis of BetterLy
 
 **0.4.1 · Android8.0+(API26) · target Android16(API36) · versionCode9**
 
-**[Download APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk)** · [Latest Release / Assets](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest) · [Fallback download](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk) · [SHA-256](downloads/SHA256SUMS)
+**[Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk)** · [Latest Release / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [Fallback download](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk) · [SHA-256](downloads/SHA256SUMS)
 
 [한국어 README](README.md) · Installation: [한국어](docs/INSTALL_KO.md) / [English](docs/INSTALL_EN.md) / [简体中文](docs/INSTALL_ZH.md)
 
@@ -31,7 +31,7 @@ Publication of0.4.1 requires Android16 emulator install/launch/update checks; se
 Java8 source/target, JDK17, SDK36 / Build Tools36.0.0, local HTML/CSS/JS WebView + WebGL, Python3 builder. No external Android runtime framework. AGP8.10.1 configuration exists, but Gradle execution was not verified.
 
 ```sh
-git clone https://github.com/sdcom1214/BetterlycisFor-mobile.git
+git clone https://github.com/Duioolllll/BetterlycisFor-mobile.git
 cd BetterlycisFor-mobile
 python3 tools/build.py --variant debug --sdk /path/to/Android/Sdk
 python3 tools/test.py

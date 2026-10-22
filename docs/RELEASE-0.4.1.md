@@ -2,7 +2,7 @@
 
 Release date: **2026-10-23** · Android8.0+(min26), target Android16(API36).
 
-**[APK 다운로드 / Download APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk)** · [SHA256SUMS](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/SHA256SUMS)
+**[APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk)** · [SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/SHA256SUMS)
 
 `BetterLyrics-Mobile-0.4.1.apk` · versionCode9 · `io.betterlyrics.mobile` · 기존 서명 유지.
 
@@ -28,8 +28,8 @@ Local checks:155 Java assertions,5 packaging cases, v2/v3 signing, prior certifi
 
 Download0.4.1 again rather than retrying0.4.0. A different signing key, damaged download, insufficient storage or security block requires separate diagnosis. Do not disable protection to force installation; uninstalling can lose app data.
 
-[한국어 설치](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.1/docs/INSTALL_KO.md) · [English](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.1/docs/INSTALL_EN.md) · [简体中文](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.1/docs/INSTALL_ZH.md)
+[한국어 설치](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.1/docs/INSTALL_KO.md) · [English](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.1/docs/INSTALL_EN.md) · [简体中文](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.1/docs/INSTALL_ZH.md)
 
-[Changelog](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.1/CHANGELOG.md) · [Build](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.1/docs/BUILD.md) · [Validation](https://github.com/sdcom1214/BetterlycisFor-mobile/blob/v0.4.1/docs/VALIDATION.md)
+[Changelog](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.1/CHANGELOG.md) · [Build](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.1/docs/BUILD.md) · [Validation](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.1/docs/VALIDATION.md)
 
 Technical reference: [Android11 compressed resources restriction](https://developer.android.com/about/versions/11/behavior-changes-11#compressed-resource-file). Independent unofficial project; GPL-3.0; original BetterLyrics attribution retained.

@@ -7,14 +7,14 @@
 
 ## A. 下载与校验
 
-1. 打开[GitHub仓库](https://github.com/sdcom1214/BetterlycisFor-mobile)。
+1. 打开[GitHub仓库](https://github.com/Duioolllll/BetterlycisFor-mobile)。
 2. 选择 **Releases**。
-3. 打开 **Latest Release**，或使用[最新版本链接](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest)。
+3. 打开 **Latest Release**，或使用[最新版本链接](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest)。
 4. 展开 **Assets** 并下载APK。`Source code.zip/tar.gz`不是安装包。
 5. 本次文件名为 `BetterLyrics-Mobile-0.4.1.apk`。后续版本以相应Release的版本和文件名为准。
 6. 如有条件，将下载文件的SHA-256与附带的`SHA256SUMS`比较。不一致时不要安装，请重新下载。
 
-[0.4.1 APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [校验和](../downloads/SHA256SUMS)。Release暂时无法打开时，可使用[仓库中的APK](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk)。不要把HTML网页或源码ZIP改名为APK。
+[0.4.1 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [校验和](../downloads/SHA256SUMS)。Release暂时无法打开时，可使用[仓库中的APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk)。不要把HTML网页或源码ZIP改名为APK。
 
 在电脑上校验：
 
