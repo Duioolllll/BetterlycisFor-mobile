@@ -41,6 +41,8 @@ jobs:
           PY
       - name: Android 16 installation and update regression
         run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libpulse0 libasound2t64 libnss3 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxi6 libxtst6 libxrandr2 libgbm1 libglu1-mesa libvulkan1
           if [ ! -x "$ANDROID_HOME/emulator/emulator" ]; then
             "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "emulator"
           fi
