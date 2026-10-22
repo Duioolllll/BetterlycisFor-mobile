@@ -1,6 +1,6 @@
 # BetterLyrics Mobile 0.4.0
 
-릴리스 날짜 / Release date: **2026-10-22**
+릴리스 날짜 / Release date: **2026-10-23**
 
 **[APK 다운로드 / Download](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.0/BetterLyrics-Mobile-0.4.0.apk)**
 

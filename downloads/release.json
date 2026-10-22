@@ -12,5 +12,7 @@
   "signing": "externally supplied private key",
   "abi": "universal (no native .so)",
   "certificateSha256": "5e017fe5163897e92ca83aa9a8b921ade3ccf065b2a6d53071c4369da74b8010",
-  "date": "2026-10-22"
+  "date": "2026-10-23",
+  "buildDate": "2026-10-22",
+  "publishRevision": 2
 }
