@@ -1,5 +1,7 @@
 # BetterLyrics Mobile 0.4.0
 
+> **설치 오류 확인 / Confirmed installation defect:** resources.arsc 패키징 오류가 있습니다. [0.4.1](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/tag/v0.4.1)을 사용하세요. Use 0.4.1 or later.
+
 릴리스 날짜 / Release date: **2026-10-23**
 
 **[APK 다운로드 / Download](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.0/BetterLyrics-Mobile-0.4.0.apk)**

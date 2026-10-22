@@ -1,3 +1,33 @@
+# 0.4.1 설치 수정 검증 — 2026-10-23
+
+## 이번에 직접 확인한 항목
+
+- 실제0.4.0 APK: resources.arsc가 DEFLATE(8), 데이터 offset2407. Android R+ 설치 조건 위반을 확인했다.0.3.0은 STORED(0), offset2380으로 조건을 충족했다.
+-0.4.1 release: STORED(0), offset2412,4바이트 정렬. 압축/정렬을 서명 전후에 검사했다. APK v2/v3 서명과 원래 인증서 SHA256 일치를 확인했다.
+- Java 파서/매칭/텍스트 정책/오디오 신호155개 검사 통과. 실제 이전 APK와 잘못된 ZIP fixture를 포함한 패키징5개 검사 통과.
+- 같은 환경에서0.4.1을 두 번 빌드한 전체 APK와 payload 해시가 일치했다.
+- SHA256: `1af5849e88074fa84688f31c2f2926df950bb55145d3eaf2f95d33bac14ff6fd`.
+- UI 기능은 수정하지 않았다. 과거190개 JVM/50개 브라우저 검사는 아래0.4.0 기록이며, 이번에 전부 다시 수행했다고 주장하지 않는다.
+
+## Android16 AVD 배포 조건
+
+Release를 게시하기 전에 전용 API36 가상 기기에서 다음을 실행한다. 실제 통과/실패와 이전 오류 문구는 Release에 첨부하는 `INSTALL_VALIDATION.json` 및 해당 Actions 실행 기록을 따른다.
+
+1.0.4.0이 resources.arsc 때문에 설치 거절되는지 확인.
+2.0.4.1 신규 설치와 설치된 버전 확인.
+3.MainActivity 시작과3초 후 프로세스 생존 확인.
+4.0.3.0 설치 후 원래 서명으로0.4.1 덮어쓰기 업데이트 확인.
+
+실제 사용자 휴대폰, Play Protect 판단, 모든 Android 버전/제조사, 다른 인증서의 기존 앱, 음악 세션/권한/오디오 캡처/장시간 안정성은 이 검사 범위가 아니다. 로컬 호스트에는 KVM과 연결 기기가 없어 AVD 검사는 GitHub Actions에서 수행하도록 구성했다.
+
+## 과거 기록과 검증의 빈틈
+
+아래0.4.0의 서명·체크섬·zipalign 검사는 실제로 통과했지만, 압축된 resources.arsc를 허용하는 검사들이었다. 따라서 설치 가능성을 증명하지 못했다.0.4.1은 저장 방식과 로컬 ZIP 데이터 offset을 독립적으로 검사하고 실제 PackageManager 설치를 배포 gate에 추가했다.
+
+[Changelog](../CHANGELOG.md) · [0.4.1 notes](RELEASE-0.4.1.md) · [패키징 결과](apk-packaging-qa-0.4.1.json) · [빌드 정보](build-info-0.4.1.json)
+
+---
+
 # 0.4.0 검증 결과
 
 날짜: 2026-10-22. Ubuntu24.04.3 / JDK17.0.20 / SDK36 / Build Tools36.0.0. 아래는 이번 코드에서 실제 수행한 검증이다. 과거 0.1–0.3 보고서는 해당 버전의 JSON/CHANGES 파일에 보존한다.

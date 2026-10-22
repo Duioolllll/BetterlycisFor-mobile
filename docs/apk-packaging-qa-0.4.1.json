@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "BetterLyrics-Mobile-0.4.0.apk: correctly rejected uncompressed",
+    "0.3.0 known-good resource table accepted",
+    "missing.apk: correctly rejected exactly one",
+    "unaligned.apk: correctly rejected aligned to 4 bytes",
+    "fixed APK resource table accepted: {\"compression\": \"stored\", \"dataOffset\": 2412, \"alignment\": 4}"
+  ]
+}

@@ -2,8 +2,8 @@
 
 [한국어](INSTALL_KO.md) · [English](INSTALL_EN.md) · [简体中文](INSTALL_ZH.md) · [Home](../README.en.md)
 
-**0.4.0 · Android8.0+(API26+) · package `io.betterlyrics.mobile` · versionCode8**
-The app interface is Korean; translated installation guides do not add English/Chinese UI. This is an independent unofficial project. It targets Android16, but installation/playback on a physical Android device or emulator has not been tested. See [validation](VALIDATION.md).
+**0.4.1 · Android8.0+(API26+) · package `io.betterlyrics.mobile` · versionCode9**
+The app interface is Korean; translated installation guides do not add English/Chinese UI. This is an independent unofficial project. It targets Android16, but publication of0.4.1 requires Android16 emulator install/launch/update checks. Physical phones and music playback require separate tests. See [validation](VALIDATION.md).
 
 ## A. Download and verify
 
@@ -11,18 +11,18 @@ The app interface is Korean; translated installation guides do not add English/C
 2. Choose **Releases**.
 3. Open **Latest Release**, or use [this link](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest).
 4. Expand **Assets** and download the APK. `Source code.zip/tar.gz` is not an installer.
-5. This release's filename is `BetterLyrics-Mobile-0.4.0.apk`. For later versions, follow that release's version and filename.
+5. This release's filename is `BetterLyrics-Mobile-0.4.1.apk`. For later versions, follow that release's version and filename.
 6. If possible, compare the downloaded file's SHA-256 with the accompanying `SHA256SUMS`. Do not install a mismatch; download again.
 
-[0.4.0 APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.0/BetterLyrics-Mobile-0.4.0.apk) · [checksums](../downloads/SHA256SUMS). If Releases is temporarily unavailable, use the [repository APK](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.0.apk). Do not rename HTML pages or source ZIPs to APK.
+[0.4.1 APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk) · [checksums](../downloads/SHA256SUMS). If Releases is temporarily unavailable, use the [repository APK](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk). Do not rename HTML pages or source ZIPs to APK.
 
 On a computer:
 
 ```powershell
-Get-FileHash .\BetterLyrics-Mobile-0.4.0.apk -Algorithm SHA256
+Get-FileHash .\BetterLyrics-Mobile-0.4.1.apk -Algorithm SHA256
 ```
 
-Linux: `sha256sum BetterLyrics-Mobile-0.4.0.apk`; macOS: `shasum -a 256 BetterLyrics-Mobile-0.4.0.apk`. Matching hashes/signatures identify a file; they do not establish Google security approval.
+Linux: `sha256sum BetterLyrics-Mobile-0.4.1.apk`; macOS: `shasum -a 256 BetterLyrics-Mobile-0.4.1.apk`. Matching hashes/signatures identify a file; they do not establish Google security approval.
 
 ## B. Install on Android
 
@@ -58,6 +58,7 @@ If an update fails, check the hash, version, package and signature. For a signat
 
 | Problem | Checks and actions |
 | --- | --- |
+| 0.4.0 installation fails | Confirmed resource packaging defect: download0.4.1 again; renaming the old file does not fix it |
 | APK installation fails | Check Android8+, free space, complete download/hash and correct APK. For updates also check signature/version |
 | Installation blocked | Check source-specific permission for the app opening the file. Ask the administrator about organization/parental policies |
 | Play Protect warning | Read it; stop for a harmful-app verdict. Do not force protection off. Report exact wording/version |

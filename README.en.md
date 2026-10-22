@@ -2,15 +2,17 @@
 
 An independent, unofficial Android lyric companion based on analysis of BetterLyrics. It is not an official product of BetterLyrics, Apple or any music service.
 
-**0.4.0 · Android8.0+(API26) · target Android16(API36) · versionCode8**
+**0.4.1 · Android8.0+(API26) · target Android16(API36) · versionCode9**
 
-**[Download APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.0/BetterLyrics-Mobile-0.4.0.apk)** · [Latest Release / Assets](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest) · [Fallback download](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.0.apk) · [SHA-256](downloads/SHA256SUMS)
+**[Download APK](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/download/v0.4.1/BetterLyrics-Mobile-0.4.1.apk)** · [Latest Release / Assets](https://github.com/sdcom1214/BetterlycisFor-mobile/releases/latest) · [Fallback download](https://github.com/sdcom1214/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.1.apk) · [SHA-256](downloads/SHA256SUMS)
 
 [한국어 README](README.md) · Installation: [한국어](docs/INSTALL_KO.md) / [English](docs/INSTALL_EN.md) / [简体中文](docs/INSTALL_ZH.md)
 
 ![Landscape lyric UI](docs/images/lyrics-wide.webp)
 
 Actual bundled web UI rendered with synthetic metadata and original sample text; a browser capture, not an Android hardware capture. Runtime album art comes from your music app.
+
+**Installation fix:**0.4.0 has a confirmed resource-table packaging defect. Use0.4.1 or later. [Changelog](CHANGELOG.md)
 
 ## Features
 
@@ -20,9 +22,9 @@ The interface is currently Korean. See the translated installation guides for it
 
 ## Verification and limits
 
-Linux debug/release builds, APK v2/v3 signature and previous signing-certificate match, two identical same-environment builds, 190 offline JVM assertions and browser regression suites were checked. Three Korean songs returned timed Hangul lyrics from live providers; this does not establish listening synchronization on a phone. Intermittent LRCLIB HTTP503 was observed.
+Linux debug/release builds, APK v2/v3 signature and previous signing-certificate match, two identical same-environment builds, 155 Java assertions and5 packaging cases were checked for this fix; previous UI regressions are retained in validation records. Three Korean songs returned timed Hangul lyrics from live providers; this does not establish listening synchronization on a phone. Intermittent LRCLIB HTTP503 was observed.
 
-No physical Android device or emulator was tested. Android16 runtime, permissions, real media/capture integration, reconnection, performance and battery use remain unverified. NetEase is unofficial and its usage/distribution terms are not cleared. Missing source words are not invented. QQ/Kugou/Apple online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded. Existing development-certificate lineage is retained for updates; this is not Google security certification.
+Publication of0.4.1 requires Android16 emulator install/launch/update checks; see the attached INSTALL_VALIDATION.json. Physical phones, permissions, real media/capture integration, reconnection, performance and battery use remain unverified. NetEase is unofficial and its usage/distribution terms are not cleared. Missing source words are not invented. QQ/Kugou/Apple online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded. Existing development-certificate lineage is retained for updates; this is not Google security certification.
 
 ## Development and references
 
@@ -35,6 +37,6 @@ python3 tools/build.py --variant debug --sdk /path/to/Android/Sdk
 python3 tools/test.py
 ```
 
-[Build/sign/ADB/reproducibility](docs/BUILD.md) · [Development](docs/DEVELOPMENT.md) · [API](docs/API_REFERENCE.md) · [Reverse engineering](docs/REVERSE_ENGINEERING.md) · [Validation](docs/VALIDATION.md) · [Release notes](docs/RELEASE-0.4.0.md) · [Security/licenses](docs/SECURITY_AND_LICENSES.md).
+[Build/sign/ADB/reproducibility](docs/BUILD.md) · [Development](docs/DEVELOPMENT.md) · [API](docs/API_REFERENCE.md) · [Reverse engineering](docs/REVERSE_ENGINEERING.md) · [Validation](docs/VALIDATION.md) · [Release notes](docs/RELEASE-0.4.1.md) · [Security/licenses](docs/SECURITY_AND_LICENSES.md).
 
 Original: [Zhe Fang / BetterLyrics contributors](https://github.com/jayfunc/BetterLyrics/tree/v1.3.527.0). Android changes: BetterLyrics Mobile contributors, 2026. [GPL-3.0](LICENSE), no warranty. Corresponding source/build scripts are available at the release tag; private signing keys are excluded. Bootstrap Icons1.13.1: MIT. [Third-party notices](THIRD_PARTY_NOTICES.md). Lyrics, artwork and trademarks retain their separate rights; software licensing does not grant content redistribution rights.

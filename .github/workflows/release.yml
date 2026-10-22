@@ -12,7 +12,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -21,36 +21,54 @@ jobs:
         run: |
           python3 tools/test.py
           python3 tools/verify-release.py
+          python3 tools/apk-packaging-test.py --fixed-apk downloads/BetterLyrics-Mobile-0.4.1.apk
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;36.0.0"
-          java -jar "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" verify --verbose --print-certs downloads/BetterLyrics-Mobile-0.4.0.apk > "$RUNNER_TEMP/signature.txt"
+          java -jar "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" verify --verbose --print-certs downloads/BetterLyrics-Mobile-0.4.1.apk > "$RUNNER_TEMP/signature.txt"
           python3 - "$RUNNER_TEMP/signature.txt" <<'PY'
           import json, sys
           from pathlib import Path
           meta=json.loads(Path('downloads/release.json').read_text())
           assert meta['certificateSha256'] in Path(sys.argv[1]).read_text()
           PY
-          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging downloads/BetterLyrics-Mobile-0.4.0.apk > "$RUNNER_TEMP/manifest.txt"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging downloads/BetterLyrics-Mobile-0.4.1.apk > "$RUNNER_TEMP/manifest.txt"
           python3 - "$RUNNER_TEMP/manifest.txt" <<'PY'
           import sys
           from pathlib import Path
           s=Path(sys.argv[1]).read_text()
-          assert "name='io.betterlyrics.mobile'" in s and "versionCode='8'" in s and "versionName='0.4.0'" in s
+          assert "name='io.betterlyrics.mobile'" in s and "versionCode='9'" in s and "versionName='0.4.1'" in s
           assert "minSdkVersion:'26'" in s.splitlines() and "targetSdkVersion:'36'" in s.splitlines()
           assert 'application-debuggable' not in s
           PY
+      - name: Android 16 installation and update regression
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "emulator" "system-images;android-36;google_apis;x86_64"
+          test -c /dev/kvm
+          sudo chown "$(id -u)" /dev/kvm
+          printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n betterlyrics_install -k "system-images;android-36;google_apis;x86_64" --force
+          "$ANDROID_HOME/emulator/emulator" -avd betterlyrics_install -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$RUNNER_TEMP/emulator.log" 2>&1 &
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
+          timeout 240 adb -s emulator-5554 wait-for-device
+          boot_deadline=$((SECONDS + 420))
+          until [ "$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ]; do
+            if [ "$SECONDS" -ge "$boot_deadline" ]; then tail -80 "$RUNNER_TEMP/emulator.log"; exit 1; fi
+            sleep 2
+          done
+          python3 tools/install-smoke.py --serial emulator-5554 --report "$RUNNER_TEMP/INSTALL_VALIDATION.json"
+          adb -s emulator-5554 emu kill
       - name: Create release with APK and checksum
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          tag=v0.4.0
+          tag=v0.4.1
           if gh release view "$tag" >/dev/null 2>&1; then
             echo "Release already exists; refusing to replace published assets."
             exit 1
           fi
-          gh release create "$tag" downloads/BetterLyrics-Mobile-0.4.0.apk downloads/SHA256SUMS --target "$GITHUB_SHA" --title 'BetterLyrics Mobile 0.4.0' --notes-file docs/RELEASE-0.4.0.md --draft
+          gh release create "$tag" downloads/BetterLyrics-Mobile-0.4.1.apk downloads/SHA256SUMS --target "$GITHUB_SHA" --title 'BetterLyrics Mobile 0.4.1' "$RUNNER_TEMP/INSTALL_VALIDATION.json" --notes-file docs/RELEASE-0.4.1.md --draft
+          gh release edit v0.4.0 --prerelease --notes-file docs/RELEASE-0.4.0.md
           gh release edit "$tag" --draft=false --latest
-          curl --fail --location --retry 3 --retry-delay 2 --output "$RUNNER_TEMP/published.apk" "https://github.com/${GH_REPO}/releases/download/${tag}/BetterLyrics-Mobile-0.4.0.apk"
+          curl --fail --location --retry 3 --retry-delay 2 --output "$RUNNER_TEMP/published.apk" "https://github.com/${GH_REPO}/releases/download/${tag}/BetterLyrics-Mobile-0.4.1.apk"
           python3 - "$RUNNER_TEMP/published.apk" <<'PY'
           import hashlib, json, sys
           from pathlib import Path

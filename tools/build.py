@@ -2,6 +2,7 @@
 """Offline Android build. Release signing requires an existing private keystore."""
 import argparse, hashlib, json, os, shutil, subprocess, zipfile, xml.etree.ElementTree as ET
 from pathlib import Path
+from apk_packaging import check_resource_table
 ROOT = Path(__file__).resolve().parents[1]
 arg = argparse.ArgumentParser()
 arg.add_argument('--sdk', default=os.environ.get('ANDROID_SDK_ROOT', os.environ.get('ANDROID_HOME', '')))
@@ -50,8 +51,8 @@ sources=sorted((ROOT/'app/src/main/java').rglob('*.java'))
 javatool('-m','jdk.compiler/com.sun.tools.javac.Main','-encoding','UTF-8','-source','8','-target','8',
          '-Xlint:deprecation','-classpath',android,'-d',classes,*sources)
 # Fixed entry dates and sorted paths eliminate wall-clock ZIP differences.
-def write_entry(z,name,data):
-    info=zipfile.ZipInfo(name,(2000,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
+def write_entry(z,name,data,compression=zipfile.ZIP_DEFLATED):
+    info=zipfile.ZipInfo(name,(2000,1,1,0,0,0));info.compress_type=compression
     info.external_attr=0o100644<<16;z.writestr(info,data)
 jar=work/'classes.jar'
 with zipfile.ZipFile(jar,'w') as z:
@@ -69,20 +70,24 @@ linked=work/'linked.apk';unsigned=work/'unsigned.apk'
 run([bt/('aapt2'+exe),'link','-I',android,'--manifest',manifest,'--min-sdk-version','26',
      '--target-sdk-version','36','--version-code',code,'--version-name',version,'-o',linked,work/'resources.zip'])
 with zipfile.ZipFile(linked) as src, zipfile.ZipFile(unsigned,'w') as z:
-    for name in sorted(src.namelist()): write_entry(z,name,src.read(name))
+    for name in sorted(src.namelist()):
+        compression = zipfile.ZIP_STORED if name == 'resources.arsc' else src.getinfo(name).compress_type
+        write_entry(z,name,src.read(name),compression)
     for p in sorted(dex.glob('*.dex')): write_entry(z,p.name,p.read_bytes())
     for p in sorted((ROOT/'app/src/main/assets').rglob('*')):
         if p.is_file(): write_entry(z,'assets/'+p.relative_to(ROOT/'app/src/main/assets').as_posix(),p.read_bytes())
 aligned=work/'aligned.apk';run([bt/('zipalign'+exe),'-f','-p','4',unsigned,aligned])
+check_resource_table(aligned)
 dist=ROOT/'dist';dist.mkdir(exist_ok=True)
 apk=dist/('BetterLyrics-Mobile-'+version+('-debug' if opt.variant=='debug' else '')+'.apk')
 javatool('-jar',bt/'lib/apksigner.jar','sign','--ks',keystore,'--ks-key-alias',opt.alias,
          '--ks-pass','env:BL_STORE_PASSWORD','--key-pass','env:BL_KEY_PASSWORD','--out',apk,aligned)
+resource_table=check_resource_table(apk)
 javatool('-jar',bt/'lib/apksigner.jar','verify','--verbose','--print-certs',apk)
 run([bt/('zipalign'+exe),'-c','4',apk]);run([bt/('aapt2'+exe),'dump','badging',apk])
 result={'apk':apk.name,'version':version,'versionCode':int(code),'variant':opt.variant,
         'bytes':apk.stat().st_size,'sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),
-        'minSdk':26,'targetSdk':36,'compileSdk':36,'buildTools':'36.0.0',
+        'resourceTable':resource_table,'minSdk':26,'targetSdk':36,'compileSdk':36,'buildTools':'36.0.0',
         'signing':'externally supplied private key' if opt.variant=='release' else 'local debug key',
         'abi':'universal (no native .so)'}
 (dist/('build-info-'+opt.variant+'.json')).write_text(json.dumps(result,indent=2)+'\n')
