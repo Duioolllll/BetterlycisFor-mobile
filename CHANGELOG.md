@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.4.2 — 2026-10-23
+
+### Fixed
+
+- 오디오 캡처 서비스 종료 처리: 서비스가 종료될 때 이미 안내한 구체적인 실패 사유(공유 종료, 앱별 캡처 실패, 연결 끊김)를 일반적인 "연결이 종료됐어요" 문구로 덮어쓰지 않는다. 녹음 장치 해제도 읽기 스레드와 경합하지 않도록 정리했다.
+- WebView 브리지 오류 안내: 내부 예외 원문을 토스트에 그대로 노출하지 않고 일반 안내 문구로 바꿨다. 진단 정보는 로그에만 남긴다.
+- 가사 요청 User-Agent의 저장소 주소를 계정명 변경(GitHub sdcom1214 → Duioolllll)에 맞게 고치고 버전을 0.4.2로 올렸다. 패키지명과 원래 인증서를 유지하면서 versionCode를 9→10으로 올렸다.
+
+### Validation and prevention
+
+- 오프라인 회귀 검사(tools/test.py)가 기본 검사 묶음을 명시적으로 실행하고, 네트워크 검사는 옵션을 켰을 때만 실행한다. Android SDK(android-36 android.jar)가 없으면 즉시 실패한다.
+- 릴리즈 워크플로가 test.py에 SDK 경로를 명시적으로 전달한다(--sdk). 로컬 실행 시 ANDROID_HOME도 폴백으로 사용한다.
+- 게시 조건은 0.4.1과 동일하다: Android 16 에뮬레이터에서 신규 설치·시작·기존 버전 덮어쓰기 업데이트를 통과해야 한다. 결과는 Release의 `INSTALL_VALIDATION.json`에 첨부된다.
+
+### English
+
+Capture-service teardown no longer overwrites a specific failure reason with a generic disconnect message, and recorder release no longer races the reader thread. WebView bridge errors show a generic toast instead of raw exception text (diagnostics go to logcat). The lyrics User-Agent uses the renamed GitHub account URL. VersionCode 10 keeps the same package and original certificate. The offline regression runner executes an explicit default check set with network checks opt-in and fails fast when the Android SDK is missing; the release workflow passes the SDK path explicitly.
+
 ## 0.4.1 — 2026-10-23
 
 ### Fixed

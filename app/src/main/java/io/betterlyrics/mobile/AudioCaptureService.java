@@ -13,13 +13,15 @@ public final class AudioCaptureService extends Service {
     private volatile AudioRecord recorder;
     private volatile boolean running;
     private volatile boolean stopping;
+    private volatile boolean failureNotified;
     private Thread reader;
     private AudioEngine engine;
     private long ticket;
     @Override public IBinder onBind(Intent intent){return null;}
+    private void notifyFailure(String text){failureNotified=true;if(engine!=null)engine.failure(ticket,text);}
     @Override public int onStartCommand(Intent intent,int flags,int startId){
         if(intent==null||Build.VERSION.SDK_INT<29){stopSelf();return START_NOT_STICKY;}
-        engine=AppState.get(this).audio;ticket=intent.getLongExtra("ticket",-1);
+        engine=AppState.get(this).audio;ticket=intent.getLongExtra("ticket",-1);failureNotified=false;
         if(ticket!=engine.ticket()){stopSelf();return START_NOT_STICKY;}
         try{
             NotificationManager notifications=getSystemService(NotificationManager.class);notifications.createNotificationChannel(new NotificationChannel("audio-visuals","사운드 반응 배경",NotificationManager.IMPORTANCE_LOW));
@@ -29,7 +31,7 @@ public final class AudioCaptureService extends Service {
             Intent data=intent.getParcelableExtra("data");
             projection=getSystemService(MediaProjectionManager.class).getMediaProjection(intent.getIntExtra("resultCode",Activity.RESULT_CANCELED),data);
             if(projection==null)throw new IllegalStateException();
-            projection.registerCallback(new MediaProjection.Callback(){@Override public void onStop(){running=false;if(!stopping&&engine!=null)engine.failure(ticket,"소리 공유가 종료됐어요. 다시 연결해 주세요.");if(!stopping)stopSelf();}},new Handler(Looper.getMainLooper()));
+            projection.registerCallback(new MediaProjection.Callback(){@Override public void onStop(){running=false;if(!stopping)notifyFailure("소리 공유가 종료됐어요. 다시 연결해 주세요.");if(!stopping)stopSelf();}},new Handler(Looper.getMainLooper()));
             AudioPlaybackCaptureConfiguration configuration=new AudioPlaybackCaptureConfiguration.Builder(projection).addMatchingUsage(AudioAttributes.USAGE_MEDIA).build();
             int rate=44100,min=AudioRecord.getMinBufferSize(rate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
             if(min<=0)throw new IllegalStateException();
@@ -37,7 +39,7 @@ public final class AudioCaptureService extends Service {
             if(recorder.getState()!=AudioRecord.STATE_INITIALIZED)throw new IllegalStateException();
             recorder.startRecording();running=true;
             reader=new Thread(()->analyze(rate),"playback-spectrum");reader.start();
-        }catch(Exception error){engine.failure(ticket,"이 음악 앱의 소리를 가져올 수 없어요. 기본 그라데이션을 사용해요.");stopSelf();}
+        }catch(Exception error){notifyFailure("이 음악 앱의 소리를 가져올 수 없어요. 기본 그라데이션을 사용해요.");stopSelf();}
         return START_NOT_STICKY;
     }
     private void analyze(int rate){
@@ -50,15 +52,15 @@ public final class AudioCaptureService extends Service {
                 String status=!engine.playing()?"paused":now-lastSound>3500?"silent":"live";
                 engine.publish(ticket,frame,status,status.equals("silent")?"소리 입력이 없어요. 음악 앱이 공유를 제한할 수 있어요.":status.equals("paused")?"일시정지 · 기본 그라데이션":"재생 소리에 반응 중");
             }
-        }catch(Exception error){if(running)engine.failure(ticket,"소리 연결이 끊겼어요. 다시 연결해 주세요.");}
+        }catch(Exception error){if(running)notifyFailure("소리 연결이 끊겼어요. 다시 연결해 주세요.");}
         finally{running=false;try{active.release();}catch(Exception ignored){}if(recorder==active)recorder=null;java.util.Arrays.fill(pcm,(short)0);stopSelf();}
     }
     @Override public void onDestroy(){
         stopping=true;running=false;
         AudioRecord active=recorder;recorder=null;
-        if(active!=null){try{active.stop();}catch(Exception ignored){}try{active.release();}catch(Exception ignored){}}
+        if(active!=null){try{active.stop();}catch(Exception ignored){}if(reader==null)try{active.release();}catch(Exception ignored){}}
         MediaProjection old=projection;projection=null;if(old!=null)try{old.stop();}catch(Exception ignored){}
-        if(engine!=null)engine.failure(ticket,"소리 연결이 종료됐어요. 다시 연결해 주세요.");
+        if(!failureNotified)notifyFailure("소리 연결이 종료됐어요. 다시 연결해 주세요.");
         stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();
     }
 }
