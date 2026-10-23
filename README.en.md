@@ -1,36 +1,106 @@
+<div align="center">
+
 # BetterLyrics Mobile
 
-An independent, unofficial Android lyric companion based on analysis of BetterLyrics. It is not an official product of BetterLyrics, Apple or any music service.
+### Your music. Your lyrics. Your screen.
 
-**0.4.3 · Android8.0+(API26) · target Android16(API36) · versionCode11**
+An Android lyric companion that follows playback in your music app.<br>
+Large lyrics, album-color gradients and a layout you can make your own.
 
-**[Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)** · [Latest Release / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [Fallback download](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.3.apk) · [SHA-256](downloads/SHA256SUMS)
+[![Release 0.4.3](https://img.shields.io/badge/release-0.4.3-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.4.3)
+[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square)](docs/INSTALL_EN.md)
+[![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-[한국어 README](README.md) · Installation: [한국어](docs/INSTALL_KO.md) / [English](docs/INSTALL_EN.md) / [简体中文](docs/INSTALL_ZH.md)
+### [↓ Download Android APK · v0.4.3](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)
 
-![Landscape lyric UI](docs/images/lyrics-wide.webp)
+**Released October 23, 2026** · Android 8.0+ · 113 KiB · versionCode 11
 
-Actual bundled web UI rendered with synthetic metadata and original sample text; a browser capture, not an Android hardware capture. Runtime album art comes from your music app.
+[Release / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [Installation](docs/INSTALL_EN.md) · [Changelog](changelog/README.md) · [한국어](README.md) · [简体中文安装](docs/INSTALL_ZH.md)
 
-**Installation fix:**0.4.0 has a confirmed resource-table packaging defect. Use0.4.3 or later. [Changelog](CHANGELOG.md)
+![BetterLyrics Mobile landscape lyric screen](docs/images/lyrics-wide.webp)
 
-## Features
+</div>
 
-MediaSession detection, album art, transport/seek/volume; LRCLIB and unofficial NetEase lyrics; Korean aliases/version matching; local lyric import; real word/line timing; continuous progress, scrub preview and per-song offset. Original/focus/album presets and persistent appearance controls cover layout, type, spacing, blur, color, brightness, cover and auto-hiding controls. Album-color gradients, optional sound-reactive backgrounds, reduced-motion fallback and floating lyrics remain available.
+> **Installing for the first time?** Choose **Download Android APK** above. The source ZIP is not an Android installer. If the download is unavailable, use the [repository fallback](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.3.apk).
 
-The interface is currently Korean. See the translated installation guides for its control labels. Allow notification access only after reading the system prompt, play music in a compatible app, then return. Audio and overlay permissions are optional. Read Play Protect warnings and stop if the app is identified as harmful; do not disable protection to force installation.
+## Lyrics that follow your music
 
-Includes service I/O/spectrum optimizations and capture teardown/bridge error fixes. [Measured performance and limitations](docs/SERVICE_OPTIMIZATION.md).
+| Focus on the words | Connected to playback | Make it yours |
+| --- | --- | --- |
+| Progress-based scrolling, active-line emphasis, supplied word timing and per-song offsets | Android MediaSession detection, album art, playback, seeking and volume | Layout presets, typography, alignment, spacing, album-color gradients and optional sound-reactive backgrounds |
 
-## Verification and limits
+LRCLIB / NetEase search, manual candidate selection, local lyric import/cache and floating lyrics are supported. Matching compares Korean title aliases, recording versions and duration. Lyrics without word timing use line timing. **The app interface is currently Korean.**
 
-Linux debug/release builds, APK v2/v3 signature and previous signing-certificate match, two identical same-environment builds, 214 offline checks, 2073 bit-identical baseline audio frames and5 packaging cases were checked for this release; previous UI regressions are retained in validation records. Three Korean songs returned timed Hangul lyrics from live providers; this does not establish listening synchronization on a phone. Intermittent LRCLIB HTTP503 was observed.
+<details>
+<summary><strong>Portrait screen and more features</strong></summary>
 
-Publication of0.4.3 requires Android16 emulator install/launch/update checks; see the attached RELEASE_VALIDATION.json and INSTALL_VALIDATION.json. Physical phones, permissions, real media/capture integration, reconnection, performance and battery use remain unverified. NetEase is unofficial and its usage/distribution terms are not cleared. Missing source words are not invented. QQ/Kugou/Apple online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded. Existing development-certificate lineage is retained for updates; this is not Google security certification.
+<p align="center">
+  <img src="docs/images/lyrics-phone.webp" alt="Portrait screen with a small album cover and large active lyric line" width="280">
+</p>
 
-## Development and references
+- **Lyrics:** LRC / Enhanced LRC / ESLRC / TTML, decoded QRC·KRC·YRC and binary KRC import; scrub preview, return to current lyrics and per-song timing offsets.
+- **Appearance:** original / focus / album presets; saved type weight, blur, brightness, cover, colors and auto-hiding playback controls.
+- **Background:** default album-color gradient; optional actual-audio response, intensity controls, reduced motion and a fallback when WebGL is unavailable.
+- **Music apps:** a compatible MediaSession is required. Artwork, lyrics, seeking and audio sharing depend on the source app and provider.
 
-Java8 source/target, JDK17, SDK36 / Build Tools36.0.0, local HTML/CSS/JS WebView + WebGL, Python3 builder. No external Android runtime framework. AGP8.10.1 configuration exists, but Gradle execution was not verified.
+</details>
+
+Screenshots show the actual bundled web UI with synthetic track metadata and original sample lyrics. They are browser captures, not Android hardware captures. Runtime album art comes from your music app.
+
+## Get started in three steps
+
+1. **[Download v0.4.3 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)** and open it. If prompted, allow installation only for the browser or file app opening this file.
+2. Launch → **··· → 음악 감지** (music detection) → allow notification access. Play a song in your music app and return.
+3. Open **··· → 화면 꾸미기** (appearance) to choose lyrics, background and layout. Audio response and floating lyrics are optional.
+
+**Installation:** [한국어](docs/INSTALL_KO.md) · [English](docs/INSTALL_EN.md) · [简体中文](docs/INSTALL_ZH.md)
+
+Read Play Protect warnings and stop if the app is identified as harmful. You can revoke the install-source permission afterward. Updates require the same package and signature; uninstalling may remove settings and lyric caches. The installation guides explain permissions and common failures.
+
+## In this release · 0.4.3
+
+- **Service processing:** reuses audio analysis arrays/calculations and reduces duplicate media queries and WebView updates.
+- **Input and cache:** cancels stale lyric/artwork/file jobs and prevents temporary-file collisions during concurrent cache saves.
+- **Error reporting:** preserves specific audio-capture failure reasons and avoids exposing internal bridge exception text.
+- **Installation checks:** retains the 0.4.1 resource packaging fix. Android 16 emulator fresh install/launch and updates/launch from 0.3.0 and 0.4.1 passed.
+
+[Full 0.4.3 release notes](changelog/0.4.3.md) · [All version history](changelog/README.md) · [Service measurements](docs/SERVICE_OPTIMIZATION.md)
+
+0.4.0 has a confirmed installation defect. **Use the current 0.4.3 download.** 0.4.2 was committed as source only and has no separate public APK release.
+
+<details>
+<summary><strong>Download details · SHA-256 · actual verification</strong></summary>
+
+| Item | Value / result |
+| --- | --- |
+| File | `BetterLyrics-Mobile-0.4.3.apk` · 115,650 bytes |
+| Package / version | `io.betterlyrics.mobile` · 0.4.3 (11) |
+| Android | Minimum 8.0 (API 26) · compile / target 16 (API 36) |
+| APK | Universal · no native `.so` |
+| Offline checks | 214 passed · 2,073 bit-identical baseline audio frames · 5 packaging cases passed |
+| Signing / builds | v2/v3 · previous certificate match · ZIP alignment · two byte-identical same-environment builds |
+| Android 16 AVD | Fresh install/launch and updates/launch from 0.3.0 and 0.4.1 passed |
+| Public file | Published APK re-downloaded and SHA-256 verified |
+
+```text
+2bd116afdc20d4b9b41c4af52ebcacff75d9cb2ab0960a053f147e30acfba078
+```
+
+[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/RELEASE_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/INSTALL_VALIDATION.json) · [Workflow run](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/runs/39940400047) · [Validation scope](docs/VALIDATION.md)
+
+</details>
+
+## Documentation and development
+
+| User guides | Developer references |
+| --- | --- |
+| [한국어 설치·업데이트·문제 해결](docs/INSTALL_KO.md) | [Environment, modules and OS setup](docs/DEVELOPMENT.md) |
+| [English installation](docs/INSTALL_EN.md) | [Debug / Release builds, signing and ADB](docs/BUILD.md) |
+| [简体中文安装指南](docs/INSTALL_ZH.md) | [Official and unofficial APIs](docs/API_REFERENCE.md) |
+| [Release and change history](changelog/README.md) | [REA analysis and Android reconstruction](docs/REVERSE_ENGINEERING.md) |
+| [Validation and unverified behavior](docs/VALIDATION.md) | [Security and license review](docs/SECURITY_AND_LICENSES.md) |
+
+**Stack:** Java 8 source/target · JDK 17 · Android SDK 36 / Build Tools 36.0.0 · WebView HTML/CSS/JavaScript + WebGL · Python 3 builder. No external Android runtime framework. AGP 8.10.1 configuration exists; Gradle execution has not been verified.
 
 ```sh
 git clone https://github.com/Duioolllll/BetterlycisFor-mobile.git
@@ -39,6 +109,19 @@ python3 tools/build.py --variant debug --sdk /path/to/Android/Sdk
 python3 tools/test.py --sdk /path/to/Android/Sdk
 ```
 
-[Build/sign/ADB/reproducibility](docs/BUILD.md) · [Development](docs/DEVELOPMENT.md) · [API](docs/API_REFERENCE.md) · [Reverse engineering](docs/REVERSE_ENGINEERING.md) · [Validation](docs/VALIDATION.md) · [Release notes](docs/RELEASE-0.4.3.md) · [Security/licenses](docs/SECURITY_AND_LICENSES.md).
+Debug builds do not require the private release key. Release builds require an externally supplied signing key. See [Build](docs/BUILD.md) for environment variables and commands.
 
-Original: [Zhe Fang / BetterLyrics contributors](https://github.com/jayfunc/BetterLyrics/tree/v1.3.527.0). Android changes: BetterLyrics Mobile contributors, 2026. [GPL-3.0](LICENSE), no warranty. Corresponding source/build scripts are available at the release tag; private signing keys are excluded. Bootstrap Icons1.13.1: MIT. [Third-party notices](THIRD_PARTY_NOTICES.md). Lyrics, artwork and trademarks retain their separate rights; software licensing does not grant content redistribution rights.
+## Known limitations
+
+- **Hardware:** physical phones, other Android versions, real-player Korean sync/artwork/capture, power-saving/reconnection and long-term stability remain unverified for this build. Linux JVM measurements are not phone-performance or battery measurements.
+- **Providers:** NetEase is unofficial and usage/distribution terms are unresolved. Intermittent LRCLIB HTTP 503 was observed. Missing source words and timestamps are not invented.
+- **Scope:** QQ / Kugou / Apple Music online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded.
+- **Validation:** the previous development-certificate lineage is retained; this is not Google review or Play Protect approval. 0.4.3 browser UI smoke could not be rerun because Chromium installation failed.
+
+## Attribution and license
+
+An **independent, unofficial project**, based on analysis of BetterLyrics source and shipped artifacts. It is not an official product of BetterLyrics, Apple or any music service.
+
+Original: [Zhe Fang / BetterLyrics contributors · v1.3.527.0](https://github.com/jayfunc/BetterLyrics/tree/v1.3.527.0). Android reconstruction: BetterLyrics Mobile contributors, 2026. [GPL-3.0](LICENSE), no warranty. Corresponding source/build scripts are available at the release tag; private signing keys are excluded. Bootstrap Icons 1.13.1: MIT. [Third-party notices](THIRD_PARTY_NOTICES.md).
+
+Lyrics, artwork and trademarks retain their separate rights; software licensing does not grant content redistribution rights. Original packages and decompiled DLL source are not distributed in this repository.

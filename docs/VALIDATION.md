@@ -26,7 +26,7 @@
 
 실제 휴대폰·Android8–15·제조사 정책·Play Protect 판정, 실제 음악 앱의 MediaSession/한국어 청취 싱크/앨범 아트/오디오 캡처, 권한 흐름·장시간 안정성·발열/배터리·교차 OS 재현 빌드는 이번 테스트 범위가 아니다. Linux JVM 성능 개선율을 휴대폰 개선율로 간주하지 않는다. 이전 릴리스의 기기 설치 검증을 이번 APK의 검증으로 재사용하지 않는다.
 
-[0.4.3 notes](RELEASE-0.4.3.md) · [빌드 정보](build-info-0.4.3.json) · [설치](INSTALL_KO.md)
+[0.4.3 notes](../changelog/0.4.3.md) · [빌드 정보](build-info-0.4.3.json) · [설치](INSTALL_KO.md)
 
 ---
 
@@ -56,7 +56,7 @@ Release를 게시하기 전에 전용 API36 가상 기기에서 다음을 실행
 
 아래0.4.0의 서명·체크섬·zipalign 검사는 실제로 통과했지만, 압축된 resources.arsc를 허용하는 검사들이었다. 따라서 설치 가능성을 증명하지 못했다.0.4.1은 저장 방식과 로컬 ZIP 데이터 offset을 독립적으로 검사하고 실제 PackageManager 설치를 배포 gate에 추가했다.
 
-[Changelog](../CHANGELOG.md) · [0.4.1 notes](RELEASE-0.4.1.md) · [패키징 결과](apk-packaging-qa-0.4.1.json) · [빌드 정보](build-info-0.4.1.json)
+[Changelog](../CHANGELOG.md) · [0.4.1 notes](../changelog/0.4.1.md) · [패키징 결과](apk-packaging-qa-0.4.1.json) · [빌드 정보](build-info-0.4.1.json)
 
 ---
 

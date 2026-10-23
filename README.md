@@ -1,54 +1,106 @@
+<div align="center">
+
 # BetterLyrics Mobile
 
-다른 음악 앱의 재생 상태에 맞춰 가사를 보여 주는 **독립적인 비공식 Android 앱**입니다. BetterLyrics의 소스·배포물 분석을 참고해 Android에 맞게 구현했습니다. 원본 BetterLyrics, Apple 또는 음악 서비스가 배포하는 공식 앱이 아닙니다.
+### 지금 듣는 음악, 가사와 함께.
 
-**최신 배포: 0.4.3 · Android8.0 이상 · target Android16 · versionCode11**
+음악 앱의 재생 흐름을 따라가는 Android 가사 플레이어.<br>
+큰 가사, 앨범색 그라데이션, 내 취향대로 바꾸는 화면.
 
-**[APK 다운로드](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)** · [최신 Release / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [다운로드 대체 경로](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.3.apk) · [SHA-256](downloads/SHA256SUMS)
+[![Release 0.4.3](https://img.shields.io/badge/release-0.4.3-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.4.3)
+[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square)](docs/INSTALL_KO.md)
+[![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-**설치:** [한국어](docs/INSTALL_KO.md) · [English](docs/INSTALL_EN.md) · [简体中文](docs/INSTALL_ZH.md) · [English README](README.en.md)
+### [↓ Android APK 다운로드 · v0.4.3](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)
 
-| 세로 가사 화면 | 가로 화면 |
+**2026.10.23 배포** · Android 8.0 이상 · 113 KiB · versionCode 11
+
+[릴리스 / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [설치 안내](docs/INSTALL_KO.md) · [변경 기록](changelog/README.md) · [English](README.en.md) · [简体中文安装](docs/INSTALL_ZH.md)
+
+![BetterLyrics Mobile 가로 가사 화면](docs/images/lyrics-wide.webp)
+
+</div>
+
+> **처음 설치하나요?** 위의 **APK 다운로드**를 누르세요. Source code ZIP은 Android 설치 파일이 아닙니다. 다운로드가 열리지 않으면 [대체 경로](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.3.apk)를 이용할 수 있습니다.
+
+## 음악에 맞춰 흐르는 가사
+
+| 가사에 집중 | 음악과 연결 | 나만의 화면 |
+| --- | --- | --- |
+| 진행도 기반 이동, 현재 줄 강조, 제공되는 단어 타이밍, 곡별 싱크 보정 | Android MediaSession 감지, 앨범 아트, 재생·탐색·음량 제어 | 화면 프리셋, 글꼴·크기·정렬·여백, 앨범색 그라데이션, 선택적 소리 반응 배경 |
+
+LRCLIB / NetEase 가사 검색, 직접 후보 선택, 로컬 가사 가져오기·캐시, 플로팅 가사를 지원합니다. 한국어 곡의 제목 별칭·버전·길이를 비교하며, 단어 타이밍이 없는 가사는 줄 단위로 표시합니다. 앱 화면은 현재 한국어입니다.
+
+<details>
+<summary><strong>세로 화면과 지원 기능 더 보기</strong></summary>
+
+<p align="center">
+  <img src="docs/images/lyrics-phone.webp" alt="작은 앨범 커버와 큰 현재 가사를 표시하는 세로 화면" width="280">
+</p>
+
+- **가사:** LRC / Enhanced LRC / ESLRC / TTML, 디코딩된 QRC·KRC·YRC와 바이너리 KRC 가져오기. 탐색 미리보기, 현재 가사로 복귀, 곡별 시간 보정.
+- **화면:** 원본 스타일 / 가사 집중 / 앨범 중심 프리셋. 글자 굵기·흐림·밝기·커버·색상·컨트롤 자동 숨김을 저장하고 즉시 적용.
+- **배경:** 기본 앨범색 그라데이션, 선택적 실제 소리 반응, 강도 조절, 동작 줄이기와 WebGL 미지원 시 대체 표시.
+- **음악 연동:** 호환 MediaSession을 제공하는 음악 앱에서 정보와 재생 상태를 받습니다. 커버·가사·탐색·오디오 공유는 음악 앱과 제공처에 따라 제한될 수 있습니다.
+
+</details>
+
+스크린샷은 실제 번들 웹 UI에 합성 곡 정보와 직접 작성한 예시 가사를 넣은 브라우저 캡처입니다. Android 실기기 캡처가 아닙니다. 실행 중 앨범 아트는 음악 앱에서 가져옵니다.
+
+## 3단계로 시작하기
+
+1. **[v0.4.3 APK 다운로드](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)** → 파일을 엽니다. 필요하면 해당 브라우저·파일 앱에만 **이 출처의 앱 설치 허용**을 설정합니다.
+2. 앱 실행 → **··· → 음악 감지**에서 알림 접근을 허용합니다. 음악 앱에서 노래를 재생한 뒤 돌아옵니다.
+3. **··· → 화면 꾸미기**에서 가사·배경·배치를 선택합니다. 소리 반응과 플로팅 가사는 선택 기능입니다.
+
+**설치 안내:** [한국어](docs/INSTALL_KO.md) · [English](docs/INSTALL_EN.md) · [简体中文](docs/INSTALL_ZH.md)
+
+Play Protect 경고 내용을 확인하고, 위험 앱으로 차단되면 설치를 중단하세요. 설치 후 출처별 설치 권한은 해제할 수 있습니다. 업데이트는 같은 패키지·서명이 필요하며, 앱 삭제 시 설정·가사 캐시가 사라질 수 있습니다. 설치 실패 원인과 권한별 설명은 설치 안내에서 확인하세요.
+
+## 이번 릴리스 · 0.4.3
+
+- **서비스 처리 최적화:** 오디오 분석 배열·계산을 재사용하고 중복 미디어 조회·화면 전송을 줄였습니다.
+- **입력과 캐시 정리:** 오래된 가사·이미지·파일 작업을 취소하고 캐시 동시 저장의 임시 파일 충돌을 막았습니다.
+- **오류 안내 수정:** 오디오 종료 시 구체적인 실패 이유를 보존하고 브리지 내부 예외 노출을 줄였습니다.
+- **설치 검증:** 0.4.1의 리소스 패키징 수정을 유지합니다. Android 16 에뮬레이터에서 신규 설치·시작과 0.3.0 / 0.4.1 → 0.4.3 업데이트·시작을 통과했습니다.
+
+[0.4.3 전체 릴리스 노트](changelog/0.4.3.md) · [모든 버전의 변경 기록](changelog/README.md) · [서비스 성능 측정](docs/SERVICE_OPTIMIZATION.md)
+
+0.4.0에는 확인된 설치 오류가 있습니다. **현재 배포인 0.4.3을 받으세요.** 0.4.2는 소스 기록만 있으며 별도 APK 릴리스가 없습니다.
+
+<details>
+<summary><strong>다운로드 정보 · SHA-256 · 실제 검증 결과</strong></summary>
+
+| 항목 | 값 / 결과 |
 | --- | --- |
-| ![세로 가사 화면](docs/images/lyrics-phone.webp) | ![가로 가사 화면](docs/images/lyrics-wide.webp) |
+| 파일 | `BetterLyrics-Mobile-0.4.3.apk` · 115,650 bytes |
+| 패키지 / 버전 | `io.betterlyrics.mobile` · 0.4.3 (11) |
+| Android | 최소 8.0 (API 26) · compile / target 16 (API 36) |
+| APK 구조 | Universal · 네이티브 `.so` 없음 |
+| 오프라인 검사 | 214개 통과 · 기준 오디오 2,073프레임 출력 동일 · 패키징 5개 통과 |
+| 서명 / 빌드 | v2/v3 · 기존 인증서 일치 · ZIP 정렬 · 같은 환경의 2회 빌드 바이트 일치 |
+| Android 16 AVD | 신규 설치·시작, 0.3.0 / 0.4.1에서 업데이트·시작 통과 |
+| 공개 파일 | Release APK 재다운로드 후 SHA-256 일치 확인 |
 
-위 이미지는 실제 번들 웹 UI를 합성 곡 정보·직접 작성한 예시 가사로 실행한 브라우저 캡처입니다. 실기기 캡처나 음악 서비스의 실제 앨범이 아닙니다. APK는 음악 앱이 제공하는 앨범 아트를 사용합니다.
+```text
+2bd116afdc20d4b9b41c4af52ebcacff75d9cb2ab0960a053f147e30acfba078
+```
 
-**설치 오류 수정:** 0.4.0 APK는 리소스 압축·정렬 오류로 설치되지 않을 수 있습니다. 0.4.3을 사용하세요. [Changelog](CHANGELOG.md)
+[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/RELEASE_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/INSTALL_VALIDATION.json) · [실행 로그](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/runs/39940400047) · [검증 범위](docs/VALIDATION.md)
 
-## 주요 기능
+</details>
 
-- Android MediaSession 음악 감지, 앨범 아트, 재생/일시정지·이전/다음·탐색·음량 제어.
-- LRCLIB / NetEase 검색, 직접 후보 선택, 한국어 별칭·버전·길이 비교, 로컬 캐시/가사 파일 가져오기.
-- 실제 단어 타이밍과 줄 타이밍 구분, 진행도 기반 가사 이동, 탐색 미리보기, 곡별 시간 보정.
-- 원본 스타일 / 가사 집중 / 앨범 중심 프리셋과 **UI 커스터마이징**: 배치, 정렬, 글꼴 스타일·크기·굵기, 여백, 흐림, 밝기, 커버, 색상, 자동 숨김.
-- Apple Music에서 참고한 가사 강조·앨범색 그라데이션, 선택적 실제 소리 반응 배경, 동작 줄이기·WebGL 미지원 대체 표시.
-- LRC / Enhanced LRC / ESLRC / TTML, 디코딩된 QRC·KRC·YRC, 바이너리 KRC 가져오기, 플로팅 가사.
+## 문서와 개발
 
-## 빠른 설치
+| 사용자 안내 | 개발·기술 문서 |
+| --- | --- |
+| [한국어 설치·업데이트·문제 해결](docs/INSTALL_KO.md) | [개발환경·구조·OS별 준비](docs/DEVELOPMENT.md) |
+| [English installation](docs/INSTALL_EN.md) | [Debug / Release 빌드·서명·ADB](docs/BUILD.md) |
+| [简体中文安装指南](docs/INSTALL_ZH.md) | [공식·비공식 API](docs/API_REFERENCE.md) |
+| [릴리스·변경 기록 모음](changelog/README.md) | [REA 분석·Android 재구현](docs/REVERSE_ENGINEERING.md) |
+| [검증과 미검증 항목](docs/VALIDATION.md) | [보안·라이선스 검토](docs/SECURITY_AND_LICENSES.md) |
 
-1. Release의 **Assets → BetterLyrics-Mobile-0.4.3.apk**를 받습니다. 소스 ZIP은 설치 파일이 아닙니다.
-2. APK를 열고 필요할 때만 해당 브라우저/파일 앱의 **이 출처 설치 허용**을 설정합니다. 앱 이름/권한을 확인합니다.
-3. 실행 후 **··· → 음악 감지**에서 알림 접근을 허용하고 음악 앱에서 노래를 재생합니다.
-4. **··· → 화면 꾸미기**에서 화면을 바꿉니다. 소리 반응/플로팅 가사는 선택 기능입니다.
-
-Play Protect가 위험 앱으로 차단하면 경고를 확인하고 설치를 중단하세요. 보안 기능을 강제로 끄는 절차는 제공하지 않습니다. 설치 후 출처별 설치 권한은 다시 해제할 수 있습니다. 업데이트에는 같은 패키지·서명이 필요하며, 삭제하면 설정/가사 캐시가 사라질 수 있습니다. 자세한 내용은 다국어 설치 안내를 따르세요.
-
-## 검증과 알려진 문제
-
-[전체 검증 결과](docs/VALIDATION.md) · [0.4.3 변경 사항](docs/RELEASE-0.4.3.md) · [보안·라이선스 검토](docs/SECURITY_AND_LICENSES.md)
-
-- Linux에서 debug/release 빌드, release v2/v3 서명·SHA-256·기존 인증서 일치, 동일 환경 두 번의 APK 바이트 일치를 확인했습니다.
-- 서비스 I/O·오디오 처리 최적화와 오디오 종료/오류 안내 수정을 포함합니다. 오프라인214개, 오디오2073프레임 출력 동등성, 패키징5개, APK 서명·정렬·동일 환경 재현 빌드를 검사했습니다. [성능 측정·한계](docs/SERVICE_OPTIMIZATION.md). 기존 UI 회귀 기록은 검증 문서에 보존했습니다.
-- 한국어 3곡의 실제 제공처에서 한글·동기화 가사를 가져왔지만 청취에 맞춘 실기기 싱크 검증은 아닙니다. LRCLIB 일시적 HTTP503도 관찰했습니다.
-- 0.4.3은 **Android16 AVD의 설치·시작·업데이트 검사 통과 후 게시**됩니다. 결과는 Release의 RELEASE_VALIDATION.json과 INSTALL_VALIDATION.json에 있습니다. 실제 휴대폰·권한·MediaSession·절전/재연결·오디오 공유·발열/성능은 별도 확인이 필요합니다.
-- 앱 UI는 현재 한국어입니다. 커버·가사·탐색은 음악 앱과 공급자에 의존합니다. 마스킹된 원문을 추측해 복원하지 않으며, 정확한 단어 타이밍이 없으면 기본적으로 줄 단위로 표시합니다.
-- NetEase는 비공식 API이며 이용/배포 조건 확인이 끝나지 않았습니다. QQ/Kugou/Apple Music 온라인 가사, 암호화 QRC, Windows 플러그인/Wallpaper Engine, Sing 보컬 제거는 포함하지 않습니다.
-- 릴리스는 기존 개발용 인증서 계보를 유지합니다. Google 검토/Play Protect 통과나 모든 기기 호환성을 보장하지 않습니다.
-
-## 기술 스택과 개발
-
-Java8 source/target, Android SDK36, JDK17, HTML/CSS/JavaScript WebView + WebGL, Python3 수동 빌드. 외부 Android 프레임워크 의존성은 없습니다. AGP8.10.1 설정은 있지만 Gradle 실행은 검증하지 않았습니다.
+**기술 스택:** Java 8 source/target · JDK 17 · Android SDK 36 / Build Tools 36.0.0 · WebView HTML/CSS/JavaScript + WebGL · Python 3 빌드 도구. 외부 Android 런타임 프레임워크 의존성은 없습니다. AGP 8.10.1 설정이 있지만 Gradle 실행은 검증하지 않았습니다.
 
 ```sh
 git clone https://github.com/Duioolllll/BetterlycisFor-mobile.git
@@ -57,15 +109,19 @@ python3 tools/build.py --variant debug --sdk /path/to/Android/Sdk
 python3 tools/test.py --sdk /path/to/Android/Sdk
 ```
 
-개인 서명 키 없이 debug APK를 만들 수 있습니다. 배포 APK와의 업데이트 호환성은 별도입니다.
+개인 서명 키 없이 Debug APK를 만들 수 있습니다. Release 빌드에는 외부에서 제공하는 개인 서명 키가 필요합니다. [빌드 안내](docs/BUILD.md)에서 환경변수와 명령을 확인하세요.
 
-- [개발환경·모듈·OS별 안내](docs/DEVELOPMENT.md)
-- [설치·debug/release 빌드·서명·ADB·재현 검증](docs/BUILD.md)
-- [공식/비공식 API 명세](docs/API_REFERENCE.md)
-- [REA 분석·역설계와 재구현](docs/REVERSE_ENGINEERING.md)
+## 알려진 제한
 
-## 원본·라이선스
+- **실기기 미검증:** 실제 휴대폰·다른 Android 버전·음악 앱별 한국어 싱크·앨범 아트·오디오 캡처·절전/재연결·장시간 안정성은 이번 릴리스에서 검증하지 않았습니다. Linux JVM 성능 측정은 휴대폰 성능·배터리 수치가 아닙니다.
+- **제공처 의존:** NetEase는 비공식 API이며 이용·배포 조건 확인이 남아 있습니다. LRCLIB 일시적 HTTP 503을 관찰했습니다. 마스킹된 원문을 추측해 복원하거나 없는 타임스탬프를 만들지 않습니다.
+- **기능 범위:** QQ / Kugou / Apple Music 온라인 가사, 암호화 QRC, Windows 플러그인·Wallpaper Engine, Sing 보컬 제거는 포함하지 않습니다.
+- **검증 범위:** 기존 개발용 인증서 계보를 유지합니다. Google 검토·Play Protect 통과를 의미하지 않습니다. 0.4.3 브라우저 UI smoke는 호스트 Chromium 설치 실패로 재실행하지 못했습니다.
 
-원작: [Zhe Fang / BetterLyrics contributors, v1.3.527.0](https://github.com/jayfunc/BetterLyrics/tree/v1.3.527.0). 수정·Android 재구현: BetterLyrics Mobile contributors, 2026. [GPL-3.0](LICENSE), 보증 없음. 배포 APK에 대응하는 소스·빌드 도구는 릴리스 태그에서 제공하며 개인 서명 키는 포함하지 않습니다. Bootstrap Icons1.13.1은 MIT입니다. [제3자 고지](THIRD_PARTY_NOTICES.md).
+## 출처와 라이선스
 
-외부 가사·앨범 이미지·상표의 권리는 각 권리자에게 있으며, 소스 라이선스가 해당 콘텐츠의 재배포 권한을 부여하지 않습니다. 원본 패키지와 디컴파일된 DLL 소스는 이 저장소에 배포하지 않습니다.
+**독립적인 비공식 프로젝트**입니다. 원본 BetterLyrics, Apple 또는 음악 서비스가 배포하는 공식 앱이 아닙니다. BetterLyrics의 소스·배포물 분석을 참고해 Android에 맞게 구현했습니다.
+
+원작: [Zhe Fang / BetterLyrics contributors · v1.3.527.0](https://github.com/jayfunc/BetterLyrics/tree/v1.3.527.0). Android 재구현: BetterLyrics Mobile contributors, 2026. [GPL-3.0](LICENSE), 보증 없음. 배포 APK에 대응하는 소스·빌드 도구는 릴리스 태그에 있습니다. 개인 서명 키는 포함하지 않습니다. Bootstrap Icons 1.13.1은 MIT입니다. [제3자 고지](THIRD_PARTY_NOTICES.md).
+
+외부 가사·앨범 이미지·상표의 권리는 각 권리자에게 있으며 소스 라이선스가 콘텐츠 재배포 권한을 부여하지 않습니다. 원본 패키지와 디컴파일된 DLL 소스는 이 저장소에 배포하지 않습니다.
