@@ -1,5 +1,7 @@
 # BetterLyrics Mobile 0.4.2 — 오디오 종료 처리와 브리지 오류 안내 수정
 
+> 이 버전은 소스·메타데이터만 커밋됐고 GitHub Release/APK로 게시되지 않았다. 수정 사항은 [0.4.3](RELEASE-0.4.3.md)에 포함된다. 아래는 당시 준비한 릴리스 노트이며 설치 검증 통과 기록을 의미하지 않는다.
+
 Release date: **2026-10-23** · Android8.0+(min26), target Android16(API36).
 
 **[APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.2/BetterLyrics-Mobile-0.4.2.apk)** · [SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.2/SHA256SUMS)

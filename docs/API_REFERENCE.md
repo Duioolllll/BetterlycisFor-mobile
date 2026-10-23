@@ -1,4 +1,6 @@
-# API reference — 0.4.0
+# API reference — 0.4.3
+
+0.4.3은 아래 API 요청/응답 프로토콜을 유지하며 User-Agent 버전과 공통 I/O 처리만 갱신했다. 실제 제공처 네트워크 호출은 이번 배포 검증에서 재실행하지 않았다. 입력 제한/취소/블로킹 시간의 범위는 [서비스 최적화 기록](SERVICE_OPTIMIZATION.md)을 따른다.
 
 기준: `LyricsRepository.java`, `ArtworkResolver.java`, `LyricsListener.java`, `AppState.java`, `MainActivity.java` 및 [helper 정적 분석 기록](HELPER_ANALYSIS.md). 2026-10-22. 인증정보를 포함한 예시는 제공하지 않는다.
 

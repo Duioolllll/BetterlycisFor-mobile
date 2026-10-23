@@ -1,3 +1,35 @@
+# 0.4.3 릴리스 검증 — 2026-10-23
+
+## 로컬에서 실제 확인한 항목
+
+- 서비스/공급자/파서/정책/설정/오디오 회귀 214개와 APK 패키징 5개를 통과했다. 검사 실행 결과는 Release의 `RELEASE_VALIDATION.json`에 첨부한다.
+- 기준 `8a12f2a`와 PCM/Visualizer/정지 2,073프레임 출력이 비트 단위 동일하다. [측정 원본](performance/service-io-2026-10-23.json)과 [최적화 검토](SERVICE_OPTIMIZATION.md)를 보존했다.
+- 0.4.3 / versionCode11 / io.betterlyrics.mobile / min26 / target36, debuggable=false로 release 빌드했다.
+- 원래 RSA3072 인증서 SHA256과 APK v2/v3 서명, resources.arsc STORED·offset2416·4바이트 정렬을 확인했다.
+- 동일 환경·키로 두 번 빌드한 APK 바이트가 일치했다. 크기115650 bytes, SHA256 `2bd116afdc20d4b9b41c4af52ebcacff75d9cb2ab0960a053f147e30acfba078`.
+- 공개 파일의 비밀 키·일반 인증정보/개인정보 패턴을 검사해 발견사항이 없었다. 휴리스틱 검사로 완전한 보안 감사를 의미하지 않는다.
+- 웹 UI 자산은 변경하지 않았다. 브라우저 smoke는 Chromium이 없고 공식 다운로드 ZIP이 손상돼 재실행하지 못했다. 과거 브라우저 통과 기록을 이번 통과로 계산하지 않는다.
+
+## Android 16 배포 gate
+
+이번 APK의 통과 여부는 Release에 첨부한 `INSTALL_VALIDATION.json`과 해당 Actions 실행 결과를 따른다. 아래는 **게시 전에 모두 통과해야 하는 실제 검사**다.
+
+1. 전용 API36 AVD에서 0.4.0을 설치해 resources.arsc 오류 거절 재현.
+2. 0.4.3 신규 설치·버전 확인, MainActivity 시작·3초 후 프로세스 생존.
+3. 0.3.0 설치 후 0.4.3 덮어쓰기 업데이트·버전 확인·시작.
+4. 최신 공개 0.4.1 설치 후 0.4.3 덮어쓰기 업데이트·버전 확인·시작.
+5. Release 게시 후 공개 URL에서 APK를 다시 다운로드해 SHA256 일치 확인.
+
+0.4.2는 소스/메타데이터만 커밋됐으며 공개 Release/APK로 게시되지 않았다. 해당 소스 수정은 0.4.3에 포함된다. 다운로드 폴더의 SHA256SUMS는 실제 포함한 APK만 나열한다.
+
+## 미검증 항목
+
+실제 휴대폰·Android8–15·제조사 정책·Play Protect 판정, 실제 음악 앱의 MediaSession/한국어 청취 싱크/앨범 아트/오디오 캡처, 권한 흐름·장시간 안정성·발열/배터리·교차 OS 재현 빌드는 이번 테스트 범위가 아니다. Linux JVM 성능 개선율을 휴대폰 개선율로 간주하지 않는다. 이전 릴리스의 기기 설치 검증을 이번 APK의 검증으로 재사용하지 않는다.
+
+[0.4.3 notes](RELEASE-0.4.3.md) · [빌드 정보](build-info-0.4.3.json) · [설치](INSTALL_KO.md)
+
+---
+
 # 0.4.1 설치 수정 검증 — 2026-10-23
 
 ## 이번에 직접 확인한 항목

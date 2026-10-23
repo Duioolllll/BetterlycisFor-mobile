@@ -1,0 +1,47 @@
+# BetterLyrics Mobile 0.4.3 — 서비스 I/O·오디오 처리 최적화
+
+Release date: **2026-10-23** · Android 8.0+(API26) · target Android 16(API36) · versionCode **11**.
+
+**[APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)** · [SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/SHA256SUMS)
+
+`BetterLyrics-Mobile-0.4.3.apk` · 115,650 bytes · `io.betterlyrics.mobile` · 기존 서명 유지.
+
+SHA-256: `2bd116afdc20d4b9b41c4af52ebcacff75d9cb2ab0960a053f147e30acfba078`
+
+## 한국어
+
+서비스의 중복 I/O·상태 전송·오디오 처리 비용을 줄였습니다. 공개된 0.4.1에서 바로 업데이트할 수 있으며, 0.4.2 소스로 커밋됐던 오디오 종료 처리와 브리지 오류 안내 수정도 포함합니다. UI/UX·가사 매칭·타이밍 정책은 유지합니다.
+
+- PCM/Visualizer 작업 배열, window, 주파수 대역 계산을 재사용합니다. 기준 소스와 오디오 2,073프레임의 출력이 비트 단위로 동일합니다.
+- 미디어 세션 sample을 저장해 빠른 tick의 반복 조회를 줄이고, 진행도는 경량 패킷으로 전달합니다. 같은 메타데이터·플로팅 텍스트·중복 WebView 갱신 작업을 줄였습니다.
+- 가사/이미지/파일 입력의 크기·경과 시간·취소 검사를 통합하고 오래된 작업을 취소·정리합니다. 블로킹 I/O의 즉시 취소나 전체 요청 20초 상한을 보장하지는 않습니다.
+- 캐시 동시 저장의 임시 파일 충돌을 막고 기존 항목 재저장의 전체 디렉터리 조회와 바이트별 formatter 생성을 줄였습니다.
+- 오디오 종료 시 구체적인 실패 안내를 보존하고, 녹음 장치 해제 경합과 브리지 내부 예외 노출을 수정했습니다. 앱 정보의 버전·저장소 주소도 갱신했습니다.
+- 로컬: 오프라인 214개, 패키징 5개, v2/v3 서명·원래 인증서·ZIP 정렬, 동일 환경의 두 release 빌드 바이트 일치를 확인했습니다.
+- Linux JVM의 처리 시간은 PCM 48.6%, Visualizer 55.3% 감소했습니다. 실제 휴대폰의 속도·배터리 개선율이 아닙니다. [측정 근거와 한계](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.3/docs/SERVICE_OPTIMIZATION.md).
+
+**게시 전 검사:** Android 16 전용 AVD에서 0.4.0 설치 거절 재현, 새 APK 신규 설치·시작, 0.3.0 및 최신 공개 0.4.1에서 덮어쓰기 업데이트·시작을 통과해야 게시합니다. 첨부 **`RELEASE_VALIDATION.json`**은 실제 정적/회귀 검사, **`INSTALL_VALIDATION.json`**은 실제 AVD 설치 결과입니다.
+
+실제 휴대폰·다른 Android 버전·음악 앱별 MediaSession/한국어 싱크/앨범 아트/오디오 캡처·장시간 안정성은 이번 릴리스에서 실기 검증하지 않았습니다. 브라우저 UI smoke는 호스트 Chromium 설치 실패로 재실행하지 못했고 웹 UI 자산은 변경하지 않았습니다. NetEase는 비공식 API이며 제공처 가용성과 이용 조건의 제한이 남습니다.
+
+같은 서명의 기존 앱 위에 설치하세요. 다른 서명, 손상된 다운로드, 저장 공간 부족, Play Protect 차단은 별도 원인입니다. 위험 경고를 강제로 무시하거나 보호 기능을 끄지 마세요. 앱 삭제는 설정·가사를 지울 수 있습니다.
+
+## English
+
+Optimizes service I/O, playback updates and spectrum processing while preserving UI, lyric matching and timing behavior. Updates the public 0.4.1 directly with the same package and signing certificate. Also includes the capture teardown and bridge error fixes previously committed as 0.4.2 source; 0.4.2 was not published as a GitHub APK release.
+
+- Reuses spectrum buffers, Hann window and band maps; 2,073 output frames match the retained baseline bit for bit.
+- Caches playback samples, sends lightweight progress updates and coalesces duplicate full WebView updates. Avoids repeated labels/unchanged overlay text work.
+- Shares bounded/cancellable input reads; cancels stale jobs; replaces cache entries through unique temporary files; avoids redundant directory scans and per-byte formatters. Blocking I/O cancellation still depends on the underlying read/connection timeout.
+- Preserves specific capture failure messages, avoids recorder-release races and hides internal bridge exception text.
+- Local checks: 214 offline checks, 5 packaging cases, v2/v3 signing, previous-certificate match, ZIP alignment and two byte-identical release builds. Linux JVM processing time decreased 48.6% for PCM and 55.3% for Visualizer; these are not Android-device latency or battery measurements.
+
+Publication is gated on Android 16 emulator fresh install/launch, reproduction of the old 0.4.0 packaging rejection, and in-place update/launch from both 0.3.0 and 0.4.1. See the attached `RELEASE_VALIDATION.json` and `INSTALL_VALIDATION.json` for actual results.
+
+Physical phones, other Android versions, real-player lyric sync/artwork/capture and long-term stability remain unverified for this build. Browser UI smoke could not run because Chromium installation failed; bundled web UI assets are unchanged. NetEase is unofficial and provider availability/terms remain limitations. Read security warnings; do not disable protection to force installation. Uninstalling can delete settings and lyrics.
+
+[한국어 설치](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.3/docs/INSTALL_KO.md) · [English](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.3/docs/INSTALL_EN.md) · [简体中文](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.3/docs/INSTALL_ZH.md)
+
+[Changelog](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.3/CHANGELOG.md) · [Build](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.3/docs/BUILD.md) · [Validation](https://github.com/Duioolllll/BetterlycisFor-mobile/blob/v0.4.3/docs/VALIDATION.md)
+
+Independent unofficial project; GPL-3.0. Original BetterLyrics attribution retained. No private signing key, API token or account credentials are included.

@@ -17,7 +17,7 @@ if not re.fullmatch(r'emulator-\d+', a.serial):
 root = Path(__file__).resolve().parents[1]
 meta = json.loads((root/'downloads/release.json').read_text())
 package = 'io.betterlyrics.mobile'
-report = {'passed': False, 'serial': a.serial, 'checks': [], 'physicalDeviceTested': False}
+report = {'passed': False, 'serial': a.serial, 'version': meta['version'], 'sha256': meta['sha256'], 'checks': [], 'physicalDeviceTested': False}
 
 
 def adb(*args, required=True):
@@ -35,6 +35,14 @@ def installed_version():
     assert re.search(r'\bversionCode=' + str(meta['versionCode']) + r'\b', output), 'Installed version code differs'
 
 
+def launch_and_check():
+    _, launch = adb('shell', 'am', 'start', '-W', '-n', package+'/.MainActivity')
+    assert 'Status: ok' in launch, launch
+    time.sleep(3)
+    _, pid = adb('shell', 'pidof', package)
+    assert pid.strip(), 'App process exited after launch'
+
+
 try:
     _, is_emulator = adb('shell', 'getprop', 'ro.kernel.qemu')
     assert is_emulator == '1', 'Refusing to change a non-emulator device'
@@ -49,17 +57,15 @@ try:
     installed_version()
     report['checks'].append('fixed APK fresh install and installed version')
     adb('shell', 'logcat', '-c')
-    _, launch = adb('shell', 'am', 'start', '-W', '-n', package+'/.MainActivity')
-    assert 'Status: ok' in launch, launch
-    time.sleep(3)
-    _, pid = adb('shell', 'pidof', package)
-    assert pid.strip(), 'App process exited after launch'
+    launch_and_check()
     report['checks'].append('MainActivity launch and process still alive after 3 seconds')
-    adb('uninstall', package)
-    adb('install', '--no-streaming', root/'downloads/BetterLyrics-Mobile-0.3.0.apk')
-    adb('install', '--no-streaming', '-r', root/'downloads'/meta['apk'])
-    installed_version()
-    report['checks'].append('0.3.0 to fixed APK in-place update with original signing identity')
+    for previous in ['0.3.0', '0.4.1']:
+        adb('uninstall', package)
+        adb('install', '--no-streaming', root/('downloads/BetterLyrics-Mobile-'+previous+'.apk'))
+        adb('install', '--no-streaming', '-r', root/'downloads'/meta['apk'])
+        installed_version()
+        launch_and_check()
+        report['checks'].append(previous+' to '+meta['version']+' in-place update and launch with original signing identity')
     report['passed'] = True
 except Exception as error:
     report['error'] = str(error)

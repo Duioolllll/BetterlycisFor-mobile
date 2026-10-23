@@ -1,4 +1,4 @@
-# 개발환경과 구조 — 0.4.0
+# 개발환경과 구조 — 0.4.3
 
 ## 확인된 기술 스택
 
@@ -11,7 +11,7 @@
 | SDK 도구 | Build Tools 36.0.0: AAPT2, D8, zipalign, apksigner |
 | Gradle | 설정 파일은 Android Gradle Plugin 8.10.1. Gradle 실행기/Wrapper는 저장소에 없고 이번에 실행 안 함 |
 | Python / Node | 실제 환경 Python 3.12.14 / Node.js 24.19.0 |
-| 테스트 | Playwright 1.62.1; org.json 20250517(test 전용); JDK assertions |
+| 테스트 | org.json 20260814(test 전용, SHA-256 고정); JDK assertions; Playwright 1.62.1 설치됨(이번 브라우저 smoke는 Chromium 설치 실패로 미실행) |
 | 런타임 라이브러리 | Android 내장 org.json, java.net, javax.crypto. 외부 Android AAR/JAR 없음 |
 | 아이콘 | Bootstrap Icons 1.13.1, MIT |
 | 분석 도구 | 기존 기록 REA 6.7.0, ILSpyCmd 11.1.0; 이번 릴리스에서 재실행 안 함 |
@@ -23,7 +23,7 @@
 
 - `app/src/main/AndroidManifest.xml`: 패키지, SDK, Activity, 알림 리스너, 오디오 공유 foreground service, 권한.
 - `app/src/main/java/io/betterlyrics/mobile/`: 아래 네이티브 모듈.
-- `app/src/main/assets/web/`: index.html, style.css, app.js, reactive.js, appearance.js/css. 외부 CDN 의존성 없음.
+- `app/src/main/assets/web/`: index.html, style.css, app.js, ambient.js, appearance.js/css. 외부 CDN 의존성 없음.
 - `app/src/main/assets/licenses/`, `LICENSE`, `THIRD_PARTY_NOTICES.md`: 라이선스.
 - `app/src/main/res/`: 앱 아이콘·테마.
 - `tests/`: 합성 데이터 기반 JVM/공급자 회귀 테스트.
@@ -41,8 +41,9 @@
 | LyricParser / LyricTextPolicy | 포맷 파싱, 시간/단어 모델, 중국어 보조 정보/마스킹 정책 |
 | ArtworkResolver | 비동기 커버 후보, HTTPS/허용 URI, 이미지 크기 제한·축소 |
 | AudioEngine / AudioCaptureService / AudioSignal | 동의 기반 소리 입력, 상태, 주파수·비트 분석 |
+| IoSupport | 크기·시간·취소 제한 입력과 호환 hex 변환 |
 | UiAppearance | 시각 설정 JSON 검증과 정규화 |
-| app.js / appearance.js / reactive.js | 시계·가사·탐색, 프리셋/커스텀, 그라데이션·소리 효과 |
+| app.js / appearance.js / ambient.js | 시계·가사·탐색, 프리셋/커스텀, 그라데이션·소리 효과 |
 
 ## 네트워크와 권한
 
@@ -65,3 +66,6 @@
 [BUILD.md](BUILD.md)의 debug APK → `adb install -r` → 기기에서 알림 접근 → 음악 재생 순서로 확인한다. 로그를 수집할 때 곡 제목·앱 알림 등 개인 정보는 공유 전에 삭제한다. 웹 미리보기는 `npm run dev -- --host 127.0.0.1 --port 4173`; 데모 데이터로 화면만 실행하며 실제 Android 권한·미디어·오디오를 시험하지 않는다.
 
 Android 16은 API36 컴파일, edge-to-edge insets/IME 처리, API33 뒤로 가기, API29 오디오 캡처 분기와 foreground service 권한 선언을 검토했다. 이는 설치/재생/백그라운드 안정성 인증이 아니다. 기기/에뮬레이터 미연결로 실제 Android 버전별 실행은 [VALIDATION.md](VALIDATION.md)에 미검증으로 남긴다.
+
+
+0.4.3 서비스 변경·측정은 [SERVICE_OPTIMIZATION.md](SERVICE_OPTIMIZATION.md), 실제 release/설치 검사는 [VALIDATION.md](VALIDATION.md)와 Release의 JSON 보고서를 따른다. SDK 36/JDK17로 실제 릴리스 빌드를 실행했으며, Gradle·Windows/macOS 실행이나 실제 음악 앱의 기기 동작을 이번에 검증했다는 뜻은 아니다.
