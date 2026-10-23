@@ -55,7 +55,12 @@ public final class AudioEngine {
     }
     private void release(Session s){s.active=false;Visualizer old=s.effect;s.effect=null;if(old!=null){try{old.setEnabled(false);}catch(Exception ignored){}try{old.release();}catch(Exception ignored){}}s.thread.quitSafely();}
     public synchronized void stop(){
-        generation++;Session s=session;session=null;if(s!=null){s.active=false;s.handler.removeCallbacksAndMessages(null);s.handler.post(()->release(s));}
+        generation++;Session s=session;session=null;
+        if(s!=null){
+            s.active=false;
+            if(s.handler!=null){s.handler.removeCallbacksAndMessages(null);s.handler.post(()->release(s));}
+            else release(s);
+        }
         context.stopService(new Intent(context,AudioCaptureService.class));connected=false;latest=new AudioSignal().silence(SystemClock.elapsedRealtime());status="off";message="소리를 연결하면 배경이 반응해요.";
     }
     public synchronized void suspend(){stop();status="paused";message="화면을 벗어나 소리 분석을 멈췄어요.";}

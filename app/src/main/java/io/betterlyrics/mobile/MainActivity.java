@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.*;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.*;
 import android.webkit.*;
 import android.widget.*;
@@ -20,6 +21,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public final class MainActivity extends Activity {
+    private static final String TAG="MainActivity";
     private WebView web;
     private AppState state;
     private boolean ready,active;
@@ -57,8 +59,12 @@ public final class MainActivity extends Activity {
         @JavascriptInterface public long elapsedRealtime(){return SystemClock.elapsedRealtime();}
         @JavascriptInterface public void command(String action,String json){
             if(action==null||action.length()>40||json==null||json.length()>8000)return;
-            handler.post(()->{try{dispatch(action,new JSONObject(json));}catch(Exception e){toast(e.getMessage()==null?"요청을 처리하지 못했습니다.":e.getMessage());}});
+            handler.post(()->{try{dispatch(action,new JSONObject(json));}catch(Exception e){bridgeFailure(action,e);}});
         }
+    }
+    private void bridgeFailure(String action,Exception error){
+        Log.w(TAG,"Bridge command failed: "+action,error);
+        toast(error instanceof JSONException?"요청 형식이 올바르지 않습니다.":"요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
     }
     private void dispatch(String action,JSONObject data)throws Exception{
         switch(action){

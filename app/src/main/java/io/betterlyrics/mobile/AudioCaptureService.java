@@ -29,7 +29,7 @@ public final class AudioCaptureService extends Service {
             Intent data=intent.getParcelableExtra("data");
             projection=getSystemService(MediaProjectionManager.class).getMediaProjection(intent.getIntExtra("resultCode",Activity.RESULT_CANCELED),data);
             if(projection==null)throw new IllegalStateException();
-            projection.registerCallback(new MediaProjection.Callback(){@Override public void onStop(){if(!stopping&&engine!=null)engine.failure(ticket,"소리 공유가 종료됐어요. 다시 연결해 주세요.");if(!stopping)stopSelf();}},new Handler(Looper.getMainLooper()));
+            projection.registerCallback(new MediaProjection.Callback(){@Override public void onStop(){running=false;if(!stopping&&engine!=null)engine.failure(ticket,"소리 공유가 종료됐어요. 다시 연결해 주세요.");if(!stopping)stopSelf();}},new Handler(Looper.getMainLooper()));
             AudioPlaybackCaptureConfiguration configuration=new AudioPlaybackCaptureConfiguration.Builder(projection).addMatchingUsage(AudioAttributes.USAGE_MEDIA).build();
             int rate=44100,min=AudioRecord.getMinBufferSize(rate,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT);
             if(min<=0)throw new IllegalStateException();
@@ -51,7 +51,14 @@ public final class AudioCaptureService extends Service {
                 engine.publish(ticket,frame,status,status.equals("silent")?"소리 입력이 없어요. 음악 앱이 공유를 제한할 수 있어요.":status.equals("paused")?"일시정지 · 기본 그라데이션":"재생 소리에 반응 중");
             }
         }catch(Exception error){if(running)engine.failure(ticket,"소리 연결이 끊겼어요. 다시 연결해 주세요.");}
-        finally{try{active.release();}catch(Exception ignored){}if(recorder==active)recorder=null;java.util.Arrays.fill(pcm,(short)0);stopSelf();}
+        finally{running=false;try{active.release();}catch(Exception ignored){}if(recorder==active)recorder=null;java.util.Arrays.fill(pcm,(short)0);stopSelf();}
     }
-    @Override public void onDestroy(){stopping=true;running=false;AudioRecord active=recorder;if(active!=null){try{active.stop();}catch(Exception ignored){}if(reader==null)try{active.release();}catch(Exception ignored){}}MediaProjection old=projection;projection=null;if(old!=null)try{old.stop();}catch(Exception ignored){}stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();}
+    @Override public void onDestroy(){
+        stopping=true;running=false;
+        AudioRecord active=recorder;recorder=null;
+        if(active!=null){try{active.stop();}catch(Exception ignored){}try{active.release();}catch(Exception ignored){}}
+        MediaProjection old=projection;projection=null;if(old!=null)try{old.stop();}catch(Exception ignored){}
+        if(engine!=null)engine.failure(ticket,"소리 연결이 종료됐어요. 다시 연결해 주세요.");
+        stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();
+    }
 }
