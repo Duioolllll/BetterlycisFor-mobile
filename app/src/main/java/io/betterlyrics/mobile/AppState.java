@@ -20,11 +20,13 @@ public final class AppState {
     final SharedPreferences prefs;
     final LyricsRepository repository;
     final AudioEngine audio;
-    final ExecutorService network=Executors.newFixedThreadPool(2);
-    final ExecutorService artwork=Executors.newSingleThreadExecutor();
-    final List<Runnable> listeners=new ArrayList<>();
+    final ThreadPoolExecutor network=(ThreadPoolExecutor)Executors.newFixedThreadPool(2);
+    final ThreadPoolExecutor artwork=(ThreadPoolExecutor)Executors.newFixedThreadPool(1);
+    interface Listener {void changed(boolean full);}
+    final List<Listener> listeners=new ArrayList<>();
     final Map<String,LyricsRepository.Result> candidates=new HashMap<>();
     MediaController controller;
+    private PlaybackState playback;
     JSONArray sources=new JSONArray();
     LyricsRepository.Song song=new LyricsRepository.Song();
     LyricsRepository.Result lyrics;
@@ -32,15 +34,25 @@ public final class AppState {
     boolean connected,loading;
     int generation,searchGeneration;
     Future<?> pending;
+    private Future<?> pendingSearch;
     Future<?> pendingArt;
     private String artFingerprint="";
     private int artGeneration;
     private long artRetryAt;
     private AppState(Context c){context=c;prefs=c.getSharedPreferences("settings",0);repository=new LyricsRepository(c);audio=new AudioEngine(c);}
     public boolean granted(){String enabled=Settings.Secure.getString(context.getContentResolver(),"enabled_notification_listeners");if(enabled==null)return false;ComponentName self=new ComponentName(context,LyricsListener.class);for(String entry:enabled.split(":"))if(self.equals(ComponentName.unflattenFromString(entry)))return true;return false;}
-    public void emit(){for(Runnable r:new ArrayList<>(listeners))r.run();LyricsListener.refreshOverlay();}
-    public void accept(MediaController next) {
-        controller=next;
+    public void emit(){notifyListeners(true);}
+    private void notifyListeners(boolean full){for(Listener r:new ArrayList<>(listeners))r.changed(full);LyricsListener.refreshOverlay();}
+    void cancelWork(Future<?> work){if(work!=null)work.cancel(true);network.purge();}
+    public void accept(MediaController next,PlaybackState currentPlayback,boolean metadataChanged,boolean sourcesChanged) {
+        boolean sameSession=controller!=null&&next!=null&&controller.getSessionToken().equals(next.getSessionToken());
+        PlaybackState previous=playback;controller=next;playback=currentPlayback;
+        boolean playbackChanged=(previous==null)!=(playback==null)||previous!=null&&playback!=null&&previous.getState()!=playback.getState();
+        // Position/speed/action samples use the lightweight clock packet. Metadata
+        // and track changes still publish a complete bootstrap, as do play/pause.
+        if(!metadataChanged&&sameSession&&!song.key.isEmpty()){
+            notifyListeners(sourcesChanged||playbackChanged);return;
+        }
         MediaMetadata m=next==null?null:next.getMetadata();
         if(m==null||value(m,MediaMetadata.METADATA_KEY_TITLE).isEmpty()){if(!song.key.isEmpty())reset();else emit();return;}
         String title=value(m,MediaMetadata.METADATA_KEY_TITLE),artist=value(m,MediaMetadata.METADATA_KEY_ARTIST),album=value(m,MediaMetadata.METADATA_KEY_ALBUM);
@@ -48,17 +60,20 @@ public final class AppState {
         String key=next.getPackageName()+"|"+value(m,MediaMetadata.METADATA_KEY_MEDIA_ID)+"|"+title+"|"+artist+"|"+album;
         long duration=Math.max(0,m.getLong(MediaMetadata.METADATA_KEY_DURATION));
         boolean changed=!key.equals(song.key);
+        boolean durationChanged=duration>0&&song.duration!=duration;
         if(changed) {
             LyricsRepository.Song fresh=new LyricsRepository.Song();fresh.key=key;fresh.title=title;fresh.artist=artist;fresh.album=album;fresh.duration=duration;song=fresh;
-            lyrics=null;cover="";candidates.clear();searchGeneration++;
+            lyrics=null;cover="";candidates.clear();searchGeneration++;cancelWork(pendingSearch);
             try{appName=context.getPackageManager().getApplicationLabel(context.getPackageManager().getApplicationInfo(next.getPackageName(),0)).toString();}catch(Exception e){appName=next.getPackageName();}
             fetch(false);
-        }else if(duration>0&&song.duration!=duration){
+        }else if(durationChanged){
             song.duration=duration;
             if(lyrics==null||(!lyrics.manual&&!lyrics.provider.equals("Local")&&!LyricsRepository.eligible(song,lyrics)))fetch(true);
         }
         updateArtwork(m,changed);
-        emit();
+        // Notification/session refreshes often repeat identical metadata. Artwork
+        // completion emits its own full update if a new image actually loads.
+        if(changed||durationChanged||sourcesChanged||playbackChanged)emit();else notifyListeners(false);
     }
     private void updateArtwork(MediaMetadata metadata,boolean changed){
         ArtworkResolver.Source primary=ArtworkResolver.metadata(metadata),fallback=LyricsListener.notificationArtwork(controller);
@@ -66,6 +81,7 @@ public final class AppState {
         if(!changed&&fingerprint.equals(artFingerprint)&&(cover.length()>0||pendingArt!=null&&!pendingArt.isDone()||now<artRetryAt))return;
         artFingerprint=fingerprint;artRetryAt=now+10000;int ticket=++artGeneration;String key=song.key;
         if(pendingArt!=null)pendingArt.cancel(true);
+        artwork.purge();
         if(primary.fingerprint().isEmpty()&&fallback.fingerprint().isEmpty())return;
         pendingArt=artwork.submit(()->{
             String loaded=ArtworkResolver.load(context,primary);if(loaded.isEmpty())loaded=ArtworkResolver.load(context,fallback);final String image=loaded;
@@ -73,10 +89,10 @@ public final class AppState {
         });
     }
     private String value(MediaMetadata m,String key){String v=m.getString(key);return v==null?"":v;}
-    public void reset(){generation++;searchGeneration++;artGeneration++;artFingerprint="";if(pendingArt!=null)pendingArt.cancel(true);if(pending!=null)pending.cancel(true);song=new LyricsRepository.Song();controller=null;lyrics=null;cover="";loading=false;status="음악을 재생해 주세요.";error="";emit();}
+    public void reset(){generation++;searchGeneration++;artGeneration++;artFingerprint="";if(pendingArt!=null)pendingArt.cancel(true);artwork.purge();cancelWork(pending);cancelWork(pendingSearch);song=new LyricsRepository.Song();controller=null;playback=null;lyrics=null;cover="";loading=false;status="음악을 재생해 주세요.";error="";emit();}
     public void fetch(boolean force){
         if(song.key.isEmpty())return;
-        int ticket=++generation;LyricsRepository.Song selected=song;if(pending!=null)pending.cancel(true);
+        int ticket=++generation;LyricsRepository.Song selected=song.copy();cancelWork(pending);
         loading=true;status="가사를 찾고 있어요…";error="";emit();
         String provider=prefs.getString("provider","auto"),mode=prefs.getString("searchMode","best");
         pending=network.submit(()->{
@@ -88,16 +104,20 @@ public final class AppState {
     }
     public void importLyrics(String raw){
         if(song.key.isEmpty()){status="음악 앱에서 노래를 먼저 재생해 주세요.";emit();return;}
-        final LyricsRepository.Song selected=song;int ticket=++generation;if(pending!=null)pending.cancel(true);loading=true;emit();
-        network.execute(()->{try{LyricsRepository.Result r=new LyricsRepository.Result();r.title=selected.title;r.artist=selected.artist;r.album=selected.album;r.duration=selected.duration;r.provider="Local";r.raw=raw;r.score=100;r.trackKey=selected.key;repository.hydrate(r);repository.save(selected,r);main.post(()->{if(ticket!=generation)return;lyrics=r;loading=false;status="가사 파일을 불러왔어요";error="";emit();});}catch(Exception e){main.post(()->{if(ticket!=generation)return;loading=false;error=e.getMessage();status="가사 파일을 확인해 주세요";emit();});}});
+        final LyricsRepository.Song selected=song.copy();int ticket=++generation;cancelWork(pending);loading=true;emit();
+        pending=network.submit(()->{try{LyricsRepository.Result r=new LyricsRepository.Result();r.title=selected.title;r.artist=selected.artist;r.album=selected.album;r.duration=selected.duration;r.provider="Local";r.raw=raw;r.score=100;r.trackKey=selected.key;repository.hydrate(r);repository.save(selected,r);IoSupport.checkInterrupted();main.post(()->{if(ticket!=generation)return;lyrics=r;loading=false;status="가사 파일을 불러왔어요";error="";emit();});}catch(Exception e){main.post(()->{if(ticket!=generation)return;loading=false;error=e.getMessage();status="가사 파일을 확인해 주세요";emit();});}});
     }
     public interface SearchCallback{void done(JSONObject response);}
     public void search(String title,String artist,SearchCallback callback){
-        int ticket=++searchGeneration;String trackKey=song.key;candidates.clear();LyricsRepository.Song q=new LyricsRepository.Song();q.title=title.trim();q.artist=artist.trim();q.album=song.album;q.duration=song.duration;q.key=trackKey;
+        int ticket=++searchGeneration;cancelWork(pendingSearch);String trackKey=song.key;candidates.clear();LyricsRepository.Song q=song.copy();q.title=title.trim();q.artist=artist.trim();
         String provider=prefs.getString("provider","auto");
-        network.execute(()->{
+        pendingSearch=network.submit(()->{
             List<LyricsRepository.Result> all=new ArrayList<>();String failure="";
-            for(String name:provider.equals("auto")?new String[]{"lrclib","netease"}:new String[]{provider})try{all.addAll(repository.search(q,name));}catch(Exception e){failure="일부 가사 제공처에 연결하지 못했습니다.";}
+            for(String name:provider.equals("auto")?new String[]{"lrclib","netease"}:new String[]{provider}){
+                if(Thread.currentThread().isInterrupted())return;
+                try{all.addAll(repository.search(q,name));}catch(InterruptedException e){Thread.currentThread().interrupt();return;}catch(Exception e){if(Thread.currentThread().isInterrupted())return;failure="일부 가사 제공처에 연결하지 못했습니다.";}
+            }
+            if(Thread.currentThread().isInterrupted())return;
             all.sort((a,b)->Integer.compare(b.score,a.score));final String message=failure;
             main.post(()->{if(ticket!=searchGeneration||!trackKey.equals(song.key))return;JSONObject response=new JSONObject();JSONArray items=new JSONArray();try{for(LyricsRepository.Result r:all){candidates.put(r.id,r);items.put(r.candidate());}response.put("items",items).put("error",all.isEmpty()?(message.isEmpty()?"검색 결과가 없습니다.":message):"");}catch(Exception ignored){}callback.done(response);});
         });
@@ -105,15 +125,15 @@ public final class AppState {
     public void choose(String id){
         LyricsRepository.Result r=candidates.get(id);if(r==null||!r.trackKey.equals(song.key))return;
         r.manual=true;
-        int ticket=++generation;LyricsRepository.Song selected=song;if(pending!=null)pending.cancel(true);loading=true;status="선택한 가사를 불러오는 중…";emit();
+        int ticket=++generation;LyricsRepository.Song selected=song.copy();cancelWork(pending);loading=true;status="선택한 가사를 불러오는 중…";emit();
         pending=network.submit(()->{try{repository.hydrate(r);repository.save(selected,r);main.post(()->{if(ticket!=generation)return;lyrics=r;loading=false;status="선택한 가사";error="";emit();});}catch(Exception e){main.post(()->{if(ticket!=generation)return;loading=false;error=e.getMessage();emit();});}});
     }
-    public long position(){PlaybackState p=controller==null?null:controller.getPlaybackState();if(p==null)return 0;return MatchScore.position(p.getPosition(),p.getLastPositionUpdateTime(),SystemClock.elapsedRealtime(),p.getPlaybackSpeed(),p.getState()==PlaybackState.STATE_PLAYING,song.duration);}
-    public boolean playing(){PlaybackState p=controller==null?null:controller.getPlaybackState();return p!=null&&p.getState()==PlaybackState.STATE_PLAYING;}
+    public long position(){PlaybackState p=playback;if(p==null)return 0;return MatchScore.position(p.getPosition(),p.getLastPositionUpdateTime(),SystemClock.elapsedRealtime(),p.getPlaybackSpeed(),p.getState()==PlaybackState.STATE_PLAYING,song.duration);}
+    public boolean playing(){PlaybackState p=playback;return p!=null&&p.getState()==PlaybackState.STATE_PLAYING;}
     private String offsetKey(){return "trackOffset:"+song.key;}
     public int offset(){return song.key.isEmpty()?0:prefs.getInt(offsetKey(),0);}
     public JSONObject track()throws JSONException{
-        PlaybackState p=controller==null?null:controller.getPlaybackState();
+        PlaybackState p=playback;
         long now=SystemClock.elapsedRealtime(),position=p==null?0:MatchScore.position(p.getPosition(),p.getLastPositionUpdateTime(),now,p.getPlaybackSpeed(),p.getState()==PlaybackState.STATE_PLAYING,song.duration);
         return new JSONObject().put("key",song.key).put("title",song.title).put("artist",song.artist).put("album",song.album).put("duration",song.duration).put("packageName",controller==null?"":controller.getPackageName()).put("appName",appName).put("cover",cover).put("position",position).put("sampledAt",now).put("positionKnown",p!=null&&p.getPosition()>=0).put("speed",p==null?1:p.getPlaybackSpeed()).put("playing",p!=null&&p.getState()==PlaybackState.STATE_PLAYING).put("actions",p==null?0:p.getActions());
     }

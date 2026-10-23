@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased — service I/O and processing
+
+- 오디오 분석 window/대역 계산과 작업 배열을 재사용한다. 기준 0.4.2와 2,073프레임 출력이 비트 단위로 동일하다.
+- 재생 sample을 보관해 빠른 tick의 반복 미디어 세션 조회를 줄이고, 진행도 갱신은 경량 WebView 패킷으로 전달한다. 중복 전체 publish와 동일 플로팅 텍스트 갱신을 줄인다.
+- 입력 크기·경과 시간·취소 검사를 통합하고, 오래된 검색/불러오기/앨범 아트 대기 작업을 취소·정리한다. 캐시는 고유 임시 파일, 교체 이동, 읽기/쓰기/삭제 잠금으로 보호한다.
+- 캐시 재저장 시 전체 디렉터리 조회를 생략하고, hex 변환에서 바이트당 formatter 생성을 제거한다. 기존 API 요청·캐시 파일명·가사 정책은 유지한다.
+- 오프라인 검사 214개와 API 36 Debug 빌드 통과. Linux JVM에서 PCM 처리 시간 48.6%, Visualizer 55.3% 감소를 측정했으며 휴대폰 성능/배터리 수치는 미검증이다. 상세 근거·재현·한계: [서비스 최적화 기록](docs/SERVICE_OPTIMIZATION.md).
+- 공개 APK/버전은 이 소스 변경으로 교체하지 않는다.
+
+English: reuse spectral processing buffers/window/band maps; cache media-session samples and use lightweight progress packets; coalesce full WebView updates; bound and cancel I/O; replace cache files safely and skip redundant directory scans; preserve wire/cache hex encoding. 214 offline checks and API 36 debug compilation pass. Linux JVM measurements and unverified Android-device behavior are separated in the linked report.
+
 ## 0.4.2 — 2026-10-23
 
 ### Fixed

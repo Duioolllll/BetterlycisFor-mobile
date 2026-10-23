@@ -18,7 +18,7 @@ import android.media.session.*;
 import android.media.session.MediaController;
 import org.json.*;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Future;
 
 public final class MainActivity extends Activity {
     private static final String TAG="MainActivity";
@@ -26,10 +26,14 @@ public final class MainActivity extends Activity {
     private AppState state;
     private boolean ready,active;
     private boolean pendingCapture,projectionPending;
+    private boolean publishQueued;
+    private long lastTickAt;
+    private Future<?> pendingFileRead;
     private volatile String bootstrap="{}";
     private final Handler handler=new Handler(Looper.getMainLooper());
-    private final Runnable observer=()->publish();
-    private final Runnable ticker=new Runnable(){public void run(){if(active&&ready){send("receive",state.tick());handler.postDelayed(this,500);}}};
+    private final Runnable publishTask=()->{publishQueued=false;publish();};
+    private final AppState.Listener observer=this::observe;
+    private final Runnable ticker=new Runnable(){public void run(){if(active&&ready){lastTickAt=SystemClock.elapsedRealtime();send("receive",state.tick());handler.postDelayed(this,500);}}};
     private final Runnable audioTicker=new Runnable(){public void run(){if(!active||!ready)return;state.audio.playing(state.playing());send("audio",state.audio.packet());handler.postDelayed(this,50);}};
     @Override public void onCreate(Bundle saved){
         super.onCreate(saved);setVolumeControlStream(AudioManager.STREAM_MUSIC);state=AppState.get(this);bootstrap=state.snapshot().toString();
@@ -47,10 +51,14 @@ public final class MainActivity extends Activity {
         if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,this::handleBack);
     }
     @Override protected void onResume(){super.onResume();active=true;if(state!=null){if(!state.listeners.contains(observer))state.listeners.add(observer);LyricsListener.refresh(this);reconcileAudio();publish();}if(web!=null)web.onResume();handler.removeCallbacks(ticker);handler.post(ticker);handler.removeCallbacks(audioTicker);handler.post(audioTicker);}
-    @Override protected void onPause(){active=false;handler.removeCallbacks(ticker);handler.removeCallbacks(audioTicker);if(state!=null){state.listeners.remove(observer);state.audio.suspend();}if(web!=null)web.onPause();super.onPause();}
-    @Override protected void onDestroy(){handler.removeCallbacksAndMessages(null);if(state!=null)state.listeners.remove(observer);if(web!=null){web.removeJavascriptInterface("Android");web.stopLoading();web.destroy();web=null;}super.onDestroy();}
+    @Override protected void onPause(){active=false;handler.removeCallbacks(ticker);handler.removeCallbacks(audioTicker);handler.removeCallbacks(publishTask);publishQueued=false;if(state!=null){state.listeners.remove(observer);state.audio.suspend();}if(web!=null)web.onPause();super.onPause();}
+    @Override protected void onDestroy(){handler.removeCallbacksAndMessages(null);if(state!=null){state.listeners.remove(observer);state.cancelWork(pendingFileRead);}if(web!=null){web.removeJavascriptInterface("Android");web.stopLoading();web.destroy();web=null;}super.onDestroy();}
     @Override public void onBackPressed(){handleBack();}
     private void handleBack(){if(web==null||!ready){finish();return;}web.evaluateJavascript("window.App&&App.handleBack?App.handleBack():false",result->{if(!"true".equals(result))finish();});}
+    private void observe(boolean full){
+        if(full){if(!publishQueued){publishQueued=true;handler.post(publishTask);}}
+        else if(active&&ready){handler.removeCallbacks(ticker);handler.postDelayed(ticker,Math.max(0,50-(SystemClock.elapsedRealtime()-lastTickAt)));}
+    }
     private void publish(){if(state==null)return;bootstrap=state.snapshot().toString();if(state.prefs.getBoolean("keepScreen",true))getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);if(ready&&web!=null)web.evaluateJavascript("window.App&&App.receive("+bootstrap+")",null);}
     private void send(String method,JSONObject value){if(ready&&web!=null)web.evaluateJavascript("window.App&&App."+method+"("+value.toString()+")",null);}
     private void toast(String text){Toast.makeText(this,text,Toast.LENGTH_LONG).show();}
@@ -134,8 +142,10 @@ public final class MainActivity extends Activity {
     @Override protected void onActivityResult(int request,int result,Intent data){
         if(request==202){super.onActivityResult(request,result,data);projectionPending=false;if(result==RESULT_OK&&data!=null)state.audio.startCapture(result,data);else{state.audio.stop();toast("기본 그라데이션으로 사용할게요.");}publish();return;}
         super.onActivityResult(request,result,data);if(request!=100||result!=RESULT_OK||data==null||data.getData()==null)return;
-        Uri uri=data.getData();String selectedKey=state.song.key;state.network.execute(()->{try(InputStream in=getContentResolver().openInputStream(uri);ByteArrayOutputStream out=new ByteArrayOutputStream()){
-            if(in==null)throw new IOException("파일을 열지 못했습니다.");byte[] buf=new byte[8192];int n;while((n=in.read(buf))!=-1){if(out.size()+n>2*1024*1024)throw new IOException("가사 파일은 2MB 이하로 선택해 주세요.");out.write(buf,0,n);}String text=LyricParser.decodeBytes(out.toByteArray());handler.post(()->{if(selectedKey.equals(state.song.key))state.importLyrics(text);else toast("곡이 변경되어 파일을 적용하지 않았어요. 다시 불러와 주세요.");});
-        }catch(Exception e){handler.post(()->toast(e.getMessage()==null?"파일을 읽지 못했습니다.":e.getMessage()));}});
+        Uri uri=data.getData();String selectedKey=state.song.key;state.cancelWork(pendingFileRead);
+        pendingFileRead=state.network.submit(()->{try(InputStream in=getContentResolver().openInputStream(uri)){
+            String text=LyricParser.decodeBytes(IoSupport.read(in,2*1024*1024,20000));IoSupport.checkInterrupted();
+            handler.post(()->{if(isDestroyed())return;if(selectedKey.equals(state.song.key))state.importLyrics(text);else toast("곡이 변경되어 파일을 적용하지 않았어요. 다시 불러와 주세요.");});
+        }catch(Exception e){if(Thread.currentThread().isInterrupted())return;handler.post(()->{if(!isDestroyed())toast(e instanceof IoSupport.TooLargeException?"가사 파일은 2MB 이하로 선택해 주세요.":e.getMessage()==null?"파일을 읽지 못했습니다.":e.getMessage());});}});
     }
 }

@@ -1,0 +1,37 @@
+{
+  "audioFramesBitIdentical": 2073,
+  "retainedFrameUnchanged": true,
+  "measurements": [
+    {
+      "operation": "pcm",
+      "iterationsPerRound": 2000,
+      "rounds": 7,
+      "baselineMedianNs": 68369.02,
+      "optimizedMedianNs": 35139.88,
+      "baselineBytesPerOp": 440.0,
+      "optimizedBytesPerOp": 138.06
+    },
+    {
+      "operation": "visualizer",
+      "iterationsPerRound": 2000,
+      "rounds": 7,
+      "baselineMedianNs": 13616.95,
+      "optimizedMedianNs": 6081.84,
+      "baselineBytesPerOp": 440.0,
+      "optimizedBytesPerOp": 137.03
+    },
+    {
+      "operation": "hex256",
+      "iterationsPerRound": 200,
+      "rounds": 7,
+      "baselineMedianNs": 110577.91,
+      "optimizedMedianNs": 3592.1,
+      "baselineBytesPerOp": 158712.0,
+      "optimizedBytesPerOp": 1640.0
+    }
+  ],
+  "baselineCommit": "8a12f2a31f4c1d32870bc7b3f281092e560b8379",
+  "host": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "java": "openjdk version \"17.0.20\" 2026-07-21",
+  "scope": "Linux JVM microbenchmark, not Android device latency or battery measurement"
+}

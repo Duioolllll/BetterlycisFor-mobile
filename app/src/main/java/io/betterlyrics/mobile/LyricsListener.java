@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.service.notification.*;
 import android.view.*;
 import android.widget.*;
+import android.text.TextUtils;
 import org.json.*;
 import java.util.*;
 
@@ -24,6 +25,7 @@ public final class LyricsListener extends NotificationListenerService {
     private final Handler handler=new Handler(Looper.getMainLooper());
     private MediaSessionManager manager;
     private final Map<MediaController,MediaController.Callback> callbacks=new LinkedHashMap<>();
+    private final Map<String,String> appLabels=new LinkedHashMap<String,String>(32,.75f,true){protected boolean removeEldestEntry(Map.Entry<String,String> entry){return size()>32;}};
     private boolean registered;
     private View overlay;
     private TextView overlayText,overlaySub;
@@ -42,7 +44,7 @@ public final class LyricsListener extends NotificationListenerService {
     @Override public void onDestroy(){cleanup();super.onDestroy();}
     private void cleanup(){
         if(registered&&manager!=null)try{manager.removeOnActiveSessionsChangedListener(active);}catch(Exception ignored){}
-        registered=false;for(Map.Entry<MediaController,MediaController.Callback> e:callbacks.entrySet())try{e.getKey().unregisterCallback(e.getValue());}catch(Exception ignored){}callbacks.clear();handler.removeCallbacksAndMessages(null);removeOverlay();
+        registered=false;for(Map.Entry<MediaController,MediaController.Callback> e:callbacks.entrySet())try{e.getKey().unregisterCallback(e.getValue());}catch(Exception ignored){}callbacks.clear();appLabels.clear();handler.removeCallbacksAndMessages(null);removeOverlay();
         if(live==this){live=null;state.connected=false;state.reset();}
     }
     private boolean mediaNotification(Notification notification){return Notification.CATEGORY_TRANSPORT.equals(notification.category)||notification.extras!=null&&notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION);}
@@ -79,24 +81,26 @@ public final class LyricsListener extends NotificationListenerService {
         while(it.hasNext()){Map.Entry<MediaController,MediaController.Callback> e=it.next();if(!tokens.contains(e.getKey().getSessionToken())){e.getKey().unregisterCallback(e.getValue());it.remove();}}
         for(MediaController c:current){boolean exists=false;for(MediaController old:callbacks.keySet())if(old.getSessionToken().equals(c.getSessionToken())){exists=true;break;}if(exists)continue;
             MediaController.Callback callback=new MediaController.Callback(){
-                @Override public void onMetadataChanged(MediaMetadata metadata){select();}
-                @Override public void onPlaybackStateChanged(PlaybackState playback){select();}
+                @Override public void onMetadataChanged(MediaMetadata metadata){select(true);}
+                @Override public void onPlaybackStateChanged(PlaybackState playback){select(false);}
                 @Override public void onSessionDestroyed(){scheduleRefresh();}
             };c.registerCallback(callback,handler);callbacks.put(c,callback);
         }
-        select();
+        select(true);
     }
-    private void select(){
-        String pinned=state.prefs.getString("sourcePackage","");MediaController best=null;int bestScore=-1;JSONArray list=new JSONArray();
+    private void select(boolean metadataChanged){
+        String pinned=state.prefs.getString("sourcePackage","");MediaController best=null;PlaybackState bestPlayback=null;int bestScore=-1;JSONArray list=new JSONArray();
         for(MediaController c:callbacks.keySet()) {
             MediaMetadata m=c.getMetadata();if(m==null||m.getString(MediaMetadata.METADATA_KEY_TITLE)==null)continue;
             PlaybackState p=c.getPlaybackState();boolean playing=p!=null&&p.getState()==PlaybackState.STATE_PLAYING;
             int score=(playing?100:0)+(p!=null&&p.getPosition()>=0?5:0)+(state.controller!=null&&c.getSessionToken().equals(state.controller.getSessionToken())?10:0)+(c.getPackageName().equals(pinned)?1000:0);
-            if(score>bestScore){best=c;bestScore=score;}
-            String name=c.getPackageName();try{name=getPackageManager().getApplicationLabel(getPackageManager().getApplicationInfo(name,0)).toString();}catch(Exception ignored){}
+            if(score>bestScore){best=c;bestPlayback=p;bestScore=score;}
+            String name=appLabels.get(c.getPackageName());
+            if(name==null){name=c.getPackageName();try{name=getPackageManager().getApplicationLabel(getPackageManager().getApplicationInfo(name,0)).toString();}catch(Exception ignored){}appLabels.put(c.getPackageName(),name);}
             try{list.put(new JSONObject().put("packageName",c.getPackageName()).put("name",name).put("playing",playing));}catch(Exception ignored){}
         }
-        state.sources=list;state.accept(best);
+        boolean sourcesChanged=!list.toString().equals(state.sources.toString());
+        state.sources=list;state.accept(best,bestPlayback,metadataChanged,sourcesChanged);
     }
     private int dp(float f){return Math.round(f*getResources().getDisplayMetrics().density);}
     private void syncOverlay(){
@@ -106,9 +110,11 @@ public final class LyricsListener extends NotificationListenerService {
         if(overlay==null)return;
         long position=state.position()+state.offset();LyricParser.Line found=null;
         if(state.lyrics!=null)for(LyricParser.Line l:state.lyrics.lines){if(l.start>=0&&l.start<=position&&(!l.bg)&&(l.end<0||position<l.end))found=l;}
-        overlayText.setText(found==null?(state.song.title.isEmpty()?"음악을 재생해 주세요":state.song.title):found.text);
-        overlaySub.setText(found!=null&&!found.translation.isEmpty()?found.translation:state.song.artist);
-        overlay.setAlpha(state.playing()?1f:.78f);
+        String text=found==null?(state.song.title.isEmpty()?"음악을 재생해 주세요":state.song.title):found.text;
+        String sub=found!=null&&!found.translation.isEmpty()?found.translation:state.song.artist;
+        if(!TextUtils.equals(overlayText.getText(),text))overlayText.setText(text);
+        if(!TextUtils.equals(overlaySub.getText(),sub))overlaySub.setText(sub);
+        float alpha=state.playing()?1f:.78f;if(overlay.getAlpha()!=alpha)overlay.setAlpha(alpha);
     }
     private void createOverlay(){
         LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(dp(18),dp(12),dp(42),dp(12));

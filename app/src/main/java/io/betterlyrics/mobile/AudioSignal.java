@@ -12,6 +12,25 @@ public final class AudioSignal {
         Frame(float level,float bass,float mid,float treble,float beat,float[] bands,long sequence,long time){this.level=level;this.bass=bass;this.mid=mid;this.treble=treble;this.beat=beat;this.bands=bands.clone();this.sequence=sequence;this.time=time;}
     }
     private final double[] real=new double[SIZE],imag=new double[SIZE];
+    private static final double[] WINDOW=new double[SIZE];
+    static {for(int i=0;i<SIZE;i++)WINDOW[i]=.5-.5*Math.cos(2*Math.PI*i/(SIZE-1));}
+    private final float[] input=new float[BANDS];
+    private final double[] totals=new double[BANDS];
+    private final BandMap pcmMap=new BandMap(),visualizerMap=new BandMap();
+    /** Rebuilt only when the input format changes, rather than for every sample. */
+    private static final class BandMap {
+        int rate=-1,size=-1;int[] indices=new int[0];final int[] bins=new int[BANDS];
+        void configure(int nextRate,int nextSize,boolean pcm){
+            if(rate==nextRate&&size==nextSize)return;
+            rate=nextRate;size=nextSize;indices=new int[size/2];Arrays.fill(indices,-1);Arrays.fill(bins,0);
+            for(int k=1;k<indices.length;k++){
+                double hz=k*(double)rate/size;
+                if(hz<30||hz>(pcm?Math.min(14000,rate*.48):14000))continue;
+                int band=Math.max(0,Math.min(BANDS-1,(int)(Math.log(hz/30)/Math.log(14000.0/30)*BANDS)));
+                indices[k]=band;bins[band]++;
+            }
+        }
+    }
     private final float[] smoothed=new float[BANDS];
     private float level,bass,mid,treble,beat,average=.08f,priorBass;
     private long previous=-1,lastBeat=-1000,sequence;
@@ -22,27 +41,25 @@ public final class AudioSignal {
         count=Math.max(0,Math.min(Math.min(count,samples.length),SIZE));double energy=0,mean=0;
         for(int i=0;i<count;i++)mean+=samples[i]/32768.0;if(count>0)mean/=count;
         Arrays.fill(real,0);Arrays.fill(imag,0);
-        for(int i=0;i<count;i++){double x=samples[i]/32768.0-mean;energy+=x*x;real[i]=x*(.5-.5*Math.cos(2*Math.PI*i/(SIZE-1)));}
+        for(int i=0;i<count;i++){double x=samples[i]/32768.0-mean;energy+=x*x;real[i]=x*WINDOW[i];}
         fft(real,imag);
-        float[] bands=new float[BANDS];double[] totals=new double[BANDS];int[] bins=new int[BANDS];
+        pcmMap.configure(sampleRate,SIZE,true);Arrays.fill(totals,0);
         for(int k=1;k<SIZE/2;k++){
-            double hz=k*(double)sampleRate/SIZE;if(hz<30||hz>Math.min(14000,sampleRate*.48))continue;
-            int index=Math.max(0,Math.min(BANDS-1,(int)(Math.log(hz/30)/Math.log(14000.0/30)*BANDS)));
-            totals[index]+=Math.hypot(real[k],imag[k])*4/SIZE;bins[index]++;
+            int index=pcmMap.indices[k];if(index<0)continue;
+            totals[index]+=Math.hypot(real[k],imag[k])*4/SIZE;
         }
-        for(int i=0;i<BANDS;i++)bands[i]=clamp(Math.sqrt(totals[i]/Math.max(1,bins[i]))*1.7);
-        return update(bands,Math.sqrt(energy/Math.max(1,count)),now);
+        for(int i=0;i<BANDS;i++)input[i]=clamp(Math.sqrt(totals[i]/Math.max(1,pcmMap.bins[i]))*1.7);
+        return update(input,Math.sqrt(energy/Math.max(1,count)),now);
     }
     public Frame visualizer(byte[] spectrum,byte[] waveform,int sampleRate,long now){
-        float[] bands=new float[BANDS];double[] totals=new double[BANDS];int[] bins=new int[BANDS];
+        visualizerMap.configure(sampleRate,spectrum.length,false);Arrays.fill(totals,0);
         for(int k=1;k<spectrum.length/2;k++){
-            double hz=k*(double)sampleRate/spectrum.length;if(hz<30||hz>14000)continue;
-            int index=Math.max(0,Math.min(BANDS-1,(int)(Math.log(hz/30)/Math.log(14000.0/30)*BANDS)));
-            totals[index]+=Math.hypot(spectrum[2*k],spectrum[2*k+1])/181.0;bins[index]++;
+            int index=visualizerMap.indices[k];if(index<0)continue;
+            totals[index]+=Math.hypot(spectrum[2*k],spectrum[2*k+1])/181.0;
         }
-        for(int i=0;i<BANDS;i++)bands[i]=clamp(Math.sqrt(totals[i]/Math.max(1,bins[i]))*1.4);
+        for(int i=0;i<BANDS;i++)input[i]=clamp(Math.sqrt(totals[i]/Math.max(1,visualizerMap.bins[i]))*1.4);
         double energy=0,mean=0;for(byte b:waveform)mean+=(b&255);mean/=Math.max(1,waveform.length);for(byte b:waveform){double x=((b&255)-mean)/128.0;energy+=x*x;}
-        return update(bands,Math.sqrt(energy/Math.max(1,waveform.length)),now);
+        return update(input,Math.sqrt(energy/Math.max(1,waveform.length)),now);
     }
     private Frame update(float[] input,double rms,long now){
         if(previous>=0&&now<previous)return silence(now);

@@ -1,0 +1,32 @@
+name: Service I/O and processing checks
+on:
+  push:
+    paths: ['app/**', 'tests/**', 'tools/**', '.github/workflows/service-checks.yml']
+  pull_request:
+    paths: ['app/**', 'tests/**', 'tools/**', '.github/workflows/service-checks.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Test services and compile Android debug APK
+        run: |
+          export JAVA_HOME="$JAVA_HOME_17_X64"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+          python3 tools/test.py --sdk "$ANDROID_HOME"
+          python3 tools/benchmark-service.py --baseline 8a12f2a31f4c1d32870bc7b3f281092e560b8379 --check-only --report build/service-output-parity.json
+          python3 tools/build.py --sdk "$ANDROID_HOME" --variant debug
+          python3 - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+          apk = Path('dist') / json.loads(Path('dist/build-info-debug.json').read_text())['apk']
+          subprocess.run([sys.executable, 'tools/apk-packaging-test.py', '--fixed-apk', str(apk)], check=True)
+          PY

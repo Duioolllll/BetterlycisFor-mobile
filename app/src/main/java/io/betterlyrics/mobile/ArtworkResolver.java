@@ -69,14 +69,12 @@ final class ArtworkResolver {
                 int status=connection.getResponseCode();
                 if(status>=300&&status<400){String next=connection.getHeaderField("Location");if(next==null)throw new IOException("Missing redirect");url=new URL(url,next);continue;}
                 if(status!=200)throw new IOException("Artwork HTTP "+status);
+                if(connection.getContentLengthLong()>8*1024*1024)throw new IOException("Artwork too large");
                 try(InputStream in=connection.getInputStream()){return bounded(in);}
             }finally{connection.disconnect();}
         }throw new IOException("Too many artwork redirects");
     }
     private static byte[] bounded(InputStream in)throws IOException{
-        if(in==null)throw new IOException("Artwork unavailable");
-        try(ByteArrayOutputStream out=new ByteArrayOutputStream()){
-            byte[] buffer=new byte[8192];int n;while((n=in.read(buffer))!=-1){if(Thread.currentThread().isInterrupted())throw new InterruptedIOException();if(out.size()+n>8*1024*1024)throw new IOException("Artwork too large");out.write(buffer,0,n);}return out.toByteArray();
-        }
+        return IoSupport.read(in,8*1024*1024,20000);
     }
 }

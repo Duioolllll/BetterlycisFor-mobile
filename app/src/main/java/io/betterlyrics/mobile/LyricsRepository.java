@@ -6,16 +6,18 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.nio.file.*;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.*;
 import java.util.concurrent.*;
 
 /** Native HTTPS requests avoid WebView CORS and keep web content offline. */
-public final class LyricsRepository {
+public final class LyricsRepository implements AutoCloseable {
     public static final class Song {
         public String title="",artist="",album="",key="";
         public long duration;
+        Song copy(){Song copy=new Song();copy.title=title;copy.artist=artist;copy.album=album;copy.key=key;copy.duration=duration;return copy;}
     }
     public static final class Result {
         public String id=UUID.randomUUID().toString(),title="",artist="",album="",provider="",raw="",plainRaw="",translation="",romanization="",trackKey="";
@@ -32,15 +34,19 @@ public final class LyricsRepository {
         }
     }
     private final File cache;
+    private static final int MAX_BYTES=3*1024*1024;
+    private final Object cacheLock=new Object();
     public interface Transport { String request(String address,String body)throws Exception; }
     private final Transport transport;
-    private final ExecutorService providers=Executors.newFixedThreadPool(2);
+    private final ThreadPoolExecutor providers=(ThreadPoolExecutor)Executors.newFixedThreadPool(2);
     public LyricsRepository(Context context) { this(context.getFilesDir()); }
     public LyricsRepository(File filesDirectory) { this(filesDirectory,LyricsRepository::request); }
     public LyricsRepository(File filesDirectory,Transport transport) { cache=new File(filesDirectory,"lyrics");cache.mkdirs();this.transport=transport; }
     private static String query(String s) throws Exception { return URLEncoder.encode(s,"UTF-8"); }
-    private String get(String address) throws Exception { return transport.request(address,null); }
+    private String exchange(String address,String body)throws Exception {IoSupport.checkInterrupted();String text=transport.request(address,body);IoSupport.checkInterrupted();return text;}
+    private String get(String address) throws Exception { return exchange(address,null); }
     private static String request(String address,String body) throws Exception {
+        IoSupport.checkInterrupted();
         HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();
         c.setConnectTimeout(8000);c.setReadTimeout(8000);c.setInstanceFollowRedirects(false);
         c.setRequestProperty("User-Agent","BetterLyricsMobile/0.4.2 (Android; https://github.com/Duioolllll/BetterlycisFor-mobile)");
@@ -50,19 +56,19 @@ public final class LyricsRepository {
             if(body!=null){c.setRequestMethod("POST");c.setDoOutput(true);c.setRequestProperty("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");byte[] payload=body.getBytes(StandardCharsets.UTF_8);c.setFixedLengthStreamingMode(payload.length);try(OutputStream out=c.getOutputStream()){out.write(payload);}}
             int status=c.getResponseCode();if(status==404)return "";
             if(status!=200)throw new IOException("HTTP "+status);
-            try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()) {
-                long deadline=System.nanoTime()+20_000_000_000L;byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){if(Thread.currentThread().isInterrupted()||System.nanoTime()>deadline)throw new InterruptedIOException("가사 응답 시간 초과");if(out.size()+n>3*1024*1024)throw new IOException("응답이 너무 큽니다.");out.write(b,0,n);}
-                return out.toString("UTF-8");
+            if(c.getContentLengthLong()>MAX_BYTES)throw new IOException("응답이 너무 큽니다.");
+            try(InputStream in=c.getInputStream()) {
+                return new String(IoSupport.read(in,MAX_BYTES,20000),StandardCharsets.UTF_8);
             }
         }finally{c.disconnect();}
     }
     /** Port of the shipped Lyricify helper's EapiHelper, using public protocol constants. */
     private String eapi(String path,JSONObject payload) throws Exception {
         String raw=payload.toString(),message="nobody"+path+"use"+raw+"md5forencrypt";
-        byte[] hash=MessageDigest.getInstance("MD5").digest(message.getBytes(StandardCharsets.UTF_8));StringBuilder md5=new StringBuilder();for(byte b:hash)md5.append(String.format(Locale.ROOT,"%02x",b&255));
+        String md5=IoSupport.hex(MessageDigest.getInstance("MD5").digest(message.getBytes(StandardCharsets.UTF_8)),false);
         byte[] data=(path+"-36cd479b6b5-"+raw+"-36cd479b6b5-"+md5).getBytes(StandardCharsets.UTF_8);
-        Cipher aes=Cipher.getInstance("AES/ECB/PKCS5Padding");aes.init(Cipher.ENCRYPT_MODE,new SecretKeySpec("e82ckenh8dichen8".getBytes(StandardCharsets.US_ASCII),"AES"));StringBuilder encrypted=new StringBuilder();for(byte b:aes.doFinal(data))encrypted.append(String.format(Locale.ROOT,"%02X",b&255));
-        return transport.request("https://interface.music.163.com/eapi/"+path.substring("/api/".length()),"params="+encrypted);
+        Cipher aes=Cipher.getInstance("AES/ECB/PKCS5Padding");aes.init(Cipher.ENCRYPT_MODE,new SecretKeySpec("e82ckenh8dichen8".getBytes(StandardCharsets.US_ASCII),"AES"));String encrypted=IoSupport.hex(aes.doFinal(data),true);
+        return exchange("https://interface.music.163.com/eapi/"+path.substring("/api/".length()),"params="+encrypted);
     }
     public List<Result> search(Song song,String source) throws Exception {
         if(Thread.currentThread().isInterrupted())throw new InterruptedException();
@@ -123,6 +129,7 @@ public final class LyricsRepository {
         return score;
     }
     public Result hydrate(Result r) throws Exception {
+        IoSupport.checkInterrupted();
         if(r.provider.equals("NetEase")&&r.raw.isEmpty()) {
             String id=r.id.substring("netease:".length());
             JSONObject payload=new JSONObject().put("id",id).put("cp","false").put("lv","0").put("kv","0").put("tv","0").put("rv","0").put("yv","0").put("ytv","0").put("yrv","0").put("csrf_token","");
@@ -150,11 +157,13 @@ public final class LyricsRepository {
             if(!alternative.isEmpty()&&LyricTextPolicy.maskCount(alternative)<LyricTextPolicy.maskCount(r.lines)){r.raw=r.plainRaw;r.lines=alternative;}
         }
         r.masked=LyricTextPolicy.maskCount(r.lines)>0;
+        IoSupport.checkInterrupted();
         if(r.lines.isEmpty())throw new IOException("가사 시간 정보를 읽지 못했습니다.");
         return r;
     }
     private static String lyric(JSONObject item,String key){JSONObject v=item.optJSONObject(key);return v==null?"":v.optString("lyric","");}
     public Result fetch(Song song,String source,String mode,boolean force) throws Exception {
+        IoSupport.checkInterrupted();
         if(!force){Result r=load(song);if(r!=null&&sourceAllows(source,r.provider))return r;}
         String[] active=source.equals("auto")?new String[]{"lrclib","netease"}:new String[]{source};
         Result best=null;Exception last=null;
@@ -163,8 +172,9 @@ public final class LyricsRepository {
             for(String name:active)tasks.add(providers.submit(()->bestProvider(song,name)));
             try {
                 for(Future<Result> future:tasks)try{Result r=future.get();if(r!=null&&(best==null||quality(song,r)>quality(song,best)))best=r;}catch(ExecutionException e){last=new IOException("가사 제공처 연결 실패",e);}
-            }finally{for(Future<Result> task:tasks)if(!task.isDone())task.cancel(true);}
-        }else for(String name:active)try{Result r=bestProvider(song,name);if(r!=null&&(best==null||quality(song,r)>quality(song,best)))best=r;if(best!=null&&synced(best)&&!best.masked)break;}catch(InterruptedException e){throw e;}catch(Exception e){last=e;}
+            }finally{for(Future<Result> task:tasks)if(!task.isDone())task.cancel(true);providers.purge();}
+        }else for(String name:active)try{Result r=bestProvider(song,name);if(r!=null&&(best==null||quality(song,r)>quality(song,best)))best=r;if(best!=null&&synced(best)&&!best.masked)break;}catch(InterruptedException e){throw e;}catch(Exception e){IoSupport.checkInterrupted();last=e;}
+        IoSupport.checkInterrupted();
         if(best==null)throw new IOException(last==null?"일치하는 가사를 찾지 못했습니다.":"가사 제공처 응답이 없거나 일치하는 가사가 없습니다. 재검색 또는 파일 불러오기를 이용해 주세요.",last);
         save(song,best);return best;
     }
@@ -173,7 +183,7 @@ public final class LyricsRepository {
         for(Result r:search(song,provider)) {
             if(Thread.currentThread().isInterrupted())throw new InterruptedException();
             if(r.score<70||!eligible(song,r))continue;
-            try{hydrate(r);if(!plausible(r))continue;if(best==null||quality(song,r)>quality(song,best))best=r;}catch(InterruptedException e){throw e;}catch(Exception ignored){}
+            try{hydrate(r);if(!plausible(r))continue;if(best==null||quality(song,r)>quality(song,best))best=r;}catch(InterruptedException e){throw e;}catch(Exception ignored){IoSupport.checkInterrupted();}
             if(provider.equals("netease")&&++attempts>=(best!=null&&best.masked?6:3))break;
         }
         return best;
@@ -181,12 +191,16 @@ public final class LyricsRepository {
     private boolean sourceAllows(String setting,String provider) { return setting.equals("auto")||provider.equals("Local")||setting.equals("lrclib")&&provider.equals("LRCLIB")||setting.equals("netease")&&provider.equals("NetEase"); }
     private File file(Song s) throws Exception {
         String key=s.title.trim()+"|"+s.artist.trim()+"|"+s.album.trim()+"|"+Math.round(s.duration/1000.0);
-        byte[] digest=MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8));StringBuilder hex=new StringBuilder();for(byte b:digest)hex.append(String.format(Locale.ROOT,"%02x",b&255));return new File(cache,hex+".json");
+        byte[] digest=MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8));return new File(cache,IoSupport.hex(digest,false)+".json");
     }
     private Result load(Song song) {
         try{
-            File f=file(song);if(!f.isFile()||f.length()>3*1024*1024)return null;
-            byte[] bytes=java.nio.file.Files.readAllBytes(f.toPath());JSONObject j=new JSONObject(new String(bytes,StandardCharsets.UTF_8));
+            File f=file(song);byte[] bytes;
+            synchronized(cacheLock){
+                if(!f.isFile()||f.length()>MAX_BYTES)return null;
+                try(InputStream in=new FileInputStream(f)){bytes=IoSupport.read(in,MAX_BYTES,0);}
+            }
+            JSONObject j=new JSONObject(new String(bytes,StandardCharsets.UTF_8));
             if(j.optInt("policy")!=3&&!j.optString("provider").equals("Local"))return null;
             Result r=new Result();r.title=j.optString("title");r.artist=j.optString("artist");r.album=j.optString("album");r.provider=j.optString("provider");r.duration=j.optLong("duration");r.raw=j.optString("raw");r.translation=j.optString("translation");r.romanization=j.optString("romanization");r.score=j.optInt("score");r.trackKey=song.key;r.cached=true;
             r.plainRaw=j.optString("plainRaw");
@@ -200,12 +214,29 @@ public final class LyricsRepository {
     public void save(Song song,Result r) {
         if(r.raw.trim().isEmpty())return;
         try {
-            File f=file(song),temp=new File(f.getPath()+".tmp");
-            try(FileOutputStream out=new FileOutputStream(temp)){out.write(r.encode().toString().getBytes(StandardCharsets.UTF_8));}
-            if(!temp.renameTo(f))temp.delete();
-            File[] all=cache.listFiles((d,n)->n.endsWith(".json"));
-            if(all!=null&&all.length>200){Arrays.sort(all,Comparator.comparingLong(File::lastModified));for(int i=0;i<all.length-200;i++)all[i].delete();}
+            IoSupport.checkInterrupted();
+            byte[] bytes=r.encode().toString().getBytes(StandardCharsets.UTF_8);if(bytes.length>MAX_BYTES)return;
+            File f=file(song);
+            synchronized(cacheLock){
+                IoSupport.checkInterrupted();boolean added=!f.isFile();
+                File temp=File.createTempFile("lyrics-",".tmp",cache);
+                try{
+                    try(FileOutputStream out=new FileOutputStream(temp)){out.write(bytes);}
+                    IoSupport.checkInterrupted();
+                    try{Files.move(temp.toPath(),f.toPath(),StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);}
+                    catch(AtomicMoveNotSupportedException unsupported){Files.move(temp.toPath(),f.toPath(),StandardCopyOption.REPLACE_EXISTING);}
+                }finally{temp.delete();}
+                // Replacing an existing entry cannot increase the cache size.
+                if(added){
+                    File[] all=cache.listFiles((d,n)->n.endsWith(".json"));
+                    if(all!=null&&all.length>200){
+                        Map<File,Long> modified=new HashMap<>();for(File entry:all)modified.put(entry,entry.lastModified());
+                        Arrays.sort(all,Comparator.comparingLong(modified::get));for(int i=0;i<all.length-200;i++)all[i].delete();
+                    }
+                }
+            }
         }catch(Exception ignored){}
     }
-    public void clear() { File[] all=cache.listFiles();if(all!=null)for(File f:all)f.delete(); }
+    public void clear() {synchronized(cacheLock){File[] all=cache.listFiles();if(all!=null)for(File f:all)f.delete();}}
+    @Override public void close(){providers.shutdownNow();}
 }
