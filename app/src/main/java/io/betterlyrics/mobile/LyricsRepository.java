@@ -49,7 +49,7 @@ public final class LyricsRepository implements AutoCloseable {
         IoSupport.checkInterrupted();
         HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();
         c.setConnectTimeout(8000);c.setReadTimeout(8000);c.setInstanceFollowRedirects(false);
-        c.setRequestProperty("User-Agent","BetterLyricsMobile/0.4.3 (Android; https://github.com/Duioolllll/BetterlycisFor-mobile)");
+        c.setRequestProperty("User-Agent","BetterLyricsMobile/0.4.4 (Android; https://github.com/Duioolllll/BetterlycisFor-mobile)");
         c.setRequestProperty("Accept","application/json");
         c.setRequestProperty("Referer","https://music.163.com/");
         try {

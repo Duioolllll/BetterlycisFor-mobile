@@ -14,6 +14,18 @@ public final class AudioSignal {
     private final double[] real=new double[SIZE],imag=new double[SIZE];
     private static final double[] WINDOW=new double[SIZE];
     static {for(int i=0;i<SIZE;i++)WINDOW[i]=.5-.5*Math.cos(2*Math.PI*i/(SIZE-1));}
+    // Fixed-size FFT plan: preserve the original recurrence order exactly.
+    private static final double[][] FFT_REAL=new double[11][],FFT_IMAG=new double[11][];
+    static {
+        for(int stage=0,length=2;length<=SIZE;stage++,length<<=1){
+            double angle=-2*Math.PI/length,wr0=Math.cos(angle),wi0=Math.sin(angle),wr=1,wi=0;
+            FFT_REAL[stage]=new double[length/2];FFT_IMAG[stage]=new double[length/2];
+            for(int j=0;j<length/2;j++){
+                FFT_REAL[stage][j]=wr;FFT_IMAG[stage][j]=wi;
+                double next=wr*wr0-wi*wi0;wi=wr*wi0+wi*wr0;wr=next;
+            }
+        }
+    }
     private final float[] input=new float[BANDS];
     private final double[] totals=new double[BANDS];
     private final BandMap pcmMap=new BandMap(),visualizerMap=new BandMap();
@@ -80,9 +92,9 @@ public final class AudioSignal {
     }
     private static void fft(double[] r,double[] im){
         int n=r.length;for(int i=1,j=0;i<n;i++){int bit=n>>1;for(; (j&bit)!=0;bit>>=1)j^=bit;j^=bit;if(i<j){double x=r[i];r[i]=r[j];r[j]=x;}}
-        for(int length=2;length<=n;length<<=1){double angle=-2*Math.PI/length,wr0=Math.cos(angle),wi0=Math.sin(angle);
-            for(int start=0;start<n;start+=length){double wr=1,wi=0;for(int j=0;j<length/2;j++){
-                int a=start+j,b=a+length/2;double tr=wr*r[b]-wi*im[b],ti=wr*im[b]+wi*r[b];r[b]=r[a]-tr;im[b]=im[a]-ti;r[a]+=tr;im[a]+=ti;double next=wr*wr0-wi*wi0;wi=wr*wi0+wi*wr0;wr=next;
+        for(int stage=0,length=2;length<=n;stage++,length<<=1){
+            for(int start=0;start<n;start+=length){for(int j=0;j<length/2;j++){double wr=FFT_REAL[stage][j],wi=FFT_IMAG[stage][j];
+                int a=start+j,b=a+length/2;double tr=wr*r[b]-wi*im[b],ti=wr*im[b]+wi*r[b];r[b]=r[a]-tr;im[b]=im[a]-ti;r[a]+=tr;im[a]+=ti;
             }}
         }
     }

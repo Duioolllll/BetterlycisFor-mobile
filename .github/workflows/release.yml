@@ -83,7 +83,7 @@ jobs:
             echo "Release already exists; refusing to replace published assets."
             exit 1
           fi
-          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/INSTALL_VALIDATION.json" docs/performance/service-io-2026-10-23.json --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
+          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/INSTALL_VALIDATION.json" docs/performance/fft-2026-10-24.json --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
           gh release edit "$tag" --draft=false --latest
           curl --fail --location --retry 3 --retry-delay 2 --output "$RUNNER_TEMP/published.apk" "https://github.com/${GH_REPO}/releases/download/${tag}/${RELEASE_APK}"
           python3 - "$RUNNER_TEMP/published.apk" <<'PY_HASH'

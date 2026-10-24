@@ -7,13 +7,13 @@
 An Android lyric companion that follows playback in your music app.<br>
 Large lyrics, album-color gradients and a layout you can make your own.
 
-[![Release 0.4.3](https://img.shields.io/badge/release-0.4.3-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.4.3)
+[![Release 0.4.4](https://img.shields.io/badge/release-0.4.4-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.4.4)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square)](docs/INSTALL_EN.md)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-### [↓ Download Android APK · v0.4.3](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)
+### [↓ Download Android APK · v0.4.4](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/BetterLyrics-Mobile-0.4.4.apk)
 
-**Released October 23, 2026** · Android 8.0+ · 113 KiB · versionCode 11
+**Released October 24, 2026** · Android 8.0+ · 113 KiB · versionCode 12
 
 [Release / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [Installation](docs/INSTALL_EN.md) · [Changelog](changelog/README.md) · [한국어](README.md) · [简体中文安装](docs/INSTALL_ZH.md)
 
@@ -21,7 +21,7 @@ Large lyrics, album-color gradients and a layout you can make your own.
 
 </div>
 
-> **Installing for the first time?** Choose **Download Android APK** above. The source ZIP is not an Android installer. If the download is unavailable, use the [repository fallback](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.3.apk).
+> **Installing for the first time?** Choose **Download Android APK** above. The source ZIP is not an Android installer. If the download is unavailable, use the [repository fallback](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.4.apk).
 
 ## Lyrics that follow your music
 
@@ -49,7 +49,7 @@ Screenshots show the actual bundled web UI with synthetic track metadata and ori
 
 ## Get started in three steps
 
-1. **[Download v0.4.3 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/BetterLyrics-Mobile-0.4.3.apk)** and open it. If prompted, allow installation only for the browser or file app opening this file.
+1. **[Download v0.4.4 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/BetterLyrics-Mobile-0.4.4.apk)** and open it. If prompted, allow installation only for the browser or file app opening this file.
 2. Launch → **··· → 음악 감지** (music detection) → allow notification access. Play a song in your music app and return.
 3. Open **··· → 화면 꾸미기** (appearance) to choose lyrics, background and layout. Audio response and floating lyrics are optional.
 
@@ -57,24 +57,26 @@ Screenshots show the actual bundled web UI with synthetic track metadata and ori
 
 Read Play Protect warnings and stop if the app is identified as harmful. You can revoke the install-source permission afterward. Updates require the same package and signature; uninstalling may remove settings and lyric caches. The installation guides explain permissions and common failures.
 
-## In this release · 0.4.3
+## In this release · 0.4.4
+
+**New optimization:** shared FFT coefficients reduced local JVM median PCM time by ~10.1%, with ~32KiB shared tables and unchanged per-frame allocations. Service improvements below are retained from prior versions.
 
 - **Service processing:** reuses audio analysis arrays/calculations and reduces duplicate media queries and WebView updates.
 - **Input and cache:** cancels stale lyric/artwork/file jobs and prevents temporary-file collisions during concurrent cache saves.
 - **Error reporting:** preserves specific audio-capture failure reasons and avoids exposing internal bridge exception text.
 - **Installation checks:** retains the 0.4.1 resource packaging fix. Android 16 emulator fresh install/launch and updates/launch from 0.3.0 and 0.4.1 passed.
 
-[Full 0.4.3 release notes](changelog/0.4.3.md) · [All version history](changelog/README.md) · [Service measurements](docs/SERVICE_OPTIMIZATION.md)
+[Full 0.4.4 release notes](changelog/0.4.4.md) · [All version history](changelog/README.md) · [Service measurements](docs/SERVICE_OPTIMIZATION.md)
 
-0.4.0 has a confirmed installation defect. **Use the current 0.4.3 download.** 0.4.2 was committed as source only and has no separate public APK release.
+0.4.0 has a confirmed installation defect. **Use the current 0.4.4 download.** 0.4.2 was committed as source only and has no separate public APK release.
 
 <details>
 <summary><strong>Download details · SHA-256 · actual verification</strong></summary>
 
 | Item | Value / result |
 | --- | --- |
-| File | `BetterLyrics-Mobile-0.4.3.apk` · 115,650 bytes |
-| Package / version | `io.betterlyrics.mobile` · 0.4.3 (11) |
+| File | `BetterLyrics-Mobile-0.4.4.apk` · 115,650 bytes |
+| Package / version | `io.betterlyrics.mobile` · 0.4.4 (12) |
 | Android | Minimum 8.0 (API 26) · compile / target 16 (API 36) |
 | APK | Universal · no native `.so` |
 | Offline checks | 214 passed · 2,073 bit-identical baseline audio frames · 5 packaging cases passed |
@@ -83,10 +85,10 @@ Read Play Protect warnings and stop if the app is identified as harmful. You can
 | Public file | Published APK re-downloaded and SHA-256 verified |
 
 ```text
-2bd116afdc20d4b9b41c4af52ebcacff75d9cb2ab0960a053f147e30acfba078
+7ce55a6c6928416106877b0b2debd69863709d22aff7337a2749ccec9c4e8068
 ```
 
-[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/RELEASE_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.3/INSTALL_VALIDATION.json) · [Workflow run](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/runs/39940400047) · [Validation scope](docs/VALIDATION.md)
+[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/RELEASE_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/INSTALL_VALIDATION.json) · [Workflow run](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [Validation scope](docs/VALIDATION.md)
 
 </details>
 
@@ -116,7 +118,7 @@ Debug builds do not require the private release key. Release builds require an e
 - **Hardware:** physical phones, other Android versions, real-player Korean sync/artwork/capture, power-saving/reconnection and long-term stability remain unverified for this build. Linux JVM measurements are not phone-performance or battery measurements.
 - **Providers:** NetEase is unofficial and usage/distribution terms are unresolved. Intermittent LRCLIB HTTP 503 was observed. Missing source words and timestamps are not invented.
 - **Scope:** QQ / Kugou / Apple Music online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded.
-- **Validation:** the previous development-certificate lineage is retained; this is not Google review or Play Protect approval. 0.4.3 browser UI smoke could not be rerun because Chromium installation failed.
+- **Validation:** the previous development-certificate lineage is retained; this is not Google review or Play Protect approval. 0.4.4 browser UI smoke could not be rerun because Chromium installation failed.
 
 ## Attribution and license
 

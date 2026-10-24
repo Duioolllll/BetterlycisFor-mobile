@@ -1,3 +1,11 @@
+# 0.4.4 — 2026-10-24
+
+214 JVM checks, 2,073 bit-identical frames against 0.4.3, five packaging cases, same-certificate v2/v3 signing and two byte-identical local release builds passed. Android 16 fresh install and updates from 0.3.0/0.4.1/0.4.3 gate publication; actual reports are attached to the Release. Physical devices and battery behavior remain unverified.
+
+[0.4.4 notes](../changelog/0.4.4.md) · [FFT measurements](performance/fft-2026-10-24.json)
+
+---
+
 # 0.4.3 릴리스 검증 — 2026-10-23
 
 ## 로컬에서 실제 확인한 항목
