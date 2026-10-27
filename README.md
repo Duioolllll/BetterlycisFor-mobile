@@ -80,12 +80,12 @@ Play Protect 경고 내용을 확인하고, 위험 앱으로 차단되면 설치
 | APK 구조 | Universal · 네이티브 `.so` 없음 |
 | 오프라인 검사 | 233개 통과 · 기준 오디오 2,073프레임 출력 동일 · 패키징 5개 통과 |
 | 서명 / 빌드 | v2/v3 · 기존 인증서 일치 · ZIP 정렬 · 같은 환경의 2회 빌드 바이트 일치 |
-| 브라우저 UI | 6개 suite · 61개 검사 묶음 통과 |
+| 브라우저 UI | 6개 suite · 62개 검사 묶음 통과 |
 | Android 16 AVD | 위젯·폰트·설치·업데이트 검사 · 첨부 보고서 참조 |
 | 공개 파일 | 게시 후 APK 재다운로드·SHA-256 검증 단계 |
 
 ```text
-51b02a69474bee9b4e9c2cbe465598e89086267b7dfc4b9d1757a302ba6abfd4
+57baa830a4851827230b6f3b1cd5a7d6b1833c33adb3fc2d785397d1940f84d1
 ```
 
 [SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/RELEASE_VALIDATION.json) · [UI_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/UI_VALIDATION.json) · [WIDGET_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/WIDGET_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/INSTALL_VALIDATION.json) · [실행 로그](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [검증 범위](docs/VALIDATION.md)
@@ -118,7 +118,7 @@ python3 tools/test.py --sdk /path/to/Android/Sdk
 - **실기기 미검증:** 실제 휴대폰·다른 Android 버전·음악 앱별 한국어 싱크·앨범 아트·오디오 캡처·절전/재연결·장시간 안정성은 이번 릴리스에서 검증하지 않았습니다. Linux JVM 성능 측정은 휴대폰 성능·배터리 수치가 아닙니다.
 - **제공처 의존:** NetEase는 비공식 API이며 이용·배포 조건 확인이 남아 있습니다. LRCLIB 일시적 HTTP 503을 관찰했습니다. 마스킹된 원문을 추측해 복원하거나 없는 타임스탬프를 만들지 않습니다.
 - **기능 범위:** QQ / Kugou / Apple Music 온라인 가사, 암호화 QRC, Windows 플러그인·Wallpaper Engine, Sing 보컬 제거는 포함하지 않습니다.
-- **검증 범위:** 기존 개발용 인증서 계보를 유지합니다. Google 검토·Play Protect 통과를 의미하지 않습니다. Chromium에서 UI 검사 61개 묶음을 통과했으며, 모의 Android 브리지로 검사했습니다.
+- **검증 범위:** 기존 개발용 인증서 계보를 유지합니다. Google 검토·Play Protect 통과를 의미하지 않습니다. Chromium에서 UI 검사 62개 묶음을 통과했으며, 모의 Android 브리지로 검사했습니다.
 
 ## 출처와 라이선스
 

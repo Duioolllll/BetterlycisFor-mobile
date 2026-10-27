@@ -24,6 +24,13 @@ const initial={track:{key:'custom',title:'노래',artist:'가수',duration:60000
    assert(loaded,'Korean font loaded: '+family);
    assert((await page.locator('.lyric-line').first().evaluate(el=>getComputedStyle(el).fontFamily)).includes(family));
    assert(await page.evaluate(font=>commands.some(c=>c.action==='setAppearance'&&c.data.appearance.font===font),id));
+   if(id==='jua'){
+    await page.evaluate(()=>{const sample=document.createElement('div');sample.id='testFontWeight';sample.className='lyric-line current';sample.textContent='가나다라';sample.style.cssText='position:fixed;top:0;left:0;z-index:1000;width:300px;font-size:48px;opacity:1;filter:none;background:white;color:black';document.body.append(sample);});
+    const sample=page.locator('#testFontWeight');await sample.evaluate(el=>el.style.fontWeight='400');const normal=await sample.screenshot();
+    await sample.evaluate(el=>el.style.fontWeight='900');const bold=await sample.screenshot();
+    assert(!normal.equals(bold),'font weight changes the rendered Korean glyphs');await sample.evaluate(el=>el.remove());
+    result.checks.push('bundled Korean font responds visibly to weight changes');
+   }
   }
   await page.locator('[data-preset=focus]').click();
   assert.equal(await page.evaluate(()=>App.getState().settings.appearance.font),'nanum-pen','changing preset keeps selected font');

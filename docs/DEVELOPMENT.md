@@ -11,7 +11,7 @@
 | SDK 도구 | Build Tools 36.0.0: AAPT2, D8, zipalign, apksigner |
 | Gradle | 설정 파일은 Android Gradle Plugin 8.10.1. Gradle 실행기/Wrapper는 저장소에 없고 이번에 실행 안 함 |
 | Python / Node | 실제 환경 Python 3.12.14 / Node.js 24.19.0 |
-| 테스트 | org.json 20260814(test 전용, SHA-256 고정); JDK assertions; Playwright 1.62.1 / Chromium: 브라우저 검사 61개 묶음 통과 |
+| 테스트 | org.json 20260814(test 전용, SHA-256 고정); JDK assertions; Playwright 1.62.1 / Chromium: 브라우저 검사 62개 묶음 통과 |
 | 런타임 라이브러리 | Android 내장 org.json, java.net, javax.crypto. 외부 Android AAR/JAR 없음 |
 | 아이콘 | Bootstrap Icons 1.13.1, MIT |
 | 분석 도구 | 기존 기록 REA 6.7.0, ILSpyCmd 11.1.0; 이번 릴리스에서 재실행 안 함 |

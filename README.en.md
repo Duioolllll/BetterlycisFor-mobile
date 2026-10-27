@@ -80,12 +80,12 @@ Read Play Protect warnings and stop if the app is identified as harmful. You can
 | APK | Universal · no native `.so` |
 | Offline checks | 233 passed · 2,073 bit-identical baseline audio frames · 5 packaging cases passed |
 | Signing / builds | v2/v3 · previous certificate match · ZIP alignment · two byte-identical same-environment builds |
-| Browser UI | Six suites · 61 check groups passed |
+| Browser UI | Six suites · 62 check groups passed |
 | Android 16 AVD | Widget, fonts, install and update gates; see attached reports |
 | Public file | Post-publication APK download and SHA-256 verification step |
 
 ```text
-51b02a69474bee9b4e9c2cbe465598e89086267b7dfc4b9d1757a302ba6abfd4
+57baa830a4851827230b6f3b1cd5a7d6b1833c33adb3fc2d785397d1940f84d1
 ```
 
 [SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/RELEASE_VALIDATION.json) · [UI_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/UI_VALIDATION.json) · [WIDGET_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/WIDGET_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/INSTALL_VALIDATION.json) · [Workflow run](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [Validation scope](docs/VALIDATION.md)
@@ -118,7 +118,7 @@ Debug builds do not require the private release key. Release builds require an e
 - **Hardware:** physical phones, other Android versions, real-player Korean sync/artwork/capture, power-saving/reconnection and long-term stability remain unverified for this build. Linux JVM measurements are not phone-performance or battery measurements.
 - **Providers:** NetEase is unofficial and usage/distribution terms are unresolved. Intermittent LRCLIB HTTP 503 was observed. Missing source words and timestamps are not invented.
 - **Scope:** QQ / Kugou / Apple Music online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded.
-- **Validation:** the previous development-certificate lineage is retained; this is not Google review or Play Protect approval. 61 browser check groups passed in Chromium using a synthetic Android bridge.
+- **Validation:** the previous development-certificate lineage is retained; this is not Google review or Play Protect approval. 62 browser check groups passed in Chromium using a synthetic Android bridge.
 
 ## Attribution and license
 

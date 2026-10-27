@@ -125,10 +125,12 @@ try:
         except (RuntimeError,ET.ParseError,ValueError):pass
         time.sleep(1)
     else:raise AssertionError('Widget did not apply saved background, font size and cover settings')
+    wait_for(text_is('widget_lyric','Widget line one'),'widget reconnects after the app process restarts',attempts=35)
     screenshot=subprocess.run(['adb','-s',args.serial,'exec-out','screencap','-p'],capture_output=True,timeout=60,check=True).stdout
     assert screenshot.startswith(b'\x89PNG\r\n\x1a\n')
     (Path(args.report).parent/'WIDGET_CUSTOM.png').write_bytes(screenshot)
     report['checks'].append('widget applies saved background, text size and cover settings')
+    report['checks'].append('widget resumes the active session after app process restart')
     report['passed']=True
 except Exception as error:
     report['error']=str(error)

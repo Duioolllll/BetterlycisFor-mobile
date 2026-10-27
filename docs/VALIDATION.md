@@ -1,6 +1,6 @@
 # 0.6.0 — 2026-10-27
 
-233 JVM checks, 2,073 bit-identical audio frames, five packaging cases and 61 browser check groups passed. Four bundled Korean fonts were checked in Chromium; the Android 16 release gate also checks font loading and preference persistence in the real WebView. [Widget and font guide](HOME_WIDGET.md) · [Release notes](../changelog/0.6.0.md).
+233 JVM checks, 2,073 bit-identical audio frames, five packaging cases and 62 browser check groups passed. Four bundled Korean fonts were checked in Chromium; the Android 16 release gate also checks font loading and preference persistence in the real WebView. [Widget and font guide](HOME_WIDGET.md) · [Release notes](../changelog/0.6.0.md).
 
 Publication requires the current APK's offline/signature checks, six browser suites, a hosted widget with a synthetic MediaSession, and Android16 clean installation plus updates from 0.3.0/0.4.1/0.4.3/0.4.4/0.5.0. Actual CI results are in RELEASE_VALIDATION.json, UI_VALIDATION.json, WIDGET_VALIDATION.json and INSTALL_VALIDATION.json attached to the Release. Physical phones, other Android versions, third-party launchers/music apps and battery remain unverified.
 
