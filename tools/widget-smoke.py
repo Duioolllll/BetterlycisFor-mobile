@@ -13,7 +13,10 @@ target='io.betterlyrics.mobile';host='io.betterlyrics.widgettest';component=host
 report={'passed':False,'serial':args.serial,'checks':[],'physicalDeviceTested':False}
 installed_target=installed_host=bound=False
 
-def run(cmd,**kw):return subprocess.run(list(map(str,cmd)),check=True,text=True,capture_output=True,timeout=120,**kw).stdout
+def run(cmd,**kw):
+    result=subprocess.run(list(map(str,cmd)),text=True,capture_output=True,timeout=120,**kw)
+    if result.returncode:raise RuntimeError('Command failed with status '+str(result.returncode)+': '+(result.stderr or result.stdout)[-1200:])
+    return result.stdout
 def adb(*cmd):return run(['adb','-s',args.serial,*cmd])
 def package_present(name):
     result=subprocess.run(['adb','-s',args.serial,'shell','pm','path',name],capture_output=True,text=True,timeout=120)
@@ -45,7 +48,7 @@ def wait_for(predicate,description,attempts=25):
         try:
             current=tree();latest=' | '.join(node.attrib.get('text','') for node in current.iter('node') if node.attrib.get('text'))
             if predicate(current):return current
-        except (subprocess.CalledProcessError,ET.ParseError,ValueError):pass
+        except (RuntimeError,ET.ParseError,ValueError):pass
         time.sleep(1)
     raise AssertionError(description+'; visible text: '+latest[:500])
 def text_is(name,value):return lambda t: (find(t,name) is not None and find(t,name).attrib.get('text')==value)
@@ -62,7 +65,13 @@ try:
     harness=build_host()
     adb('install','--no-streaming',Path(args.apk).resolve());installed_target=True
     adb('install','--no-streaming',harness);installed_host=True
-    adb('shell','appwidget','grantbind','--package',host,'--user','current');bound=True
+    try:adb('shell','appwidget','grantbind','--package',host,'--user','0')
+    except RuntimeError as error:
+        if 'status 137' not in str(error):raise
+        # Low-memory-killer during first boot: free background processes and retry once.
+        adb('shell','am','kill-all');time.sleep(3)
+        adb('shell','appwidget','grantbind','--package',host,'--user','0')
+    bound=True
     adb('shell','pm','grant',host,'android.permission.POST_NOTIFICATIONS')
     adb('shell','am','start','-W','-n',component)
     wait_for(text_is('widget_lyric','음악 감지 연결'),'widget without permission')

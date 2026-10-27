@@ -8,3 +8,4 @@
 .font-choice { min-height: 48px; padding: 10px 12px; text-align: left; border: 1px solid #ffffff1a; border-radius: 13px; background: #ffffff06; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .font-choice[aria-pressed=true] { background: #dcebbf18; border-color: #dcebbf99; color: #e7f2d4; }
 .font-choice:hover { background: #ffffff10; }
+.font-choice[data-font=nanum-pen] { font-size: 21px; }
