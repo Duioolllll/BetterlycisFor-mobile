@@ -39,3 +39,13 @@ jobs:
           persist-credentials: false
       - name: Exercise the home-screen widget on Android 16
         run: bash tools/emulator-widget-ci.sh widget
+      - name: Save widget test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: widget-validation
+          path: |
+            ${{ runner.temp }}/WIDGET_VALIDATION.json
+            ${{ runner.temp }}/WIDGET_PREVIEW.png
+            ${{ runner.temp }}/WIDGET_LOGCAT.txt
+          if-no-files-found: ignore

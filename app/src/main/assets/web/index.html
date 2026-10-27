@@ -73,7 +73,7 @@
 
   <div id="sheetBackdrop" class="sheet-backdrop" hidden></div>
   <section id="settingsSheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
-    <div class="sheet-handle" aria-hidden="true"></div><header class="sheet-header"><div><h2 id="settingsTitle">나의 가사 화면</h2></div><button class="icon-button close-sheet" aria-label="닫기"><svg><use href="#i-close"/></svg></button></header>
+    <div class="sheet-handle" aria-hidden="true"></div><header class="sheet-header"><div><h2 id="settingsTitle">설정</h2></div><button class="icon-button close-sheet" aria-label="닫기"><svg><use href="#i-close"/></svg></button></header>
     <div class="sheet-body">
       <button id="appearanceButton" class="appearance-entry setting-action"><div><strong>화면 꾸미기</strong></div><svg><use href="#i-settings"/></svg></button>
       <div class="setting-section"><h3>홈 화면 위젯</h3><button id="addWidget" class="setting-action"><strong>위젯 추가</strong><span aria-hidden="true">＋</span></button><div class="setting-select"><label for="widgetTheme">위젯 배경</label><select id="widgetTheme"><option value="dark">어둡게</option><option value="light">밝게</option><option value="clear">반투명</option></select></div><div class="setting-select"><label for="widgetSize">위젯 글자 크기</label><select id="widgetSize"><option value="small">작게</option><option value="medium">보통</option><option value="large">크게</option></select></div><label class="toggle-row"><strong>위젯 앨범 커버</strong><input id="widgetCover" type="checkbox" role="switch" checked><span class="toggle" aria-hidden="true"></span></label></div>
@@ -84,7 +84,7 @@
         <button id="audioConnect" class="setting-action"><div><strong id="audioConnectLabel">재생 소리에 연결</strong></div><span aria-hidden="true">↗</span></button>
         <p id="audioStatus" class="audio-status" role="status">연결 안 됨</p>
 
-        <button id="audioCapture" class="mini-button">다른 방식으로 소리 연결</button>
+        <button id="audioCapture" class="mini-button">시스템 오디오 캡처</button>
         <div class="setting-range"><div class="label-row"><label for="backgroundIntensity">반응 강도</label><output id="backgroundIntensityValue">70%</output></div><input id="backgroundIntensity" type="range" min="0" max="100" step="1" value="70"></div>
         <label class="toggle-row"><div><strong>빛 입자</strong></div><input id="backgroundParticles" type="checkbox" role="switch" checked><span class="toggle" aria-hidden="true"></span></label>
         <button id="backgroundPreview" class="secondary-button">5초 효과 미리보기</button>

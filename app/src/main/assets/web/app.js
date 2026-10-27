@@ -468,7 +468,7 @@
       const b=document.createElement('button');b.className='source-item';
       const icon=document.createElement('span');icon.className='source-avatar';icon.textContent=s.packageName?String(s.name || '?').slice(0,1):'↻';
       const text=document.createElement('div'),title=document.createElement('strong'),small=document.createElement('small');
-      title.textContent=s.name || s.packageName;small.textContent=s.packageName?(s.playing?'재생 중':'일시정지 또는 대기'):'재생 중인 앱을 따라가요';text.append(title,small);b.append(icon,text);
+      title.textContent=s.name || s.packageName;small.textContent=s.packageName?(s.playing?'재생 중':'일시정지'):'';text.append(title,small);b.append(icon,text);
       if(s.packageName && s.packageName===state.track.packageName){const check=document.createElement('span');check.className='playing-tag';check.textContent='현재 연결';b.append(check);}
       b.addEventListener('click',()=>{command('selectSource',{packageName:s.packageName});closeSheet();});root.append(b);
     }

@@ -26,7 +26,7 @@ def build_host():
     work.mkdir(parents=True,exist_ok=True);classes=work/'classes';dex=work/'dex';classes.mkdir(exist_ok=True);dex.mkdir(exist_ok=True)
     manifest=root/'tools/widget-harness/AndroidManifest.xml';linked=work/'linked.apk';unsigned=work/'unsigned.apk';aligned=work/'aligned.apk';apk=work/'widget-host.apk'
     run([bt/'aapt2','link','-I',android,'--manifest',manifest,'--min-sdk-version','26','--target-sdk-version','28','-o',linked])
-    run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','--release','8','-classpath',android,'-d',classes,root/'tools/widget-harness/WidgetHostActivity.java'])
+    run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','--release','8','-encoding','UTF-8','-classpath',android,'-d',classes,*sorted((root/'tools/widget-harness').glob('*.java'))])
     run(['java','-cp',bt/'lib/d8.jar','com.android.tools.r8.D8','--min-api','26','--lib',android,'--output',dex,*sorted(classes.rglob('*.class'))])
     with zipfile.ZipFile(linked) as source,zipfile.ZipFile(unsigned,'w') as dest:
         for name in source.namelist():dest.writestr(name,source.read(name),compress_type=zipfile.ZIP_STORED if name=='resources.arsc' else zipfile.ZIP_DEFLATED)
@@ -89,6 +89,9 @@ try:
     adb('shell','am','start','-W','-n',component,'--es','command','start')
     current=wait_for(text_is('widget_lyric','Widget line one'),'cached lyric on paused session')
     assert find(current,'widget_title').attrib.get('text')=='Widget Test'
+    screenshot=subprocess.run(['adb','-s',args.serial,'exec-out','screencap','-p'],capture_output=True,timeout=60,check=True).stdout
+    assert screenshot.startswith(b'\x89PNG\r\n\x1a\n'),'invalid emulator screenshot'
+    (Path(args.report).parent/'WIDGET_PREVIEW.png').write_bytes(screenshot)
     report['checks'].append('live media session and cached lyric shown')
     click(find(current,'widget_play'))
     current=wait_for(lambda t:find(t,'widget_play') is not None and find(t,'widget_play').attrib.get('content-desc')=='일시정지','play control')
@@ -111,9 +114,15 @@ try:
         time.sleep(1)
     else:raise AssertionError('Widget did not open MainActivity')
     report['checks'].append('widget opens the app')
+    instrumentation=adb('shell','am','instrument','-w',host+'/.FontInstrumentation')
+    assert 'INSTRUMENTATION_RESULT: fonts=ok' in instrumentation and 'INSTRUMENTATION_CODE: -1' in instrumentation, instrumentation
+    report['checks'].append('Android WebView loads all four Korean fonts and persists selection')
     report['passed']=True
 except Exception as error:
-    report['error']=str(error);raise
+    report['error']=str(error)
+    try:(Path(args.report).parent/'WIDGET_LOGCAT.txt').write_text(adb('logcat','-d','-t','600','AndroidRuntime:E','AppWidgetHostView:W','*:S'))
+    except Exception:pass
+    raise
 finally:
     if bound:
         try:adb('shell','appwidget','revokebind','--package',host,'--user','current')
