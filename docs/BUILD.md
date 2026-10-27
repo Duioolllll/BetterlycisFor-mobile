@@ -110,13 +110,12 @@ python3 tools/appearance-test.py --json-jar /path/to/json-20260814.jar
 ```sh
 npm install --no-save --package-lock=false playwright@1.62.1
 npx playwright install chromium
-BETTERLYRICS_PREVIEW_URL=http://127.0.0.1:4173/ node tools/ui-smoke.cjs
-node tools/flow-smoke.cjs
-node tools/player-smoke.cjs
-node tools/appearance-smoke.cjs
+# 별도 터미널: npm run dev -- --host 127.0.0.1 --port 4173
+export BETTERLYRICS_PREVIEW_URL=http://127.0.0.1:4173/
+for suite in ui flow player appearance review customization; do node "tools/$suite-smoke.cjs"; done
 ```
 
-기존 Chromium 실행 파일을 쓸 때 `BETTERLYRICS_CHROME`에 절대 경로를 지정한다. Linux에서는 한글 글꼴이 없으면 캡처에 네모가 나타날 수 있으므로 QA 호스트에 한글 글꼴을 설치한다. 이 글꼴은 APK에 포함하지 않는다. 미리보기는 `npm run dev`이며 데모 전용이다.
+기존 Chromium 실행 파일을 쓸 때 `BETTERLYRICS_CHROME`에 절대 경로를 지정한다. Linux에서는 한글 글꼴이 없으면 캡처에 네모가 나타날 수 있으므로 QA 호스트에 한글 글꼴을 설치한다. QA 호스트에 별도로 설치한 글꼴은 APK에 포함하지 않는다. 앱에는 오프라인 한글 글꼴 네 종류가 포함된다. 미리보기는 `npm run dev`이며 데모 전용이다.
 
 ## 7. 실패 해결
 
