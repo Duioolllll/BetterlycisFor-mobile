@@ -34,6 +34,7 @@ public final class LyricsListener extends NotificationListenerService {
     private final Runnable refreshTask=()->refreshSessions();
     private final MediaSessionManager.OnActiveSessionsChangedListener active=this::bindSessions;
     private final Runnable overlayTick=new Runnable(){public void run(){if(live!=LyricsListener.this)return;syncOverlay();if(overlay!=null)handler.postDelayed(this,150);}};
+    private final Runnable widgetTick=new Runnable(){public void run(){if(live!=LyricsListener.this||!LyricsWidgetProvider.exists(LyricsListener.this))return;LyricsWidgetProvider.refreshAll(LyricsListener.this,state,false);long delay=LyricsWidgetProvider.nextDelay(state);if(delay>0)handler.postDelayed(this,delay);}};
     @Override public void onCreate(){super.onCreate();state=AppState.get(this);windows=(WindowManager)getSystemService(WINDOW_SERVICE);}
     @Override public void onListenerConnected(){
         super.onListenerConnected();live=this;state.connected=true;manager=(MediaSessionManager)getSystemService(MEDIA_SESSION_SERVICE);
@@ -53,6 +54,7 @@ public final class LyricsListener extends NotificationListenerService {
     private void scheduleRefresh(){handler.removeCallbacks(refreshTask);handler.postDelayed(refreshTask,200);}
     public static void refresh(Context context){LyricsListener service=live;if(service!=null)service.handler.post(service.refreshTask);else if(AppState.get(context).granted())try{requestRebind(new ComponentName(context,LyricsListener.class));}catch(Exception ignored){}}
     public static void refreshOverlay(){LyricsListener service=live;if(service!=null){service.handler.removeCallbacks(service.overlayTick);service.handler.post(service.overlayTick);}}
+    public static void refreshWidget(Context context){LyricsListener service=live;if(service!=null){service.handler.removeCallbacks(service.widgetTick);service.handler.post(service.widgetTick);}else LyricsWidgetProvider.refreshAll(context,AppState.get(context),false);}
     static ArtworkResolver.Source notificationArtwork(MediaController controller){
         ArtworkResolver.Source source=new ArtworkResolver.Source();LyricsListener service=live;
         if(service==null||controller==null)return source;

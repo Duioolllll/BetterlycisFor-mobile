@@ -11,6 +11,8 @@ public class AppearanceCheck {
   JSONObject round=UiAppearance.parse(a.toString());assert round.similar(a);
   assert UiAppearance.parse("{\"textColor\":\"url(x)\"}").getString("textColor").equals("#ffffff");
   assert UiAppearance.parse("null").similar(d);assert UiAppearance.parse("[]").similar(d);
-  System.out.println("AppearanceCheck: 14 assertions passed");
+  for(String font:new String[]{"nanum-gothic","nanum-myeongjo","jua","nanum-pen"})assert UiAppearance.parse("{\"font\":\""+font+"\"}").getString("font").equals(font);
+  assert UiAppearance.parse("{\"font\":\"url(bad)\"}").getString("font").equals("system");
+  System.out.println("AppearanceCheck: 19 assertions passed");
  }
 }

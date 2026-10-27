@@ -198,6 +198,7 @@
     $('backgroundMode').value=s.backgroundMode||'sound';
     $('backgroundIntensity').value=number(s.backgroundIntensity,70);$('backgroundIntensityValue').textContent=number(s.backgroundIntensity,70)+'%';
     $('backgroundParticles').checked=s.backgroundParticles!==false;updateAudioSettings();
+    $('widgetTheme').value=s.widgetTheme||'dark';$('widgetSize').value=s.widgetSize||'medium';$('widgetCover').checked=s.widgetCover!==false;
   }
 
   function audioFrame(input){
@@ -210,7 +211,7 @@
     let title=preview?'효과 미리보기':mode==='static'?'고정 그라데이션':mode==='ambient'?'흐르는 그라데이션':data.status==='live'?'소리에 반응 중':data.status==='silent'?'소리 입력 대기':data.status==='connecting'?'소리 연결 중':data.connected?'일시정지':'소리 연결';
     $('audioQuickLabel').textContent=title;$('audioQuick').setAttribute('aria-label','사운드 반응 배경 · '+title);$('audioQuick').classList.toggle('connected',!!data.available||preview);
     $('audioConnectLabel').textContent=data.connected?'소리 연결 끊기':'재생 소리에 연결';
-    $('audioStatus').textContent=preview?'5초 동안 효과를 미리 보고 있어요.':data.message||'연결하면 저음·중음·고음에 맞춰 배경이 움직여요.';
+    $('audioStatus').textContent=preview?'미리보기 중':data.message||'연결 안 됨';
     $('audioCapture').disabled=data.status==='connecting';
   }
 
@@ -219,29 +220,25 @@
     $('lyricsViewport').hidden=!hasLines;
     $('emptyState').hidden=hasLines;
     if(hasLines)return;
-    let title,description,action;
+    let title,action;
     const status=String(state.lyrics.status || '').toLowerCase();
     if(!state.permissions.notifications && !hasSource()) {
-      title='노래를 켜면,\n가사가 따라와요.';
-      description='음악 감지를 연결하고\nSpotify, YouTube Music 등에서 재생해 보세요.';
-      action='음악 감지 연결하기';
+      title='음악 감지 연결';
+      action='음악 감지';
     } else if(!hasSource() && state.permissions.connected===false) {
-      title='음악 앱과\n연결하고 있어요.';
-      description='권한을 켠 직후에는 잠시 걸릴 수 있어요.\n음악 앱에서 재생한 뒤 다시 확인해 주세요.';action='연결 다시 확인';
+      title='음악 연결 중';action='다시 확인';
     } else if(!hasSource()) {
-      title='지금, 어떤 노래를\n듣고 있나요?';
-      description='음악 앱에서 노래를 재생하면\n가사를 자동으로 찾아드려요.';action='음악 앱 열기';
+      title='음악 재생 대기';action='음악 앱 열기';
     } else if(state.lyrics.loading || status.includes('load') || status.includes('search')) {
-      title='이 노래의 가사를\n찾고 있어요.';
-      description='노래 제목과 가수를 확인하며\n가장 잘 맞는 가사를 찾는 중이에요.';action='가사 직접 검색';
+      title='가사를 찾고 있어요';action='가사 검색';
     } else {
-      title='아직 가사를\n찾지 못했어요.';
-      description=typeof state.lyrics.error==='string' && state.lyrics.error ? state.lyrics.error.slice(0,250) : '다른 제목으로 검색하거나\n가지고 있는 가사 파일을 불러와 보세요.';action='가사 직접 검색';
+      title='가사 없음';action='가사 검색';
     }
-    $('emptyTitle').textContent=title; $('emptyDescription').textContent=description;
-    $('emptyAction').textContent=action+' ↗';
+    $('emptyTitle').textContent=title;
+    $('emptyAction').textContent=action;
     $('emptyAction').dataset.action=!state.permissions.notifications&&!hasSource()?'permission':!hasSource()&&state.permissions.connected===false?'refresh':!hasSource()?'player':'search';
-    $('emptySecondary').textContent=hasSource()?'가사 파일 불러오기':'가사 직접 검색';
+    $('emptySecondary').hidden=!hasSource();
+    $('emptySecondary').textContent='가사 파일 불러오기';
   }
 
   function updateBadge() {
@@ -258,7 +255,6 @@
     const badge=$('lyricsBadge');
     badge.replaceChildren(document.createElement('span'),document.createTextNode(label));
     badge.classList.toggle('exact',exact);
-    $('syncCaption').textContent=number(state.settings.offset)!==0 ? '가사 보정 '+(state.settings.offset>0?'+':'')+state.settings.offset+' ms' : '음악에 맞춰, 한 줄씩.';
   }
 
   function buildLyrics() {
@@ -451,7 +447,7 @@
     if(id==='searchSheet') {
       $('submitSearch').disabled=false;$('submitSearch').textContent='검색';
       $('searchTrack').value=state.track.title || '';$('searchArtist').value=state.track.artist || '';
-      $('searchStatus').textContent='현재 곡과 같은 버전인지 곡 길이도 확인해 주세요.';$('searchResults').replaceChildren();
+      $('searchStatus').textContent='';$('searchResults').replaceChildren();
     }
     if(id==='sourcesSheet')renderSources();
     $(id).querySelector('button').focus({preventScroll:true});
@@ -502,6 +498,9 @@
     document.addEventListener('keydown',e=>{if(e.key==='Tab'){keyboardNavigation=true;controlsUntil=performance.now()+3500;}});
     if(window.ResizeObserver)new ResizeObserver(()=>{flowLayoutDirty=true;snapFollow=true;}).observe($('lyricsViewport'));
     $('settingsButton').addEventListener('click',()=>openSheet('settingsSheet'));
+    $('addWidget').addEventListener('click',()=>command('addWidget'));
+    for(const id of ['widgetTheme','widgetSize'])$(id).addEventListener('change',()=>setSetting(id,$(id).value));
+    $('widgetCover').addEventListener('change',()=>setSetting('widgetCover',$('widgetCover').checked));
     $('sourceButton').addEventListener('click',()=>openSheet('sourcesSheet'));
     $('searchButton').addEventListener('click',()=>openSheet('searchSheet'));
     $('emptyAction').addEventListener('click',()=>{const a=$('emptyAction').dataset.action;if(a==='permission')command('notificationAccess');else if(a==='player')command('openPlayer');else if(a==='refresh')command('refresh');else openSheet('searchSheet');});
@@ -559,7 +558,7 @@
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();return;}if(e.key==='Tab'&&lastSheet){const nodes=Array.from($(lastSheet).querySelectorAll('button,input,select,[tabindex]')).filter(n=>!n.disabled&&!n.hidden),first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
     $('searchForm').addEventListener('submit',e=>{e.preventDefault();const title=$('searchTrack').value.trim(),artist=$('searchArtist').value.trim();if(!title){$('searchTrack').focus();return;}$('searchResults').replaceChildren();$('searchStatus').textContent='가사를 검색하고 있어요…';$('submitSearch').disabled=true;$('submitSearch').textContent='검색 중…';command('search',{title,artist});});
     window.addEventListener('resize',()=>{currentAnchor=-1;flowLayoutDirty=true;resizeAmbient();});
-    if(document.fonts && document.fonts.ready)document.fonts.ready.then(()=>{flowLayoutDirty=true;currentAnchor=-1;});
+    if(document.fonts && document.fonts.ready){const changed=()=>{flowLayoutDirty=true;currentAnchor=-1;};document.fonts.ready.then(changed);if(document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',changed);}
     document.addEventListener('visibilitychange',()=>{if(!document.hidden && native){try{receive(window.Android.getBootstrap());}catch(_){}}});
   }
 

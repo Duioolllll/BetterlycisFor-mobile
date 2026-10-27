@@ -42,7 +42,8 @@ const initial = {
       await page.screenshot({path:path.join(out, 'player-' + viewport.width + '.png')});
       result.viewports.push(viewport);
       await page.evaluate(() => App.receive({track:{key:'', title:'', artist:'', album:'', packageName:''}, lyrics:{lines:[]}, permissions:{notifications:false}}));
-      for (const id of ['emptyAction','emptySecondary']) {
+      assert(await page.locator('#emptySecondary').isHidden(), 'import requires a selected song');
+      for (const id of ['emptyAction']) {
         await page.locator('#' + id).scrollIntoViewIfNeeded();
         const action = await page.locator('#' + id).boundingBox();
         const footer = await page.locator('.player').boundingBox();
@@ -88,7 +89,7 @@ const initial = {
       }
       await page.close();
     }
-    result.checks.push('44px control targets and nonoverlapping playback controls on five viewports', 'both empty-state actions stay accessible above playback controls');
+    result.checks.push('44px control targets and nonoverlapping playback controls on five viewports', 'empty-state action stays accessible above playback controls');
     assert.deepEqual(result.errors, []);
     result.passed = true;
   } finally {

@@ -45,6 +45,7 @@ selected=[
     'MathTests',
     'AudioSignalTests',
     'ServiceIoTests',
+    'WidgetLogicTests',
 ]
 if args.include_korean_check:selected.append('KoreanProviderCheck')
 if args.include_network_check:selected.append('RepositoryNetworkCheck')
@@ -57,6 +58,7 @@ sources=[
     'UiAppearance.java',
     'LyricsRepository.java',
     'IoSupport.java',
+    'WidgetLyrics.java',
 ]
 compile_command=['java','-m','jdk.compiler/com.sun.tools.javac.Main','--release','8','-encoding','UTF-8','-cp',os.pathsep.join([str(json_jar),str(android)]),'-d',str(out),*[str(src/name) for name in sources],*[str(tests/(name+'.java')) for name in selected]]
 subprocess.run(compile_command,check=True)

@@ -4,7 +4,7 @@ The selected player icons are from Bootstrap Icons v1.13.1, copyright the Bootst
 
 Source: https://github.com/twbs/icons/tree/v1.13.1/icons
 
-Apple screenshots were inspected as design references only and are not bundled in the APK or source distribution. Album images are supplied by the connected music app. Android system fonts are used.
+Apple screenshots were inspected as design references only and are not bundled in the APK or source distribution. Album images are supplied by the connected music app. Android system fonts and the following bundled SIL Open Font License 1.1 fonts are available: Nanum Gothic, Nanum Myeongjo, Nanum Pen Script (NHN Corporation / Sandoll Communication), and Jua (The Jua Project Authors / Woowahan Brothers). Their individual licenses are in app/src/main/assets/licenses/. The WOFF2 files preserve the upstream Unicode character coverage. Sources: https://github.com/google/fonts/tree/main/ofl/nanumgothic, https://github.com/google/fonts/tree/main/ofl/nanummyeongjo, https://github.com/google/fonts/tree/main/ofl/nanumpenscript, https://github.com/google/fonts/tree/main/ofl/jua.
 
 BetterLyrics Mobile is an independent, unofficial Android adaptation. Original BetterLyrics: Zhe Fang and BetterLyrics contributors, tag v1.3.527.0, GNU GPL v3 (see LICENSE). Android implementation and modifications: BetterLyrics Mobile contributors, 2026. No warranty. Corresponding source and build instructions accompany the release tag.
 

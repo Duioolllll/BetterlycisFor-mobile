@@ -1,0 +1,10 @@
+@font-face { font-family: 'BL Nanum Gothic'; src: url('fonts/nanum-gothic.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'BL Nanum Myeongjo'; src: url('fonts/nanum-myeongjo.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'BL Jua'; src: url('fonts/jua.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'BL Nanum Pen'; src: url('fonts/nanum-pen.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+
+.font-section { padding-top: 18px; }
+.font-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.font-choice { min-height: 48px; padding: 10px 12px; text-align: left; border: 1px solid #ffffff1a; border-radius: 13px; background: #ffffff06; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.font-choice[aria-pressed=true] { background: #dcebbf18; border-color: #dcebbf99; color: #e7f2d4; }
+.font-choice:hover { background: #ffffff10; }

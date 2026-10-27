@@ -30,3 +30,12 @@ jobs:
           apk = Path('dist') / json.loads(Path('dist/build-info-debug.json').read_text())['apk']
           subprocess.run([sys.executable, 'tools/apk-packaging-test.py', '--fixed-apk', str(apk)], check=True)
           PY
+  widget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Exercise the home-screen widget on Android 16
+        run: bash tools/emulator-widget-ci.sh widget

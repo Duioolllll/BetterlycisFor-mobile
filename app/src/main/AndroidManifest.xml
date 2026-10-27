@@ -18,6 +18,11 @@
     </queries>
     <application android:label="BetterLyrics Mobile" android:icon="@drawable/ic_launcher" android:theme="@style/AppTheme" android:allowBackup="false" android:usesCleartextTraffic="false" android:supportsRtl="true" android:enableOnBackInvokedCallback="true">
         <service android:name=".AudioCaptureService" android:exported="false" android:foregroundServiceType="mediaProjection" />
+        <receiver android:name=".LyricsWidgetProvider" android:exported="true" android:label="@string/widget_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/lyrics_widget_info" />
+        </receiver>
+        <receiver android:name=".WidgetActionReceiver" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden" android:resizeableActivity="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

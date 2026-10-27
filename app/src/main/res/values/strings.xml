@@ -1,0 +1,9 @@
+<resources>
+    <string name="widget_name">가사 위젯</string>
+    <string name="widget_connect">음악 감지 연결</string>
+    <string name="widget_art">앨범 커버</string>
+    <string name="widget_previous">이전 곡</string>
+    <string name="widget_play">재생</string>
+    <string name="widget_pause">일시정지</string>
+    <string name="widget_next">다음 곡</string>
+</resources>

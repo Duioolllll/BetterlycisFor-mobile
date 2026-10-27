@@ -42,7 +42,7 @@ public final class AppState {
     private AppState(Context c){context=c;prefs=c.getSharedPreferences("settings",0);repository=new LyricsRepository(c);audio=new AudioEngine(c);}
     public boolean granted(){String enabled=Settings.Secure.getString(context.getContentResolver(),"enabled_notification_listeners");if(enabled==null)return false;ComponentName self=new ComponentName(context,LyricsListener.class);for(String entry:enabled.split(":"))if(self.equals(ComponentName.unflattenFromString(entry)))return true;return false;}
     public void emit(){notifyListeners(true);}
-    private void notifyListeners(boolean full){for(Listener r:new ArrayList<>(listeners))r.changed(full);LyricsListener.refreshOverlay();}
+    private void notifyListeners(boolean full){for(Listener r:new ArrayList<>(listeners))r.changed(full);LyricsListener.refreshOverlay();LyricsListener.refreshWidget(context);}
     void cancelWork(Future<?> work){if(work!=null)work.cancel(true);network.purge();}
     public void accept(MediaController next,PlaybackState currentPlayback,boolean metadataChanged,boolean sourcesChanged) {
         boolean sameSession=controller!=null&&next!=null&&controller.getSessionToken().equals(next.getSessionToken());
@@ -130,6 +130,9 @@ public final class AppState {
     }
     public long position(){PlaybackState p=playback;if(p==null)return 0;return MatchScore.position(p.getPosition(),p.getLastPositionUpdateTime(),SystemClock.elapsedRealtime(),p.getPlaybackSpeed(),p.getState()==PlaybackState.STATE_PLAYING,song.duration);}
     public boolean playing(){PlaybackState p=playback;return p!=null&&p.getState()==PlaybackState.STATE_PLAYING;}
+    public boolean positionKnown(){return playback!=null&&playback.getPosition()>=0;}
+    public float playbackSpeed(){return playback==null?0:playback.getPlaybackSpeed();}
+    public long playbackActions(){return playback==null?0:playback.getActions();}
     private String offsetKey(){return "trackOffset:"+song.key;}
     public int offset(){return song.key.isEmpty()?0:prefs.getInt(offsetKey(),0);}
     public JSONObject track()throws JSONException{
@@ -151,6 +154,7 @@ public final class AppState {
             JSONObject lyric=new JSONObject().put("revision",generation).put("lines",rows).put("provider",lyrics==null?"":lyrics.provider).put("score",lyrics==null?0:lyrics.score).put("status",status).put("error",error).put("loading",loading).put("masked",lyrics!=null&&lyrics.masked).put("synced",lyrics!=null&&!lyrics.lines.isEmpty()&&lyrics.lines.get(0).start>=0);
             JSONObject settings=new JSONObject().put("offset",offset()).put("fontSize",prefs.getInt("fontSize",28)).put("wordMode",prefs.getString("wordMode","auto")).put("provider",prefs.getString("provider","auto")).put("searchMode",prefs.getString("searchMode","best")).put("keepScreen",prefs.getBoolean("keepScreen",true)).put("overlay",prefs.getBoolean("overlay",false));
             settings.put("backgroundMode",prefs.getString("backgroundMode","sound")).put("backgroundIntensity",prefs.getInt("backgroundIntensity",70)).put("backgroundParticles",prefs.getBoolean("backgroundParticles",true)).put("audioEnabled",prefs.getBoolean("audioEnabled",false));
+            settings.put("widgetTheme",prefs.getString("widgetTheme","dark")).put("widgetSize",prefs.getString("widgetSize","medium")).put("widgetCover",prefs.getBoolean("widgetCover",true));
             settings.put("appearance",UiAppearance.parse(prefs.getString("appearance","{}")));
             root.put("audio",audio.packet()).put("volume",volume());
             root.put("track",track()).put("lyrics",lyric).put("settings",settings).put("permissions",new JSONObject().put("notifications",granted()).put("overlay",Settings.canDrawOverlays(context)).put("connected",connected)).put("sources",sources);
@@ -167,6 +171,9 @@ public final class AppState {
         else if(key.equals("backgroundMode")&&Arrays.asList("sound","ambient","static").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
         else if(key.equals("backgroundIntensity"))e.putInt(key,Math.max(0,Math.min(100,((Number)value).intValue())));
         else if(key.equals("backgroundParticles"))e.putBoolean(key,Boolean.TRUE.equals(value));
+        else if(key.equals("widgetTheme")&&Arrays.asList("dark","light","clear").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
+        else if(key.equals("widgetSize")&&Arrays.asList("small","medium","large").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
+        else if(key.equals("widgetCover"))e.putBoolean(key,Boolean.TRUE.equals(value));
         e.apply();if(key.equals("provider")||key.equals("searchMode"))fetch(true);else emit();
     }
 }

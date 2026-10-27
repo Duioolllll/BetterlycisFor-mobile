@@ -12,7 +12,7 @@ public final class UiAppearance {
             choice(in,out,"preset","original","original","focus","album","custom");
             choice(in,out,"layout","auto","auto","immersive","split","reverse");
             choice(in,out,"align","left","left","center","right");
-            choice(in,out,"font","system","system","serif","rounded");
+            choice(in,out,"font","system","system","serif","rounded","nanum-gothic","nanum-myeongjo","jua","nanum-pen");
             choice(in,out,"controls","auto","auto","always","minimal");
             choice(in,out,"flow","continuous","continuous","line");
             number(in,out,"weight",700,400,900);number(in,out,"lineHeight",135,110,180);

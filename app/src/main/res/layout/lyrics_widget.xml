@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/widget_background_dark" android:orientation="vertical"
+    android:paddingLeft="12dp" android:paddingRight="12dp" android:paddingTop="8dp" android:paddingBottom="8dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical">
+        <ImageView android:id="@+id/widget_art" android:layout_width="40dp" android:layout_height="40dp"
+            android:layout_marginRight="8dp" android:src="@drawable/widget_art_placeholder" android:scaleType="centerCrop" android:contentDescription="@string/widget_art" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/widget_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/widget_name" android:textColor="#F5F7EF" android:textSize="14sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+            <TextView android:id="@+id/widget_artist" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="#B9C8BC" android:textSize="11sp" android:maxLines="1" android:ellipsize="end" />
+        </LinearLayout>
+        <ImageButton android:id="@+id/widget_previous" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp"
+            android:background="@drawable/widget_button" android:src="@drawable/widget_previous_light" android:contentDescription="@string/widget_previous" />
+        <ImageButton android:id="@+id/widget_play" android:layout_width="44dp" android:layout_height="44dp" android:padding="9dp"
+            android:background="@drawable/widget_button" android:src="@drawable/widget_play_light" android:contentDescription="@string/widget_play" />
+        <ImageButton android:id="@+id/widget_next" android:layout_width="44dp" android:layout_height="44dp" android:padding="10dp"
+            android:background="@drawable/widget_button" android:src="@drawable/widget_next_light" android:contentDescription="@string/widget_next" />
+    </LinearLayout>
+    <TextView android:id="@+id/widget_lyric" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:gravity="center_vertical" android:text="@string/widget_connect" android:textColor="#F5F7EF" android:textSize="19sp"
+        android:textStyle="bold" android:ellipsize="end" android:maxLines="2" android:paddingTop="4dp" />
+</LinearLayout>

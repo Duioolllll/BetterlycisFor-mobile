@@ -47,7 +47,20 @@ else:
 work=ROOT/'build'/('manual-'+opt.variant)
 if work.exists(): shutil.rmtree(work)
 classes,dex=work/'classes',work/'dex';classes.mkdir(parents=True);dex.mkdir()
-sources=sorted((ROOT/'app/src/main/java').rglob('*.java'))
+# Link resources first so native Java can compile against the generated R IDs.
+run([bt/('aapt2'+exe),'compile','--dir',ROOT/'app/src/main/res','-o',work/'resources.zip'])
+manifest=work/'AndroidManifest.xml'
+source=(ROOT/'app/src/main/AndroidManifest.xml').read_text()
+source=source.replace('<manifest ','<manifest package="io.betterlyrics.mobile" ',1)
+source=source.replace('<application ', '<application android:debuggable="'+str(opt.variant=='debug').lower()+'" ',1)
+manifest.write_text(source,encoding='utf-8')
+attrs=ET.fromstring(source).attrib;ns='{http://schemas.android.com/apk/res/android}'
+version,code=attrs[ns+'versionName'],attrs[ns+'versionCode']
+linked=work/'linked.apk';unsigned=work/'unsigned.apk';generated=work/'generated';generated.mkdir()
+run([bt/('aapt2'+exe),'link','-I',android,'--manifest',manifest,'--min-sdk-version','26',
+     '--target-sdk-version','36','--version-code',code,'--version-name',version,'--java',generated,'-o',linked,work/'resources.zip'])
+sources=sorted((ROOT/'app/src/main/java').rglob('*.java'))+sorted(generated.rglob('*.java'))
+if not any(p.name=='R.java' for p in sources): raise SystemExit('AAPT2 did not generate resource IDs.')
 javatool('-m','jdk.compiler/com.sun.tools.javac.Main','-encoding','UTF-8','-source','8','-target','8',
          '-Xlint:deprecation','-classpath',android,'-d',classes,*sources)
 # Fixed entry dates and sorted paths eliminate wall-clock ZIP differences.
@@ -58,17 +71,6 @@ jar=work/'classes.jar'
 with zipfile.ZipFile(jar,'w') as z:
     for p in sorted(classes.rglob('*.class')): write_entry(z,p.relative_to(classes).as_posix(),p.read_bytes())
 javatool('-cp',bt/'lib/d8.jar','com.android.tools.r8.D8','--min-api','26','--lib',android,'--output',dex,jar)
-run([bt/('aapt2'+exe),'compile','--dir',ROOT/'app/src/main/res','-o',work/'resources.zip'])
-manifest=work/'AndroidManifest.xml'
-source=(ROOT/'app/src/main/AndroidManifest.xml').read_text()
-source=source.replace('<manifest ','<manifest package="io.betterlyrics.mobile" ',1)
-source=source.replace('<application ', '<application android:debuggable="'+str(opt.variant=='debug').lower()+'" ',1)
-manifest.write_text(source,encoding='utf-8')
-attrs=ET.fromstring(source).attrib;ns='{http://schemas.android.com/apk/res/android}'
-version,code=attrs[ns+'versionName'],attrs[ns+'versionCode']
-linked=work/'linked.apk';unsigned=work/'unsigned.apk'
-run([bt/('aapt2'+exe),'link','-I',android,'--manifest',manifest,'--min-sdk-version','26',
-     '--target-sdk-version','36','--version-code',code,'--version-name',version,'-o',linked,work/'resources.zip'])
 with zipfile.ZipFile(linked) as src, zipfile.ZipFile(unsigned,'w') as z:
     for name in sorted(src.namelist()):
         compression = zipfile.ZIP_STORED if name == 'resources.arsc' else src.getinfo(name).compress_type

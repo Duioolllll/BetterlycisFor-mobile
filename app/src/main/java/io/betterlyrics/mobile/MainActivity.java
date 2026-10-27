@@ -1,6 +1,7 @@
 package io.betterlyrics.mobile;
 
 import android.app.*;
+import android.appwidget.AppWidgetManager;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.media.projection.MediaProjectionManager;
@@ -76,6 +77,11 @@ public final class MainActivity extends Activity {
     }
     private void dispatch(String action,JSONObject data)throws Exception{
         switch(action){
+            case "addWidget":{
+                AppWidgetManager manager=AppWidgetManager.getInstance(this);
+                try{if(!manager.isRequestPinAppWidgetSupported()||!manager.requestPinAppWidget(new ComponentName(this,LyricsWidgetProvider.class),null,null))toast("홈 화면에서 위젯 추가");}
+                catch(RuntimeException error){toast("홈 화면에서 위젯 추가");}break;
+            }
             case "notificationAccess":startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));break;
             case "overlayPermission":startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,Uri.parse("package:"+getPackageName())));break;
             case "toggleOverlay":if(!state.granted()){toast("음악 감지 권한을 먼저 켜 주세요.");startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));}else if(!Settings.canDrawOverlays(this))startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,Uri.parse("package:"+getPackageName())));else state.set("overlay",!state.prefs.getBoolean("overlay",false));break;
@@ -101,7 +107,7 @@ public final class MainActivity extends Activity {
             case "chooseResult":state.choose(data.optString("id"));break;
             case "importLyrics":if(state.song.key.isEmpty()){toast("음악을 먼저 재생해 주세요.");break;}Intent file=new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*");file.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);startActivityForResult(file,100);break;
             case "openPlayer":openPlayer();break;
-            case "about":new AlertDialog.Builder(this).setTitle("BetterLyrics Mobile "+getPackageManager().getPackageInfo(getPackageName(),0).versionName).setMessage("BetterLyrics v1.3.527.0을 분석하여 Android에 맞게 구현한 비공식 이식판입니다.\n\n원작: Zhe Fang / BetterLyrics contributors\nGPL-3.0 · 보증 없음 · 같은 라이선스로 재배포 가능\n소스와 라이선스: github.com/Duioolllll/BetterlycisFor-mobile\n\n음악 감지는 미디어 세션만 사용합니다. 가사 검색 시 제목·가수·앨범 정보를 선택한 가사 제공처로 전송합니다.\n\nWindows DLL 플러그인, Wallpaper Engine, Windows 오디오 기능은 이 버전에 포함되지 않습니다. 재생 소리 분석은 별도 연결 시 기기에서만 수행합니다.\n아이콘: Bootstrap Icons (MIT).").setPositiveButton("확인",null).show();break;
+            case "about":new AlertDialog.Builder(this).setTitle("BetterLyrics Mobile "+getPackageManager().getPackageInfo(getPackageName(),0).versionName).setMessage("독립 비공식 앱\n원작: Zhe Fang / BetterLyrics contributors\nGPL-3.0").setPositiveButton("확인",null).show();break;
         }
     }
     private void reconcileAudio(){

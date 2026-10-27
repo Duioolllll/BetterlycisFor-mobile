@@ -127,7 +127,7 @@ button { transition: background .18s ease, color .18s ease, transform .18s ease;
 .appearance-sheet .sheet-header .eyebrow { color: var(--accent); }
 .appearance-sheet .sheet-body { padding: 0 22px 24px; }
 .appearance-help { color: var(--quiet); }
-.preset-list button { border-radius: 16px; min-height: 92px; padding: 14px 11px; }
+.preset-list button { border-radius: 16px; min-height: 52px; padding: 12px 11px; }
 .preset-list button[aria-pressed=true] { background: #dcebbf12; border-color: #dcebbf88; }
 .preset-list small { color: var(--quiet); font-size: 11px; }
 .appearance-toggle { min-height: 52px; font-size: 13px; }
