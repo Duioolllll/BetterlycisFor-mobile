@@ -1,0 +1,465 @@
+{
+  "checks": [
+    "native volume + hardware update + fixed volume",
+    "volume packets preserve playback clock",
+    "menu search/import/overlay and focus return",
+    "source selection and all transport actions",
+    "sound connection and scrub remaining time",
+    "lyrics and album views fit five screen sizes",
+    "both lyric-view controls work and follow resumes"
+  ],
+  "errors": [],
+  "viewports": [
+    {
+      "width": 360,
+      "height": 740,
+      "mode": "lyrics",
+      "player": {
+        "left": 18,
+        "right": 342,
+        "top": 596,
+        "bottom": 724,
+        "width": 324,
+        "height": 128
+      },
+      "track": {
+        "left": 92,
+        "right": 274,
+        "top": 69,
+        "bottom": 134.1875,
+        "width": 182,
+        "height": 65.1875
+      },
+      "cover": {
+        "left": 24,
+        "right": 78,
+        "top": 74.59375,
+        "bottom": 128.59375,
+        "width": 54,
+        "height": 54
+      },
+      "scroll": 360
+    },
+    {
+      "width": 360,
+      "height": 740,
+      "mode": "album",
+      "player": {
+        "left": 18,
+        "right": 342,
+        "top": 596,
+        "bottom": 724,
+        "width": 324,
+        "height": 128
+      },
+      "track": {
+        "left": 24,
+        "right": 280,
+        "top": 423.703125,
+        "bottom": 508.6875,
+        "width": 256,
+        "height": 84.984375
+      },
+      "cover": {
+        "left": 47.75868225097656,
+        "right": 312.22572326660156,
+        "top": 136.27430725097656,
+        "bottom": 400.74134826660156,
+        "width": 264.467041015625,
+        "height": 264.467041015625
+      },
+      "scroll": 360
+    },
+    {
+      "width": 360,
+      "height": 740,
+      "mode": "lyrics",
+      "player": {
+        "left": 18,
+        "right": 342,
+        "top": 596,
+        "bottom": 724,
+        "width": 324,
+        "height": 128
+      },
+      "track": {
+        "left": 92,
+        "right": 274,
+        "top": 69,
+        "bottom": 134.1875,
+        "width": 182,
+        "height": 65.1875
+      },
+      "cover": {
+        "left": 24,
+        "right": 78,
+        "top": 74.59375,
+        "bottom": 128.59375,
+        "width": 54,
+        "height": 54
+      },
+      "scroll": 360
+    },
+    {
+      "width": 412,
+      "height": 915,
+      "mode": "lyrics",
+      "player": {
+        "left": 30,
+        "right": 382,
+        "top": 771,
+        "bottom": 899,
+        "width": 352,
+        "height": 128
+      },
+      "track": {
+        "left": 108,
+        "right": 320,
+        "top": 75,
+        "bottom": 142.984375,
+        "width": 212,
+        "height": 67.984375
+      },
+      "cover": {
+        "left": 30,
+        "right": 94,
+        "top": 76.984375,
+        "bottom": 140.984375,
+        "width": 64,
+        "height": 64
+      },
+      "scroll": 412
+    },
+    {
+      "width": 412,
+      "height": 915,
+      "mode": "album",
+      "player": {
+        "left": 30,
+        "right": 382,
+        "top": 771,
+        "bottom": 899,
+        "width": 352,
+        "height": 128
+      },
+      "track": {
+        "left": 30,
+        "right": 326,
+        "top": 545.703125,
+        "bottom": 630.6875,
+        "width": 296,
+        "height": 84.984375
+      },
+      "cover": {
+        "left": 42.7469482421875,
+        "right": 369.2374267578125,
+        "top": 195.7625732421875,
+        "bottom": 522.2530517578125,
+        "width": 326.490478515625,
+        "height": 326.490478515625
+      },
+      "scroll": 412
+    },
+    {
+      "width": 412,
+      "height": 915,
+      "mode": "lyrics",
+      "player": {
+        "left": 30,
+        "right": 382,
+        "top": 771,
+        "bottom": 899,
+        "width": 352,
+        "height": 128
+      },
+      "track": {
+        "left": 108,
+        "right": 320,
+        "top": 75,
+        "bottom": 142.984375,
+        "width": 212,
+        "height": 67.984375
+      },
+      "cover": {
+        "left": 30,
+        "right": 94,
+        "top": 76.984375,
+        "bottom": 140.984375,
+        "width": 64,
+        "height": 64
+      },
+      "scroll": 412
+    },
+    {
+      "width": 812,
+      "height": 375,
+      "mode": "lyrics",
+      "player": {
+        "left": 116,
+        "right": 696,
+        "top": 231,
+        "bottom": 359,
+        "width": 580,
+        "height": 128
+      },
+      "track": {
+        "left": 85.125,
+        "right": 344.875,
+        "top": 156,
+        "bottom": 228.171875,
+        "width": 259.75,
+        "height": 72.171875
+      },
+      "cover": {
+        "left": 85.125,
+        "right": 175.125,
+        "top": 54,
+        "bottom": 144,
+        "width": 90,
+        "height": 90
+      },
+      "scroll": 812
+    },
+    {
+      "width": 812,
+      "height": 375,
+      "mode": "album",
+      "player": {
+        "left": 236,
+        "right": 576,
+        "top": 231,
+        "bottom": 359,
+        "width": 340,
+        "height": 128
+      },
+      "track": {
+        "left": 250,
+        "right": 622,
+        "top": 69.5,
+        "bottom": 158.484375,
+        "width": 372,
+        "height": 88.984375
+      },
+      "cover": {
+        "left": 136.43951416015625,
+        "right": 235.56048583984375,
+        "top": 69.93952178955078,
+        "bottom": 169.06048583984375,
+        "width": 99.1209716796875,
+        "height": 99.12096405029297
+      },
+      "scroll": 812
+    },
+    {
+      "width": 812,
+      "height": 375,
+      "mode": "lyrics",
+      "player": {
+        "left": 116,
+        "right": 696,
+        "top": 231,
+        "bottom": 359,
+        "width": 580,
+        "height": 128
+      },
+      "track": {
+        "left": 85.125,
+        "right": 344.875,
+        "top": 156,
+        "bottom": 228.171875,
+        "width": 259.75,
+        "height": 72.171875
+      },
+      "cover": {
+        "left": 85.125,
+        "right": 175.125,
+        "top": 54,
+        "bottom": 144,
+        "width": 90,
+        "height": 90
+      },
+      "scroll": 812
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "mode": "lyrics",
+      "player": {
+        "left": 350,
+        "right": 930,
+        "top": 656,
+        "bottom": 784,
+        "width": 580,
+        "height": 128
+      },
+      "track": {
+        "left": 161.921875,
+        "right": 542.078125,
+        "top": 520.0625,
+        "bottom": 617.921875,
+        "width": 380.15625,
+        "height": 97.859375
+      },
+      "cover": {
+        "left": 161.921875,
+        "right": 481.921875,
+        "top": 182.0625,
+        "bottom": 502.0625,
+        "width": 320,
+        "height": 320
+      },
+      "scroll": 1280
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "mode": "album",
+      "player": {
+        "left": 350,
+        "right": 930,
+        "top": 656,
+        "bottom": 784,
+        "width": 580,
+        "height": 128
+      },
+      "track": {
+        "left": 440,
+        "right": 784,
+        "top": 456.5,
+        "bottom": 545.484375,
+        "width": 344,
+        "height": 88.984375
+      },
+      "cover": {
+        "left": 473.478515625,
+        "right": 806.521484375,
+        "top": 103.97853088378906,
+        "bottom": 437.02149963378906,
+        "width": 333.04296875,
+        "height": 333.04296875
+      },
+      "scroll": 1280
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "mode": "lyrics",
+      "player": {
+        "left": 350,
+        "right": 930,
+        "top": 656,
+        "bottom": 784,
+        "width": 580,
+        "height": 128
+      },
+      "track": {
+        "left": 161.921875,
+        "right": 542.078125,
+        "top": 520.0625,
+        "bottom": 617.921875,
+        "width": 380.15625,
+        "height": 97.859375
+      },
+      "cover": {
+        "left": 161.921875,
+        "right": 481.921875,
+        "top": 182.0625,
+        "bottom": 502.0625,
+        "width": 320,
+        "height": 320
+      },
+      "scroll": 1280
+    },
+    {
+      "width": 800,
+      "height": 1280,
+      "mode": "lyrics",
+      "player": {
+        "left": 90,
+        "right": 710,
+        "top": 1136,
+        "bottom": 1264,
+        "width": 620,
+        "height": 128
+      },
+      "track": {
+        "left": 108,
+        "right": 708,
+        "top": 75,
+        "bottom": 142.984375,
+        "width": 600,
+        "height": 67.984375
+      },
+      "cover": {
+        "left": 30,
+        "right": 94,
+        "top": 76.984375,
+        "bottom": 140.984375,
+        "width": 64,
+        "height": 64
+      },
+      "scroll": 800
+    },
+    {
+      "width": 800,
+      "height": 1280,
+      "mode": "album",
+      "player": {
+        "left": 90,
+        "right": 710,
+        "top": 1136,
+        "bottom": 1264,
+        "width": 620,
+        "height": 128
+      },
+      "track": {
+        "left": 160,
+        "right": 584,
+        "top": 743.5,
+        "bottom": 828.484375,
+        "width": 424,
+        "height": 84.984375
+      },
+      "cover": {
+        "left": 221.58282470703125,
+        "right": 578.4171752929688,
+        "top": 363.08282470703125,
+        "bottom": 719.9171752929688,
+        "width": 356.8343505859375,
+        "height": 356.8343505859375
+      },
+      "scroll": 800
+    },
+    {
+      "width": 800,
+      "height": 1280,
+      "mode": "lyrics",
+      "player": {
+        "left": 90,
+        "right": 710,
+        "top": 1136,
+        "bottom": 1264,
+        "width": 620,
+        "height": 128
+      },
+      "track": {
+        "left": 108,
+        "right": 708,
+        "top": 75,
+        "bottom": 142.984375,
+        "width": 600,
+        "height": 67.984375
+      },
+      "cover": {
+        "left": 30,
+        "right": 94,
+        "top": 76.984375,
+        "bottom": 140.984375,
+        "width": 64,
+        "height": 64
+      },
+      "scroll": 800
+    }
+  ],
+  "passed": true
+}

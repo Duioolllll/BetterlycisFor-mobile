@@ -2,13 +2,13 @@
 
 [프로젝트 홈](../README.md) · [English](../README.en.md) · [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases)
 
-## 현재 배포 · v0.4.4
+## 현재 배포 · v0.5.0
 
-**2026-10-24 · Android 8.0+ · versionCode 12**
+**2026-10-27 · Android 8.0+ · versionCode 13**
 
-**[↓ APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/BetterLyrics-Mobile-0.4.4.apk)** · [Release / 검증 첨부 파일](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.4.4) · [0.4.4 전체 노트](0.4.4.md)
+**[↓ APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/BetterLyrics-Mobile-0.5.0.apk)** · [Release / 검증 첨부 파일](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.5.0) · [0.5.0 전체 노트](0.5.0.md)
 
-서비스 I/O·오디오 처리 최적화, 캐시 저장 경합 방지, 오디오 종료·오류 안내 수정. Android 16 AVD 신규 설치·시작 및 0.3.0 / 0.4.1에서 업데이트·시작을 통과했습니다. 실제 휴대폰·음악 앱 연동은 별도 검증이 필요합니다.
+가사 화면·플레이어·설정 디자인을 정리하고 오디오 상태, 검색 재진입, 탐색 접근성 문제를 수정했습니다. 게시 전 브라우저·APK·서명·Android 16 설치 검사 결과는 Release 첨부 보고서를 확인하세요.
 
 설치: [한국어](../docs/INSTALL_KO.md) · [English](../docs/INSTALL_EN.md) · [简体中文](../docs/INSTALL_ZH.md)
 
@@ -17,7 +17,8 @@
 | 버전 / 문서 | 배포 상태 / Status | 주요 내용 / Highlights |
 | --- | --- | --- |
 | [Unreleased](UNRELEASED.md) | 문서·배포 구성 변경 / Documentation only | 첫 화면과 변경 기록 정리. 새 APK 없음 / Landing page and history organization; no new APK |
-| [0.4.4](0.4.4.md) | **최신 공개 APK / Current public APK** | FFT 계수 재사용 / Cached FFT plan |
+| [0.5.0](0.5.0.md) | **최신 APK / Current APK** | 화면 현대화·상태·접근성 수정 / Refined UI and state/accessibility fixes |
+| [0.4.4](0.4.4.md) | 이전 공개 APK / Previous public APK | FFT 계수 재사용 / Cached FFT plan |
 | [0.4.3](0.4.3.md) | 이전 공개 APK / Previous APK | 서비스 I/O·오디오 처리 최적화 / Service I/O and audio processing |
 | [0.4.2](0.4.2.md) | **소스만 기록, APK 미공개 / Source only** | 오디오 종료·브리지 안내 수정, 0.4.3에 포함 / Capture teardown and bridge errors, included in 0.4.3 |
 | [0.4.1](0.4.1.md) | 이전 공개 APK / Previous public APK | Android 설치 패키징 수정 / Installation packaging fix |

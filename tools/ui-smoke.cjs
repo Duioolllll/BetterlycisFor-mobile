@@ -14,7 +14,7 @@ const lines=[{start:0,end:6000,text:'첫 번째 목소리',agent:'v1',bg:false,r
   for(const viewport of [{width:360,height:740},{width:412,height:915},{width:812,height:375},{width:1280,height:800},{width:800,height:1280}]){
    const page=await browser.newPage({viewport,deviceScaleFactor:1});page.on('pageerror',e=>result.errors.push(e.message));
    await page.addInitScript(initial=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(initial),command:(action,json)=>window.commands.push({action,data:JSON.parse(json)})};},state(lines));
-   await page.goto('file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(220);
+   await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(220);
    assert.equal(await page.locator('#demoBanner').isVisible(),false);
    assert.equal(await page.locator('#trackTitle').textContent(),track.title);
    assert.doesNotMatch(await page.locator('main').innerText(),/BetterLyrics|MOBILE \/ 01/,'header branding removed');
@@ -106,7 +106,7 @@ const lines=[{start:0,end:6000,text:'첫 번째 목소리',agent:'v1',bg:false,r
    const page=await browser.newPage({viewport:{width:412,height:915},reducedMotion:fallback==='reduced-motion'?'reduce':'no-preference'});
    page.on('pageerror',e=>result.errors.push(e.message));
    await page.addInitScript(({initial,block})=>{window.Android={getBootstrap:()=>JSON.stringify(initial),command:()=>{}};if(block){const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(kind,...args){return kind==='webgl'?null:original.call(this,kind,...args);};}},{initial:state(lines),block:fallback==='no-webgl'});
-   await page.goto('file://'+path.join(root,'app/src/main/assets/web/index.html'));
+   await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));
    await page.evaluate(()=>{App.receive({track:{playing:true,position:2000}});App.audio({status:'live',available:true,level:1,bass:1,mid:1,treble:1,beat:1,sequence:3});});await page.waitForTimeout(250);
    const info=await page.evaluate(()=>ReactiveAmbient.metrics());
    if(fallback==='reduced-motion')assert(info.reducedMotion&&info.energy.every(x=>x===0)&&info.rings===0,'system reduced motion respected');else assert(!info.webgl&&await page.locator('.ambient-fallback').isVisible(),'CSS gradient fallback survives unavailable WebGL');

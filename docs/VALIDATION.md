@@ -1,3 +1,11 @@
+# 0.5.0 — 2026-10-27
+
+214 JVM checks, 2,073 bit-identical audio frames, five packaging cases and 56 browser check groups passed. Debug/release builds use JDK17/API36/Build Tools36.0.0. The release certificate matches the previous public APK. [Code review and re-review](CODE_REVIEW_0.5.0.md) · [Release notes](../changelog/0.5.0.md).
+
+Publication requires the current APK's offline/signature checks, all five browser suites and Android16 fresh install/launch plus updates from 0.3.0/0.4.1/0.4.3/0.4.4. See that Release's RELEASE_VALIDATION.json, UI_VALIDATION.json and INSTALL_VALIDATION.json for actual CI results. Physical phones, other Android versions, live music-app integration and battery remain unverified.
+
+---
+
 # 0.4.4 — 2026-10-24
 
 214 JVM checks, 2,073 bit-identical frames against 0.4.3, five packaging cases, same-certificate v2/v3 signing and two byte-identical local release builds passed. Android 16 fresh install and updates from 0.3.0/0.4.1/0.4.3 gate publication; actual reports are attached to the Release. Physical devices and battery behavior remain unverified.

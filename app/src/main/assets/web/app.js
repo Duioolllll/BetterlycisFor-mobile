@@ -95,6 +95,8 @@
     $('trackArtist').textContent=t.artist || (has ? '아티스트 정보 없음' : '좋아하는 음악을 재생해 주세요');
     $('trackAlbum').textContent=t.album || '';
     $('sourceName').textContent=t.appName || (has ? '음악 앱 연결됨' : state.permissions.notifications && state.permissions.connected===false ? '음악 연결 중' : '음악 연결 대기');
+    $('sessionSource').textContent=$('sourceName').textContent;
+    document.querySelector('.session-bar').classList.toggle('is-connected',has);
     $('sourceDot').classList.toggle('connected',has);
     const cover=typeof t.cover==='string' ? t.cover : '';
     if(cover===lastCover) return;
@@ -131,6 +133,7 @@
     if($('seek').disabled && seeking){seeking=false;seekPreview=null;snapFollow=true;}
     $('playIcon').setAttribute('href', state.track.playing ? '#i-pause' : '#i-play');
     $('playButton').setAttribute('aria-label',state.track.playing ? '일시정지' : '재생');
+    $('sessionLabel').textContent=hasSource()?(state.track.playing?'지금 재생 중':'일시정지'):'음악을 기다리는 중';
     updateTimeLabels(seeking?seekPreview:position());
     $('overlayAccess').setAttribute('aria-pressed',String(!!state.settings.overlay));
   }
@@ -139,6 +142,8 @@
     const known=state.track.positionKnown!==false;
     $('positionLabel').textContent=known?formatTime(p):'—:—';
     $('durationLabel').textContent=known && state.track.duration>0?'−'+formatTime(Math.max(0,state.track.duration-p)):'—:—';
+    const description=known && state.track.duration>0?formatTime(p)+' / '+formatTime(state.track.duration):'재생 위치 정보 없음';
+    if($('seek').getAttribute('aria-valuetext')!==description)$('seek').setAttribute('aria-valuetext',description);
   }
 
   function updateVolume() {
@@ -201,7 +206,7 @@
   }
   function updateAudioSettings(){
     const preview=window.ReactiveAmbient.isPreview(),data=state.audio||{},mode=state.settings.backgroundMode||'sound';
-    const signature=[preview,data.status,data.source,data.connected,mode].join('|');if(signature===audioStatusSignature)return;audioStatusSignature=signature;
+    const signature=JSON.stringify([preview,data.status,data.source,data.connected,data.available,data.message,mode]);if(signature===audioStatusSignature)return;audioStatusSignature=signature;
     let title=preview?'효과 미리보기':mode==='static'?'고정 그라데이션':mode==='ambient'?'흐르는 그라데이션':data.status==='live'?'소리에 반응 중':data.status==='silent'?'소리 입력 대기':data.status==='connecting'?'소리 연결 중':data.connected?'일시정지':'소리 연결';
     $('audioQuickLabel').textContent=title;$('audioQuick').setAttribute('aria-label','사운드 반응 배경 · '+title);$('audioQuick').classList.toggle('connected',!!data.available||preview);
     $('audioConnectLabel').textContent=data.connected?'소리 연결 끊기':'재생 소리에 연결';
@@ -444,6 +449,7 @@
     for(const name of ['settingsSheet','searchSheet','sourcesSheet','appearanceSheet'])$(name).hidden=name!==id;
     $('sheetBackdrop').hidden=false;document.body.classList.add('sheet-open');lastSheet=id;
     if(id==='searchSheet') {
+      $('submitSearch').disabled=false;$('submitSearch').textContent='검색';
       $('searchTrack').value=state.track.title || '';$('searchArtist').value=state.track.artist || '';
       $('searchStatus').textContent='현재 곡과 같은 버전인지 곡 길이도 확인해 주세요.';$('searchResults').replaceChildren();
     }

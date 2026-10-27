@@ -1,4 +1,4 @@
-# 개발환경과 구조 — 0.4.3
+# 개발환경과 구조 — 0.5.0
 
 ## 확인된 기술 스택
 
@@ -7,15 +7,15 @@
 | 언어 | Java 8 source/target, JavaScript(ECMAScript, 별도 컴파일러 없음), HTML5, CSS, Python 3 |
 | Android UI | Android SDK Activity/Service + 로컬 WebView, DOM/CSS/WebGL. React/Flutter/Compose 없음 |
 | Android | minSdk 26(Android 8.0), compileSdk/targetSdk 36(Android 16) |
-| JDK | OpenJDK 17.0.20+8, 실제 수동 빌드에 사용 |
+| JDK | OpenJDK 17.0.21+9, 실제 수동 빌드에 사용 |
 | SDK 도구 | Build Tools 36.0.0: AAPT2, D8, zipalign, apksigner |
 | Gradle | 설정 파일은 Android Gradle Plugin 8.10.1. Gradle 실행기/Wrapper는 저장소에 없고 이번에 실행 안 함 |
 | Python / Node | 실제 환경 Python 3.12.14 / Node.js 24.19.0 |
-| 테스트 | org.json 20260814(test 전용, SHA-256 고정); JDK assertions; Playwright 1.62.1 설치됨(이번 브라우저 smoke는 Chromium 설치 실패로 미실행) |
+| 테스트 | org.json 20260814(test 전용, SHA-256 고정); JDK assertions; Playwright 1.62.1 / Chromium: 브라우저 검사 56개 묶음 통과 |
 | 런타임 라이브러리 | Android 내장 org.json, java.net, javax.crypto. 외부 Android AAR/JAR 없음 |
 | 아이콘 | Bootstrap Icons 1.13.1, MIT |
 | 분석 도구 | 기존 기록 REA 6.7.0, ILSpyCmd 11.1.0; 이번 릴리스에서 재실행 안 함 |
-| 실제 OS | Ubuntu 24.04.3 LTS, x86_64 Linux |
+| 실제 OS | x86_64 Linux 클라우드 환경 |
 
 `tools/build.py`가 이번 APK의 재현 경로다. Gradle 버전은 **실행 확인값 없음**이며 AGP 버전과 혼동하지 않는다. SDK·도구는 설치자가 공식 배포처에서 준비해야 한다. APK에 SDK/JDK/REA/ILSpy/Playwright/QA용 글꼴은 포함되지 않는다. Android 기기의 System WebView·시스템 글꼴에 따라 실제 표현과 성능이 달라진다.
 
@@ -23,7 +23,7 @@
 
 - `app/src/main/AndroidManifest.xml`: 패키지, SDK, Activity, 알림 리스너, 오디오 공유 foreground service, 권한.
 - `app/src/main/java/io/betterlyrics/mobile/`: 아래 네이티브 모듈.
-- `app/src/main/assets/web/`: index.html, style.css, app.js, ambient.js, appearance.js/css. 외부 CDN 의존성 없음.
+- `app/src/main/assets/web/`: index.html, style.css, app.js, ambient.js, appearance.js/css, theme.css. 외부 CDN 의존성 없음.
 - `app/src/main/assets/licenses/`, `LICENSE`, `THIRD_PARTY_NOTICES.md`: 라이선스.
 - `app/src/main/res/`: 앱 아이콘·테마.
 - `tests/`: 합성 데이터 기반 JVM/공급자 회귀 테스트.
@@ -55,7 +55,7 @@
 
 | OS | 설치 경로 | 실제 검증 |
 | --- | --- | --- |
-| Linux | 배포판 패키지/공식 Git, JDK 17, Python 3, Android Studio SDK Manager에서 API36·36.0.0·platform-tools 설치 | Ubuntu 수동 debug/release 빌드 및 자동 테스트 실행 |
+| Linux | 배포판 패키지/공식 Git, JDK 17, Python 3, Android Studio SDK Manager에서 API36·36.0.0·platform-tools 설치 | Linux 수동 debug/release 빌드 및 자동 테스트 실행 |
 | Windows | Git for Windows, JDK17, Python3, Android Studio; SDK는 보통 `%LOCALAPPDATA%\Android\Sdk`; PowerShell 환경변수 설정 | `.exe`, 경로 구분, classpath 처리를 코드 검토했지만 실행 미검증 |
 | macOS | 공식 Git 또는 Xcode CLI 도구, JDK17, Python3, Android Studio; SDK는 보통 `~/Library/Android/sdk` | POSIX 경로 코드 검토만, 실행 미검증 |
 

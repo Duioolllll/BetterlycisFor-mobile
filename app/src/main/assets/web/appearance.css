@@ -1,5 +1,5 @@
 /* BetterLyrics 1.3.527 visual vocabulary: a quiet canvas, album block, focused verse. */
-:root{--page-gutter:30px;--lyric-weight:700;--lyric-height:1.35;--lyric-gap:18px;--lyric-opacity:.3;--lyric-blur:2px;--background-brightness:.85;--cover-scale:1;--lyric-width:90%;--lyric-color:#fff;--lyric-font:Arial,'Noto Sans KR',Roboto,sans-serif}
+:root{--page-gutter:30px;--lyric-weight:700;--lyric-height:1.35;--lyric-gap:18px;--lyric-opacity:.42;--lyric-blur:1px;--background-brightness:.85;--cover-scale:1;--lyric-width:90%;--lyric-color:#fff;--lyric-font:Arial,'Noto Sans KR',Roboto,sans-serif}
 .ambient{opacity:1;filter:brightness(var(--background-brightness)) saturate(.9)}
 .shade{background:linear-gradient(120deg,#02040b26,transparent 65%)}
 .app{max-width:none;padding:24px var(--page-gutter) max(18px,env(safe-area-inset-bottom));padding-top:max(24px,env(safe-area-inset-top))}

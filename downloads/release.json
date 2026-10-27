@@ -1,13 +1,13 @@
 {
-  "apk": "BetterLyrics-Mobile-0.4.4.apk",
-  "version": "0.4.4",
-  "versionCode": 12,
+  "apk": "BetterLyrics-Mobile-0.5.0.apk",
+  "version": "0.5.0",
+  "versionCode": 13,
   "variant": "release",
-  "bytes": 115650,
-  "sha256": "7ce55a6c6928416106877b0b2debd69863709d22aff7337a2749ccec9c4e8068",
+  "bytes": 119812,
+  "sha256": "502b78848bbe7061e37f1af31541854e43f8c9f736e657476f594a28fabebdfb",
   "resourceTable": {
     "compression": "stored",
-    "dataOffset": 2412,
+    "dataOffset": 2416,
     "alignment": 4
   },
   "minSdk": 26,
@@ -17,6 +17,6 @@
   "signing": "externally supplied private key",
   "abi": "universal (no native .so)",
   "certificateSha256": "5e017fe5163897e92ca83aa9a8b921ade3ccf065b2a6d53071c4369da74b8010",
-  "date": "2026-10-24",
+  "date": "2026-10-27",
   "publishRevision": 1
 }

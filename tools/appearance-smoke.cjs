@@ -9,7 +9,7 @@ const initial={track:{key:'custom',title:'노래가 머무는 순간',artist:'Be
   for(const viewport of [{width:360,height:740},{width:412,height:915},{width:812,height:375},{width:1280,height:800}]){
    const page=await browser.newPage({viewport});page.on('pageerror',e=>result.errors.push(e.message));
    await page.addInitScript(s=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(s),command:(action,json)=>commands.push({action,data:JSON.parse(json)})};},initial);
-   await page.goto('file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(200);
+   await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(200);
    for(const layout of ['auto','immersive','reverse']){
     await page.evaluate(layout=>App.receive({settings:{appearance:{layout,controls:'always'}}}),layout);
     await page.locator('#lyricsButton').click();await page.waitForTimeout(160);
@@ -43,7 +43,7 @@ const initial={track:{key:'custom',title:'노래가 머무는 순간',artist:'Be
   }
   // Demo persistence is distinct from Android SharedPreferences; this validates only the web path.
   const page=await browser.newPage({viewport:{width:412,height:915}});page.on('pageerror',e=>result.errors.push(e.message));
-  await page.goto('file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.locator('#settingsButton').click();await page.locator('#appearanceButton').click();await page.locator('[data-preset=focus]').click();await page.reload();
+  await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.locator('#settingsButton').click();await page.locator('#appearanceButton').click();await page.locator('[data-preset=focus]').click();await page.reload();
   assert.equal(await page.locator('#app').getAttribute('data-align'),'center');result.checks.push('browser demo preference reload');
   assert.equal(result.errors.length,0);result.passed=true;fs.writeFileSync(path.join(out,'appearance-results.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
  }finally{await browser.close();}

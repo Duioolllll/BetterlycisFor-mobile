@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "360: presets, live preferences, modal focus, reset/clock/offset isolation, hide/reveal",
+    "412: presets, live preferences, modal focus, reset/clock/offset isolation, hide/reveal",
+    "812: presets, live preferences, modal focus, reset/clock/offset isolation, hide/reveal",
+    "1280: presets, live preferences, modal focus, reset/clock/offset isolation, hide/reveal",
+    "browser demo preference reload"
+  ],
+  "errors": []
+}

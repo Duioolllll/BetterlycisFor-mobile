@@ -1,0 +1,213 @@
+{
+  "viewports": [
+    {
+      "width": 360,
+      "height": 740,
+      "scroll": 360,
+      "bottom": 707,
+      "metadataBottom": 146.1875,
+      "playerTop": 596,
+      "webgl": true,
+      "layout": {
+        "track": {
+          "left": 24,
+          "right": 336,
+          "top": 69,
+          "bottom": 146.1875,
+          "width": 312,
+          "height": 77.1875
+        },
+        "player": {
+          "left": 18,
+          "right": 342,
+          "top": 596,
+          "bottom": 724,
+          "width": 324,
+          "height": 128
+        },
+        "lyrics": {
+          "left": 0,
+          "right": 360,
+          "top": 146.1875,
+          "bottom": 722,
+          "width": 360,
+          "height": 575.8125
+        }
+      }
+    },
+    {
+      "width": 412,
+      "height": 915,
+      "scroll": 412,
+      "bottom": 882,
+      "metadataBottom": 154.984375,
+      "playerTop": 771,
+      "webgl": true,
+      "layout": {
+        "track": {
+          "left": 30,
+          "right": 382,
+          "top": 75,
+          "bottom": 154.984375,
+          "width": 352,
+          "height": 79.984375
+        },
+        "player": {
+          "left": 30,
+          "right": 382,
+          "top": 771,
+          "bottom": 899,
+          "width": 352,
+          "height": 128
+        },
+        "lyrics": {
+          "left": 0,
+          "right": 412,
+          "top": 154.984375,
+          "bottom": 897,
+          "width": 412,
+          "height": 742.015625
+        }
+      }
+    },
+    {
+      "width": 812,
+      "height": 375,
+      "scroll": 812,
+      "bottom": 342,
+      "metadataBottom": 228.171875,
+      "playerTop": 231,
+      "webgl": true,
+      "layout": {
+        "track": {
+          "left": 85.125,
+          "right": 344.875,
+          "top": 54,
+          "bottom": 228.171875,
+          "width": 259.75,
+          "height": 174.171875
+        },
+        "player": {
+          "left": 116,
+          "right": 696,
+          "top": 231,
+          "bottom": 359,
+          "width": 580,
+          "height": 128
+        },
+        "lyrics": {
+          "left": 406,
+          "right": 788,
+          "top": 0,
+          "bottom": 375,
+          "width": 382,
+          "height": 375
+        }
+      }
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "scroll": 1280,
+      "bottom": 767,
+      "metadataBottom": 617.921875,
+      "playerTop": 656,
+      "webgl": true,
+      "layout": {
+        "track": {
+          "left": 161.921875,
+          "right": 542.078125,
+          "top": 182.0625,
+          "bottom": 617.921875,
+          "width": 380.15625,
+          "height": 435.859375
+        },
+        "player": {
+          "left": 350,
+          "right": 930,
+          "top": 656,
+          "bottom": 784,
+          "width": 580,
+          "height": 128
+        },
+        "lyrics": {
+          "left": 640,
+          "right": 1216,
+          "top": 0,
+          "bottom": 800,
+          "width": 576,
+          "height": 800
+        }
+      }
+    },
+    {
+      "width": 800,
+      "height": 1280,
+      "scroll": 800,
+      "bottom": 1247,
+      "metadataBottom": 154.984375,
+      "playerTop": 1136,
+      "webgl": true,
+      "layout": {
+        "track": {
+          "left": 30,
+          "right": 770,
+          "top": 75,
+          "bottom": 154.984375,
+          "width": 740,
+          "height": 79.984375
+        },
+        "player": {
+          "left": 90,
+          "right": 710,
+          "top": 1136,
+          "bottom": 1264,
+          "width": 620,
+          "height": 128
+        },
+        "lyrics": {
+          "left": 0,
+          "right": 800,
+          "top": 154.984375,
+          "bottom": 1262,
+          "width": 800,
+          "height": 1107.015625
+        }
+      }
+    }
+  ],
+  "checks": [
+    "large Korean text 22–46",
+    "lyric tap seeks",
+    "manual browse sharpens lyrics + follow",
+    "empty-state connection",
+    "native bridge",
+    "overlapping vocals",
+    "true/estimated timing",
+    "word modes",
+    "loading state",
+    "transport capability bits",
+    "paused seek + offset",
+    "lyric injection text",
+    "provider setting",
+    "manual search + result selection",
+    "2000-line document",
+    "late artwork on same song",
+    "clear art on song switch",
+    "native delivery latency + speed",
+    "paused latency",
+    "partial packets preserve clock",
+    "signal-driven fluid shader + rings + particles",
+    "stale audio decay",
+    "pause clears audio energy",
+    "static mode render freeze",
+    "labelled effect preview",
+    "two explicit native audio connection actions",
+    "background mode preference",
+    "reduced-motion",
+    "no-webgl"
+  ],
+  "errors": [],
+  "longLyricsBuildMs": 11,
+  "passed": true
+}

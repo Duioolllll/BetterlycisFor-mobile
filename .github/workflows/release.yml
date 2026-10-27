@@ -34,6 +34,47 @@ jobs:
           with open(os.environ['GITHUB_ENV'],'a') as output:
               output.write('RELEASE_VERSION='+meta['version']+'\nRELEASE_APK='+meta['apk']+'\n')
           PY_ENV
+      - name: Browser playback and appearance regressions
+        run: |
+          npm install --prefix "$RUNNER_TEMP/betterlyrics-browser" --no-save --package-lock=false playwright@1.62.1
+          export NODE_PATH="$RUNNER_TEMP/betterlyrics-browser/node_modules"
+          node "$NODE_PATH/playwright/cli.js" install --with-deps chromium
+          export BETTERLYRICS_PREVIEW_URL=http://127.0.0.1:4173/
+          node tools/preview.cjs --host 127.0.0.1 --port 4173 > "$RUNNER_TEMP/preview.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          node - <<'JS'
+          const assert=require('node:assert/strict'),fs=require('node:fs');
+          (async()=>{
+            for(let attempt=0;attempt<30;attempt++){
+              try{
+                const response=await fetch(process.env.BETTERLYRICS_PREVIEW_URL);
+                assert.equal(response.status,200);
+                assert.equal(await response.text(),fs.readFileSync('app/src/main/assets/web/index.html','utf8'));
+                return;
+              }catch(error){if(attempt===29)throw error;await new Promise(resolve=>setTimeout(resolve,500));}
+            }
+          })().catch(error=>{console.error(error);process.exit(1);});
+          JS
+          for suite in ui flow player appearance review; do node "tools/$suite-smoke.cjs"; done
+          python3 - <<'PY_UI'
+          import json, os
+          from pathlib import Path
+          suites = {
+              name: json.loads(Path(file).read_text()) for name, file in {
+                  'ui': 'build/ui-qa/results.json',
+                  'flow': 'build/ui-qa/flow-results.json',
+                  'player': 'build/ui-qa/player-results.json',
+                  'appearance': 'build/ui-qa/appearance-results.json',
+                  'review': 'build/review-qa/results.json',
+              }.items()
+          }
+          assert all(result['passed'] and not result['errors'] for result in suites.values())
+          report = {'passed': True, 'sourceCommit': os.environ['GITHUB_SHA'],
+                    'checkGroups': sum(len(result['checks']) for result in suites.values()),
+                    'scope': 'Chromium with a synthetic Android bridge; not a physical device', 'suites': suites}
+          (Path(os.environ['RUNNER_TEMP']) / 'UI_VALIDATION.json').write_text(json.dumps(report, indent=2) + '\n')
+          PY_UI
       - name: Android 16 installation and update regression
         run: |
           sudo apt-get update -qq
@@ -83,7 +124,7 @@ jobs:
             echo "Release already exists; refusing to replace published assets."
             exit 1
           fi
-          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/INSTALL_VALIDATION.json" docs/performance/fft-2026-10-24.json --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
+          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/INSTALL_VALIDATION.json" "$RUNNER_TEMP/UI_VALIDATION.json" --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
           gh release edit "$tag" --draft=false --latest
           curl --fail --location --retry 3 --retry-delay 2 --output "$RUNNER_TEMP/published.apk" "https://github.com/${GH_REPO}/releases/download/${tag}/${RELEASE_APK}"
           python3 - "$RUNNER_TEMP/published.apk" <<'PY_HASH'

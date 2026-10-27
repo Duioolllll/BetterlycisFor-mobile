@@ -7,13 +7,13 @@
 음악 앱의 재생 흐름을 따라가는 Android 가사 플레이어.<br>
 큰 가사, 앨범색 그라데이션, 내 취향대로 바꾸는 화면.
 
-[![Release 0.4.4](https://img.shields.io/badge/release-0.4.4-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.4.4)
+[![Release 0.5.0](https://img.shields.io/badge/release-0.5.0-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.5.0)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square)](docs/INSTALL_KO.md)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-### [↓ Android APK 다운로드 · v0.4.4](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/BetterLyrics-Mobile-0.4.4.apk)
+### [↓ Android APK 다운로드 · v0.5.0](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/BetterLyrics-Mobile-0.5.0.apk)
 
-**2026.10.24 배포** · Android 8.0 이상 · 113 KiB · versionCode 12
+**2026.10.27 배포** · Android 8.0 이상 · 117 KiB · versionCode 13
 
 [릴리스 / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [설치 안내](docs/INSTALL_KO.md) · [변경 기록](changelog/README.md) · [English](README.en.md) · [简体中文安装](docs/INSTALL_ZH.md)
 
@@ -21,7 +21,7 @@
 
 </div>
 
-> **처음 설치하나요?** 위의 **APK 다운로드**를 누르세요. Source code ZIP은 Android 설치 파일이 아닙니다. 다운로드가 열리지 않으면 [대체 경로](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.4.apk)를 이용할 수 있습니다.
+> **처음 설치하나요?** 위의 **APK 다운로드**를 누르세요. Source code ZIP은 Android 설치 파일이 아닙니다. 다운로드가 열리지 않으면 [대체 경로](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.5.0.apk)를 이용할 수 있습니다.
 
 ## 음악에 맞춰 흐르는 가사
 
@@ -39,7 +39,7 @@ LRCLIB / NetEase 가사 검색, 직접 후보 선택, 로컬 가사 가져오기
 </p>
 
 - **가사:** LRC / Enhanced LRC / ESLRC / TTML, 디코딩된 QRC·KRC·YRC와 바이너리 KRC 가져오기. 탐색 미리보기, 현재 가사로 복귀, 곡별 시간 보정.
-- **화면:** 원본 스타일 / 가사 집중 / 앨범 중심 프리셋. 글자 굵기·흐림·밝기·커버·색상·컨트롤 자동 숨김을 저장하고 즉시 적용.
+- **화면:** 기본 스타일 / 가사 집중 / 앨범 중심 프리셋. 글자 굵기·흐림·밝기·커버·색상·컨트롤 자동 숨김을 저장하고 즉시 적용.
 - **배경:** 기본 앨범색 그라데이션, 선택적 실제 소리 반응, 강도 조절, 동작 줄이기와 WebGL 미지원 시 대체 표시.
 - **음악 연동:** 호환 MediaSession을 제공하는 음악 앱에서 정보와 재생 상태를 받습니다. 커버·가사·탐색·오디오 공유는 음악 앱과 제공처에 따라 제한될 수 있습니다.
 
@@ -49,7 +49,7 @@ LRCLIB / NetEase 가사 검색, 직접 후보 선택, 로컬 가사 가져오기
 
 ## 3단계로 시작하기
 
-1. **[v0.4.4 APK 다운로드](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/BetterLyrics-Mobile-0.4.4.apk)** → 파일을 엽니다. 필요하면 해당 브라우저·파일 앱에만 **이 출처의 앱 설치 허용**을 설정합니다.
+1. **[v0.5.0 APK 다운로드](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/BetterLyrics-Mobile-0.5.0.apk)** → 파일을 엽니다. 필요하면 해당 브라우저·파일 앱에만 **이 출처의 앱 설치 허용**을 설정합니다.
 2. 앱 실행 → **··· → 음악 감지**에서 알림 접근을 허용합니다. 음악 앱에서 노래를 재생한 뒤 돌아옵니다.
 3. **··· → 화면 꾸미기**에서 가사·배경·배치를 선택합니다. 소리 반응과 플로팅 가사는 선택 기능입니다.
 
@@ -57,38 +57,37 @@ LRCLIB / NetEase 가사 검색, 직접 후보 선택, 로컬 가사 가져오기
 
 Play Protect 경고 내용을 확인하고, 위험 앱으로 차단되면 설치를 중단하세요. 설치 후 출처별 설치 권한은 해제할 수 있습니다. 업데이트는 같은 패키지·서명이 필요하며, 앱 삭제 시 설정·가사 캐시가 사라질 수 있습니다. 설치 실패 원인과 권한별 설명은 설치 안내에서 확인하세요.
 
-## 이번 릴리스 · 0.4.4
+## 이번 릴리스 · 0.5.0
 
-**새 최적화:** FFT 계수를 공유해 PCM 처리 중앙값을 로컬 JVM에서 약 10.1% 줄였습니다. 공유 메모리 약 32KiB 추가, 프레임별 할당량 동일. 아래 서비스 개선은 이전 버전에서 이어집니다.
+- **화면 개선:** 선명한 재생 버튼, 현재 재생·연결 상태, 곡·가수·앨범 구분과 읽기 쉬운 설정 화면.
+- **작은 화면 대응:** 주요 버튼 44px 터치 영역, 320px에서 두 줄 플레이어, 처음 실행 동작이 가려지지 않는 스크롤 영역.
+- **오류 수정:** 갱신되지 않던 오디오 안내·연결 표시와 검색 재진입 시 잠긴 버튼 수정. 스크린 리더에 탐색 시간 제공.
+- **검증 강화:** 214개 JVM 검사, 브라우저 56개 검사 묶음, 패키징 5개와 기존 오디오 출력 동일성 확인. 게시 전 브라우저 검사와 Android 16 설치·업데이트 검사 필수.
 
-- **서비스 처리 최적화:** 오디오 분석 배열·계산을 재사용하고 중복 미디어 조회·화면 전송을 줄였습니다.
-- **입력과 캐시 정리:** 오래된 가사·이미지·파일 작업을 취소하고 캐시 동시 저장의 임시 파일 충돌을 막았습니다.
-- **오류 안내 수정:** 오디오 종료 시 구체적인 실패 이유를 보존하고 브리지 내부 예외 노출을 줄였습니다.
-- **설치 검증:** 0.4.1의 리소스 패키징 수정을 유지합니다. Android 16 에뮬레이터에서 신규 설치·시작과 0.3.0 / 0.4.1 → 0.4.4 업데이트·시작을 통과했습니다.
+[0.5.0 전체 릴리스 노트](changelog/0.5.0.md) · [코드 검토·재검토](docs/CODE_REVIEW_0.5.0.md) · [모든 버전](changelog/README.md)
 
-[0.4.4 전체 릴리스 노트](changelog/0.4.4.md) · [모든 버전의 변경 기록](changelog/README.md) · [서비스 성능 측정](docs/SERVICE_OPTIMIZATION.md)
-
-0.4.0에는 확인된 설치 오류가 있습니다. **현재 배포인 0.4.4을 받으세요.** 0.4.2는 소스 기록만 있으며 별도 APK 릴리스가 없습니다.
+0.4.0에는 확인된 설치 오류가 있습니다. **현재 배포인 0.5.0을 받으세요.** 0.4.2는 소스 기록만 있으며 별도 APK 릴리스가 없습니다.
 
 <details>
 <summary><strong>다운로드 정보 · SHA-256 · 실제 검증 결과</strong></summary>
 
 | 항목 | 값 / 결과 |
 | --- | --- |
-| 파일 | `BetterLyrics-Mobile-0.4.4.apk` · 115,650 bytes |
-| 패키지 / 버전 | `io.betterlyrics.mobile` · 0.4.4 (12) |
+| 파일 | `BetterLyrics-Mobile-0.5.0.apk` · 119,812 bytes |
+| 패키지 / 버전 | `io.betterlyrics.mobile` · 0.5.0 (13) |
 | Android | 최소 8.0 (API 26) · compile / target 16 (API 36) |
 | APK 구조 | Universal · 네이티브 `.so` 없음 |
 | 오프라인 검사 | 214개 통과 · 기준 오디오 2,073프레임 출력 동일 · 패키징 5개 통과 |
 | 서명 / 빌드 | v2/v3 · 기존 인증서 일치 · ZIP 정렬 · 같은 환경의 2회 빌드 바이트 일치 |
-| Android 16 AVD | 신규 설치·시작, 0.3.0 / 0.4.1에서 업데이트·시작 통과 |
-| 공개 파일 | Release APK 재다운로드 후 SHA-256 일치 확인 |
+| 브라우저 UI | 5개 suite · 56개 검사 묶음 통과 |
+| Android 16 AVD | 게시 전 필수 · 첨부 INSTALL_VALIDATION.json 참조 |
+| 공개 파일 | 게시 후 APK 재다운로드·SHA-256 검증 단계 |
 
 ```text
-7ce55a6c6928416106877b0b2debd69863709d22aff7337a2749ccec9c4e8068
+502b78848bbe7061e37f1af31541854e43f8c9f736e657476f594a28fabebdfb
 ```
 
-[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/RELEASE_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/INSTALL_VALIDATION.json) · [실행 로그](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [검증 범위](docs/VALIDATION.md)
+[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/RELEASE_VALIDATION.json) · [UI_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/UI_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/INSTALL_VALIDATION.json) · [실행 로그](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [검증 범위](docs/VALIDATION.md)
 
 </details>
 
@@ -118,7 +117,7 @@ python3 tools/test.py --sdk /path/to/Android/Sdk
 - **실기기 미검증:** 실제 휴대폰·다른 Android 버전·음악 앱별 한국어 싱크·앨범 아트·오디오 캡처·절전/재연결·장시간 안정성은 이번 릴리스에서 검증하지 않았습니다. Linux JVM 성능 측정은 휴대폰 성능·배터리 수치가 아닙니다.
 - **제공처 의존:** NetEase는 비공식 API이며 이용·배포 조건 확인이 남아 있습니다. LRCLIB 일시적 HTTP 503을 관찰했습니다. 마스킹된 원문을 추측해 복원하거나 없는 타임스탬프를 만들지 않습니다.
 - **기능 범위:** QQ / Kugou / Apple Music 온라인 가사, 암호화 QRC, Windows 플러그인·Wallpaper Engine, Sing 보컬 제거는 포함하지 않습니다.
-- **검증 범위:** 기존 개발용 인증서 계보를 유지합니다. Google 검토·Play Protect 통과를 의미하지 않습니다. 0.4.4 브라우저 UI smoke는 호스트 Chromium 설치 실패로 재실행하지 못했습니다.
+- **검증 범위:** 기존 개발용 인증서 계보를 유지합니다. Google 검토·Play Protect 통과를 의미하지 않습니다. Chromium에서 UI 검사 56개 묶음을 통과했으며, 모의 Android 브리지로 검사했습니다.
 
 ## 출처와 라이선스
 

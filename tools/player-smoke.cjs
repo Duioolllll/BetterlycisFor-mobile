@@ -13,7 +13,7 @@ const state={track:{key:'player-qa',title:'밤의 여백',artist:'화면 미리�
   for(const viewport of [{width:360,height:740},{width:412,height:915},{width:812,height:375},{width:1280,height:800},{width:800,height:1280}]){
    const page=await browser.newPage({viewport});page.on('pageerror',e=>result.errors.push(e.message));
    await page.addInitScript(s=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(s),command:(action,json)=>commands.push({action,data:JSON.parse(json)})};},state);
-   await page.goto('file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(650);
+   await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(650);
    assert.equal(await page.locator('#durationLabel').textContent(),'−1:35','remaining time uses the playback clock');
    assert(await page.locator('#volume').isEnabled());assert.equal(await page.locator('#volume').inputValue(),'400');
    assert.equal(await page.locator('#searchButton').isVisible(),false,'secondary tools live in the menu');

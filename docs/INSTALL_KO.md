@@ -2,8 +2,8 @@
 
 [한국어](INSTALL_KO.md) · [English](INSTALL_EN.md) · [简体中文](INSTALL_ZH.md) · [홈](../README.md)
 
-**0.4.4 · Android 8.0 이상(API26+) · 패키지 `io.betterlyrics.mobile` · versionCode 12**
-앱 화면은 한국어다. 이 문서는 설치 안내 번역이며 영어/중국어 UI를 제공한다는 뜻은 아니다. 독립적인 비공식 프로젝트다. Android 16을 대상으로 빌드했지만 0.4.4 게시 전 Android16 AVD 설치·시작·업데이트를 검사한다. 실제 휴대폰·음악 재생 검증은 별도다. [검증 범위](VALIDATION.md).
+**0.5.0 · Android 8.0 이상(API26+) · 패키지 `io.betterlyrics.mobile` · versionCode 13**
+앱 화면은 한국어다. 이 문서는 설치 안내 번역이며 영어/중국어 UI를 제공한다는 뜻은 아니다. 독립적인 비공식 프로젝트다. Android 16을 대상으로 빌드했지만 0.5.0 게시 전 Android16 AVD 설치·시작·업데이트를 검사한다. 실제 휴대폰·음악 재생 검증은 별도다. [검증 범위](VALIDATION.md).
 
 ## A. 다운로드와 확인
 
@@ -11,18 +11,18 @@
 2. **Releases** 메뉴를 선택한다.
 3. **Latest Release**를 연다. [최신 릴리스 바로가기](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest).
 4. 아래 **Assets**를 펼쳐 APK를 다운로드한다. `Source code.zip/tar.gz`는 설치 파일이 아니다.
-5. 이번 버전 파일명은 `BetterLyrics-Mobile-0.4.4.apk`다. 이후 버전은 해당 Release의 버전·파일명을 따른다.
+5. 이번 버전 파일명은 `BetterLyrics-Mobile-0.5.0.apk`다. 이후 버전은 해당 Release의 버전·파일명을 따른다.
 6. 가능하면 함께 제공하는 `SHA256SUMS`의 SHA-256과 실제 파일을 비교한다. 일치하지 않으면 설치하지 말고 다시 다운로드한다.
 
-[0.4.4 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.4.4/BetterLyrics-Mobile-0.4.4.apk) · [체크섬](../downloads/SHA256SUMS). Release가 일시적으로 열리지 않으면 [저장소 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.4.4.apk)를 사용한다. HTML 페이지나 ZIP의 확장자를 APK로 바꾸지 않는다.
+[0.5.0 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/BetterLyrics-Mobile-0.5.0.apk) · [체크섬](../downloads/SHA256SUMS). Release가 일시적으로 열리지 않으면 [저장소 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.5.0.apk)를 사용한다. HTML 페이지나 ZIP의 확장자를 APK로 바꾸지 않는다.
 
 컴퓨터에서 확인하는 방법:
 
 ```powershell
-Get-FileHash .\BetterLyrics-Mobile-0.4.4.apk -Algorithm SHA256
+Get-FileHash .\BetterLyrics-Mobile-0.5.0.apk -Algorithm SHA256
 ```
 
-Linux는 `sha256sum BetterLyrics-Mobile-0.4.4.apk`, macOS는 `shasum -a 256 BetterLyrics-Mobile-0.4.4.apk`를 쓴다. 체크섬과 서명 일치는 파일 식별이며 Google 보안 승인을 의미하지 않는다.
+Linux는 `sha256sum BetterLyrics-Mobile-0.5.0.apk`, macOS는 `shasum -a 256 BetterLyrics-Mobile-0.5.0.apk`를 쓴다. 체크섬과 서명 일치는 파일 식별이며 Google 보안 승인을 의미하지 않는다.
 
 ## B. Android 설치
 
@@ -58,7 +58,7 @@ GitHub Releases에서 새 APK를 내려받아 기존 앱 위에 설치한다. **
 
 | 문제 | 확인 및 조치 |
 | --- | --- |
-| 0.4.0 APK 설치 실패 | 리소스 패키징 결함이 확인됐다. 0.4.4 APK를 새로 받는다. 기존 파일의 이름만 바꾸지 않는다 |
+| 0.4.0 APK 설치 실패 | 리소스 패키징 결함이 확인됐다. 0.5.0 APK를 새로 받는다. 기존 파일의 이름만 바꾸지 않는다 |
 | APK 설치 실패 | Android8 이상인지, 저장 공간, 전체 다운로드/해시, 올바른 APK인지 확인. 업데이트라면 서명과 버전도 확인 |
 | 앱 설치 차단 | 해당 파일을 여는 앱의 출처별 권한인지 확인. 회사/보호자 정책은 관리자에게 문의 |
 | Play Protect 경고 | 경고를 읽고 위험 판정이면 중단. 보안 기능 강제 해제 금지. 정확한 문구·버전 보고 |

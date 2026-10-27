@@ -2,7 +2,7 @@
 
 // Persist only this versioned, bounded visual schema; never arbitrary CSS/HTML.
 window.Appearance = (() => {
-  const defaults = Object.freeze({version:1,preset:'original',layout:'auto',align:'left',font:'system',weight:700,lineHeight:135,lineGap:18,opacity:30,blur:2,brightness:85,coverSize:100,lyricWidth:90,focusPosition:50,controls:'auto',showCover:true,showInfo:true,showTranslation:true,showRomanization:false,glow:true,flow:'continuous',textColor:'#ffffff'});
+  const defaults = Object.freeze({version:1,preset:'original',layout:'auto',align:'left',font:'system',weight:700,lineHeight:135,lineGap:18,opacity:42,blur:1,brightness:85,coverSize:100,lyricWidth:90,focusPosition:50,controls:'auto',showCover:true,showInfo:true,showTranslation:true,showRomanization:false,glow:true,flow:'continuous',textColor:'#ffffff'});
   const ranges={weight:[400,900],lineHeight:[110,180],lineGap:[4,40],opacity:[15,80],blur:[0,5],brightness:[25,100],coverSize:[60,130],lyricWidth:[60,100],focusPosition:[30,65]};
   const choices={preset:['original','focus','album','custom'],layout:['auto','immersive','split','reverse'],align:['left','center','right'],font:['system','serif','rounded'],controls:['auto','always','minimal'],flow:['continuous','line']};
   const presets={original:{},focus:{layout:'immersive',align:'center',weight:750,lineGap:26,opacity:25,blur:2.5,lyricWidth:94,controls:'auto'},album:{layout:'split',align:'left',coverSize:125,opacity:35,blur:1.5,controls:'always'}};
@@ -26,7 +26,7 @@ window.Appearance = (() => {
     root.style.setProperty('--lyric-font',current.font==='serif'?"'Noto Serif KR',serif":current.font==='rounded'?"'Arial Rounded MT Bold','Noto Sans KR',sans-serif":"Arial,'Noto Sans KR',Roboto,sans-serif");
     document.querySelectorAll('[data-appearance]').forEach(el=>{const key=el.dataset.appearance;if(el.type==='checkbox')el.checked=current[key];else el.value=String(current[key]);const out=$(el.id+'Value');if(out)out.textContent=current[key]+(el.dataset.unit||'');});
     document.querySelectorAll('[data-preset]').forEach(el=>el.setAttribute('aria-pressed',String(current.preset===el.dataset.preset)));
-    $('appearanceSummary').textContent=({original:'원본 스타일',focus:'가사 집중',album:'앨범 중심',custom:'직접 꾸민 화면'})[current.preset];
+    $('appearanceSummary').textContent=({original:'기본 스타일',focus:'가사 집중',album:'앨범 중심',custom:'직접 꾸민 화면'})[current.preset];
     $('appearanceStatus').textContent='변경 사항이 자동으로 저장돼요';
     return changed;
   }

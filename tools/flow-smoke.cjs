@@ -13,7 +13,7 @@ function initial(lines=rows){return {track:{key:'flow-qa',title:'흐름 확인',
   for(const viewport of [{width:412,height:915},{width:1280,height:800}]){
    const page=await browser.newPage({viewport});page.on('pageerror',e=>result.errors.push(e.message));
    await page.addInitScript(s=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(s),command:(action,json)=>commands.push({action,data:JSON.parse(json)})};},initial());
-   await page.goto('file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(180);
+   await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(180);
    const scroll=()=>page.locator('#lyricsViewport').evaluate(e=>e.scrollTop);
    const tick=async(position,playing=false,speed=1)=>{await page.evaluate(track=>App.receive({tick:true,track}),{position,playing,speed});await page.waitForTimeout(160);};
    const active=async expected=>{if(expected!==undefined)await page.waitForFunction(index=>document.querySelector('.lyric-line.current')?.dataset.index===index,expected,{timeout:1500});return page.locator('.lyric-line.current').first().getAttribute('data-index');};
@@ -57,7 +57,7 @@ function initial(lines=rows){return {track:{key:'flow-qa',title:'흐름 확인',
    await page.close();
   }
   const page=await browser.newPage({viewport:{width:412,height:915},reducedMotion:'reduce'});page.on('pageerror',e=>result.errors.push(e.message));
-  await page.addInitScript(s=>{window.Android={getBootstrap:()=>JSON.stringify(s),command:()=>{}};},initial());await page.goto('file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(100);
+  await page.addInitScript(s=>{window.Android={getBootstrap:()=>JSON.stringify(s),command:()=>{}};},initial());await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(100);
   const start=await page.locator('#lyricsViewport').evaluate(e=>e.scrollTop);await page.evaluate(()=>App.receive({tick:true,track:{position:26500,playing:false}}));await page.waitForTimeout(110);assert.equal(await page.locator('#lyricsViewport').evaluate(e=>e.scrollTop),start,'reduced motion disables continuous scroll');
   await page.evaluate(()=>App.receive({tick:true,track:{position:28000,playing:false}}));await page.waitForTimeout(110);assert(await page.locator('#lyricsViewport').evaluate(e=>e.scrollTop)>start+20,'reduced motion still follows new verse');
   result.checks.push('reduced motion: hold inside verse, follow at verse boundary');await page.close();

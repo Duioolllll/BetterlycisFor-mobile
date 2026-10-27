@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "checks": [
+    "source and playback state updates",
+    "accessible elapsed/total time and scrub preview",
+    "audio reason and availability updates without a status change",
+    "interrupted search can be reopened and submitted",
+    "44px control targets and nonoverlapping playback controls on five viewports",
+    "both empty-state actions stay accessible above playback controls"
+  ],
+  "viewports": [
+    {
+      "width": 320,
+      "height": 640
+    },
+    {
+      "width": 360,
+      "height": 740
+    },
+    {
+      "width": 412,
+      "height": 915
+    },
+    {
+      "width": 812,
+      "height": 375
+    },
+    {
+      "width": 1280,
+      "height": 800
+    }
+  ],
+  "errors": []
+}

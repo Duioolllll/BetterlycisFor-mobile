@@ -16,8 +16,8 @@ public final class UiAppearance {
             choice(in,out,"controls","auto","auto","always","minimal");
             choice(in,out,"flow","continuous","continuous","line");
             number(in,out,"weight",700,400,900);number(in,out,"lineHeight",135,110,180);
-            number(in,out,"lineGap",18,4,40);number(in,out,"opacity",30,15,80);
-            number(in,out,"blur",2,0,5);number(in,out,"brightness",85,25,100);
+            number(in,out,"lineGap",18,4,40);number(in,out,"opacity",42,15,80);
+            number(in,out,"blur",1,0,5);number(in,out,"brightness",85,25,100);
             number(in,out,"coverSize",100,60,130);number(in,out,"lyricWidth",90,60,100);
             number(in,out,"focusPosition",50,30,65);
             for(String key:new String[]{"showCover","showInfo","showTranslation","showRomanization","glow"}) {
