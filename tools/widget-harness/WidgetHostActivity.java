@@ -3,6 +3,7 @@ package io.betterlyrics.widgettest;
 import android.app.*;
 import android.appwidget.*;
 import android.content.*;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -16,6 +17,7 @@ public final class WidgetHostActivity extends Activity {
     private AppWidgetHost host;
     private AppWidgetManager manager;
     private AppWidgetHostView widgetView;
+    private TextView probeStatus;
     private int widgetId;
     private MediaSession session;
     private boolean playing;
@@ -29,7 +31,7 @@ public final class WidgetHostActivity extends Activity {
         host.startListening();resize(320,140);
         widgetView=host.createView(this,widgetId,manager.getAppWidgetInfo(widgetId));
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(12),dp(12),dp(12),dp(12));
-        root.addView(widgetView,new LinearLayout.LayoutParams(dp(320),dp(140)));setContentView(root);
+        root.addView(widgetView,new LinearLayout.LayoutParams(dp(320),dp(140)));probeStatus=new TextView(this);root.addView(probeStatus);setContentView(root);
     }
     private void resize(int width,int height){
         Bundle options=new Bundle();options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,width);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH,width);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT,height);options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,height);manager.updateAppWidgetOptions(widgetId,options);
@@ -39,6 +41,18 @@ public final class WidgetHostActivity extends Activity {
         super.onNewIntent(intent);String command=intent.getStringExtra("command");
         if("start".equals(command))startSession();
         if("resize".equals(command))resize(intent.getIntExtra("width",220),intent.getIntExtra("height",90));
+        if("inspect".equals(command))inspectStyle();
+    }
+    private void inspectStyle(){
+        try{
+            android.content.res.Resources resources=getPackageManager().getResourcesForApplication("io.betterlyrics.mobile");
+            android.view.View panel=widgetView.findViewById(resources.getIdentifier("widget_root","id","io.betterlyrics.mobile"));
+            android.view.View art=widgetView.findViewById(resources.getIdentifier("widget_art","id","io.betterlyrics.mobile"));
+            TextView lyric=widgetView.findViewById(resources.getIdentifier("widget_lyric","id","io.betterlyrics.mobile"));
+            int color=((GradientDrawable)panel.getBackground()).getColor().getDefaultColor();
+            float size=lyric.getTextSize()/getResources().getDisplayMetrics().scaledDensity;
+            probeStatus.setText(color==0xF5F5F7EF&&art.getVisibility()==android.view.View.GONE&&Math.abs(size-22)<.5f?"WIDGET_STYLE_OK":"WIDGET_STYLE_WAIT");
+        }catch(Exception error){probeStatus.setText("WIDGET_STYLE_WAIT");}
     }
     private void startSession(){
         if(session!=null)return;

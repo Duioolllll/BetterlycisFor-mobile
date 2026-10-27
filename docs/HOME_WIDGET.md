@@ -14,10 +14,14 @@
 
 ## 글꼴
 
+![한글 글꼴 선택 화면](images/font-choices-0.6.0.png)
+
+브라우저 미리보기 화면입니다.
+
 **설정 → 화면 꾸미기 → 글꼴**에서 기본, 나눔고딕, 나눔명조, 주아, 나눔손글씨와 기기의 명조·둥근 글꼴을 고를 수 있습니다. 선택한 글꼴은 미리보기에 바로 적용되고 저장됩니다. 화면 프리셋을 바꿔도 선택한 글꼴은 유지되며, **화면 스타일 초기화**를 누르면 기본 글꼴로 돌아갑니다. 한글 글꼴 4종은 앱에 포함되어 네트워크 없이 사용할 수 있습니다.
 
 ## 참고 자료
 
-- [Retro Music Player](https://github.com/RetroMusicPlayer/RetroMusicPlayer): 홈 화면 위젯, 재생 제어, 테마와 크기별 배치를 참고했습니다. 구현은 이 앱의 MediaSession·가사 구조에 맞춰 작성했습니다.
+- [Retro Music Player의 위젯 구현](https://github.com/RetroMusicPlayer/RetroMusicPlayer/blob/e85b2aca8f00a66e9cc4c7327a8b167dcd35e25e/app/src/main/java/code/name/monkey/retromusic/appwidgets/AppWidgetSmall.kt): 홈 화면 위젯, 재생 제어, 테마와 크기별 배치를 참고했습니다. 구현은 이 앱의 MediaSession·가사 구조에 맞춰 작성했습니다.
 - [Android 앱 위젯 가이드](https://developer.android.com/develop/ui/views/appwidgets)와 [고급 위젯 업데이트](https://developer.android.com/develop/ui/views/appwidgets/advanced): 크기 조절, 고정 요청, RemoteViews 및 갱신 제한을 참고했습니다.
-- [Google Fonts](https://github.com/google/fonts): 나눔고딕, 나눔명조, 주아, 나눔손글씨 원본과 각 SIL Open Font License를 사용했습니다. 세부 고지와 라이선스는 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)에 있습니다.
+- [Google Fonts](https://github.com/google/fonts/tree/a4c0b21f839d7ac65a7d8b49eb81bddd110774a3/ofl): 나눔고딕, 나눔명조, 주아, 나눔손글씨 원본과 각 SIL Open Font License를 사용했습니다. 세부 고지와 라이선스는 [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md)에 있습니다.

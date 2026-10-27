@@ -2,8 +2,8 @@
 
 [한국어](INSTALL_KO.md) · [English](INSTALL_EN.md) · [简体中文](INSTALL_ZH.md) · [首页](../README.md)
 
-**0.5.0 · Android8.0及以上(API26+) · 包名 `io.betterlyrics.mobile` · versionCode13**
-应用界面目前为韩语；翻译安装指南不代表提供英语或中文界面。这是独立的非官方项目。面向Android16构建，但0.5.0发布前须通过Android16模拟器安装、启动、升级检查；真机和音乐播放仍需单独验证。参见[验证范围](VALIDATION.md)。
+**0.6.0 · Android8.0及以上(API26+) · 包名 `io.betterlyrics.mobile` · versionCode14**
+应用界面目前为韩语；翻译安装指南不代表提供英语或中文界面。这是独立的非官方项目。面向Android16构建，但0.6.0发布前须通过Android16模拟器安装、启动、升级检查；真机和音乐播放仍需单独验证。参见[验证范围](VALIDATION.md)。
 
 ## A. 下载与校验
 
@@ -11,18 +11,18 @@
 2. 选择 **Releases**。
 3. 打开 **Latest Release**，或使用[最新版本链接](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest)。
 4. 展开 **Assets** 并下载APK。`Source code.zip/tar.gz`不是安装包。
-5. 本次文件名为 `BetterLyrics-Mobile-0.5.0.apk`。后续版本以相应Release的版本和文件名为准。
+5. 本次文件名为 `BetterLyrics-Mobile-0.6.0.apk`。后续版本以相应Release的版本和文件名为准。
 6. 如有条件，将下载文件的SHA-256与附带的`SHA256SUMS`比较。不一致时不要安装，请重新下载。
 
-[0.5.0 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.5.0/BetterLyrics-Mobile-0.5.0.apk) · [校验和](../downloads/SHA256SUMS)。Release暂时无法打开时，可使用[仓库中的APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.5.0.apk)。不要把HTML网页或源码ZIP改名为APK。
+[0.6.0 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.6.0/BetterLyrics-Mobile-0.6.0.apk) · [校验和](../downloads/SHA256SUMS)。Release暂时无法打开时，可使用[仓库中的APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.6.0.apk)。不要把HTML网页或源码ZIP改名为APK。
 
 在电脑上校验：
 
 ```powershell
-Get-FileHash .\BetterLyrics-Mobile-0.5.0.apk -Algorithm SHA256
+Get-FileHash .\BetterLyrics-Mobile-0.6.0.apk -Algorithm SHA256
 ```
 
-Linux使用`sha256sum BetterLyrics-Mobile-0.5.0.apk`，macOS使用`shasum -a 256 BetterLyrics-Mobile-0.5.0.apk`。校验和、签名一致用于识别文件，不代表通过Google安全审核。
+Linux使用`sha256sum BetterLyrics-Mobile-0.6.0.apk`，macOS使用`shasum -a 256 BetterLyrics-Mobile-0.6.0.apk`。校验和、签名一致用于识别文件，不代表通过Google安全审核。
 
 ## B. 在Android上安装
 
@@ -58,7 +58,7 @@ Google Play Protect出现警告时，请阅读具体内容和原因。如果判�
 
 | 问题 | 检查与处理 |
 | --- | --- |
-| 0.4.0安装失败 | 已确认资源打包缺陷，请重新下载0.5.0，不要仅修改旧文件名 |
+| 0.4.0安装失败 | 已确认资源打包缺陷，请重新下载0.6.0，不要仅修改旧文件名 |
 | APK安装失败 | 检查Android8以上、剩余空间、完整下载/校验和及正确APK；更新还需检查签名和版本 |
 | 安装被阻止 | 检查打开文件的应用所对应的来源权限；组织/家长策略请咨询管理员 |
 | Play Protect警告 | 阅读警告，有害应用判定时停止；不要强制关闭保护；报告完整提示和版本 |

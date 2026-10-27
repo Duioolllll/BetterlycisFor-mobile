@@ -117,6 +117,18 @@ try:
     instrumentation=adb('shell','am','instrument','-w',host+'/.FontInstrumentation')
     assert 'INSTRUMENTATION_RESULT: fonts=ok' in instrumentation and 'INSTRUMENTATION_CODE: -1' in instrumentation, instrumentation
     report['checks'].append('Android WebView loads all four Korean fonts and persists selection')
+    adb('shell','am','start','-W','-f','0x00020000','-n',component,'--es','command','resize','--ei','width','320','--ei','height','140')
+    for _ in range(15):
+        adb('shell','am','start','-W','-f','0x00020000','-n',component,'--es','command','inspect')
+        try:
+            if any(node.attrib.get('text')=='WIDGET_STYLE_OK' for node in tree().iter('node')):break
+        except (RuntimeError,ET.ParseError,ValueError):pass
+        time.sleep(1)
+    else:raise AssertionError('Widget did not apply saved background, font size and cover settings')
+    screenshot=subprocess.run(['adb','-s',args.serial,'exec-out','screencap','-p'],capture_output=True,timeout=60,check=True).stdout
+    assert screenshot.startswith(b'\x89PNG\r\n\x1a\n')
+    (Path(args.report).parent/'WIDGET_CUSTOM.png').write_bytes(screenshot)
+    report['checks'].append('widget applies saved background, text size and cover settings')
     report['passed']=True
 except Exception as error:
     report['error']=str(error)

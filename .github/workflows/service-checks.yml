@@ -47,5 +47,6 @@ jobs:
           path: |
             ${{ runner.temp }}/WIDGET_VALIDATION.json
             ${{ runner.temp }}/WIDGET_PREVIEW.png
+            ${{ runner.temp }}/WIDGET_CUSTOM.png
             ${{ runner.temp }}/WIDGET_LOGCAT.txt
           if-no-files-found: ignore
