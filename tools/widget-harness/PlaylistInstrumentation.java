@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.lang.reflect.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** Actual Android document-grant, player, media-session and encrypted-token checks. */
@@ -99,7 +100,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
             mainCall(client,"connect",new Class<?>[]{Activity.class,callbackType},browser,authCallback);
             if(browser.launched==null||browser.launched.getData()==null)throw new IllegalStateException("Spotify browser request missing");
             Uri authorization=browser.launched.getData();String redirect=authorization.getQueryParameter("redirect_uri"),state=authorization.getQueryParameter("state");
-            if(!"accounts.spotify.com".equals(authorization.getHost())||!"http://127.0.0.1:43123/callback".equals(redirect)||state==null||state.isEmpty()||!"S256".equals(authorization.getQueryParameter("code_challenge_method")))throw new IllegalStateException("Spotify authorization URI differs from configured callback");
+            if(!"accounts.spotify.com".equals(authorization.getHost())||!"http://127.0.0.1:43123/callback".equals(redirect)||state==null||state.isEmpty()||!"S256".equals(authorization.getQueryParameter("code_challenge_method"))||!authorization.getQueryParameter("scope").contains("user-modify-playback-state"))throw new IllegalStateException("Spotify authorization request is missing callback or playback scope");
             request(43123,"/callback?error=access_denied&state=wrong");
             if(authResult.get()!=null)throw new IllegalStateException("Wrong OAuth state completed authorization");
             request(43123,"/callback?error=access_denied&state="+Uri.encode(state));
@@ -128,6 +129,40 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Object reloaded=ctor.newInstance(context);if(!((Boolean)call(reloaded,"connected",new Class<?>[]{})))throw new IllegalStateException("encrypted token did not reload");
             call(reloaded,"disconnect",new Class<?>[]{});if(!context.getSharedPreferences("spotify_auth",0).getString("token","").isEmpty())throw new IllegalStateException("disconnect did not clear tokens");
             call(client,"storeTokens",new Class<?>[]{JSONObject.class,boolean.class},tokens,false);output.putString("spotifyStorage","ok");
+
+            Log.i("PlaylistInstrumentation","Verifying Spotify Connect playback requests");
+            Class<?> transportType=targetLoader.loadClass("io.betterlyrics.mobile.SpotifyClient$Transport"),statusType=targetLoader.loadClass("io.betterlyrics.mobile.SpotifyClient$StatusException");
+            Constructor<?> statusCtor=statusType.getDeclaredConstructor(int.class);statusCtor.setAccessible(true);
+            AtomicInteger mode=new AtomicInteger(),attempts=new AtomicInteger(),refreshes=new AtomicInteger();AtomicReference<JSONObject> sent=new AtomicReference<>();
+            Object transport=java.lang.reflect.Proxy.newProxyInstance(targetLoader,new Class<?>[]{transportType},(proxy,method,arguments)->{
+                String address=(String)arguments[0],verb=(String)arguments[1];
+                if(address.equals("https://accounts.spotify.com/api/token")){refreshes.incrementAndGet();return new JSONObject().put("access_token","synthetic-refreshed").put("expires_in",3600);}
+                if(!address.equals("https://api.spotify.com/v1/me/player/play")||!verb.equals("PUT")||!"application/json".equals(arguments[4]))throw new IllegalStateException("Unexpected playback request");
+                sent.set(new JSONObject((String)arguments[3]));
+                if(mode.get()==404)throw (Exception)statusCtor.newInstance(404);
+                if(mode.get()==401&&attempts.getAndIncrement()==0)throw (Exception)statusCtor.newInstance(401);
+                return new JSONObject();
+            });
+            Constructor<?> injected=clientClass.getDeclaredConstructor(Context.class,transportType);injected.setAccessible(true);Object playerClient=injected.newInstance(context,transport);
+            AtomicReference<JSONObject> playResult=new AtomicReference<>();
+            Object playCallback=java.lang.reflect.Proxy.newProxyInstance(targetLoader,new Class<?>[]{callbackType},(proxy,method,arguments)->{if(method.getName().equals("done"))playResult.set((JSONObject)arguments[0]);return null;});
+            String playlistId="0123456789ABCDEFGHIJKL";
+            mainCall(playerClient,"play",new Class<?>[]{String.class,int.class,callbackType},playlistId,-1,playCallback);
+            if(playResult.get()==null||!"reauthorize".equals(playResult.get().optString("state"))||sent.get()!=null)throw new IllegalStateException("Legacy Spotify token did not request playback permission");
+            JSONObject authorized=new JSONObject(tokens.toString()).put("scope","playlist-read-private user-modify-playback-state");
+            call(playerClient,"storeTokens",new Class<?>[]{JSONObject.class,boolean.class},authorized,false);playResult.set(null);
+            mainCall(playerClient,"play",new Class<?>[]{String.class,int.class,callbackType},playlistId,51,playCallback);
+            waitFor(()->playResult.get()!=null,"Spotify track playback request");
+            if(!"accepted".equals(playResult.get().optString("state"))||sent.get()==null||!sent.get().optString("context_uri").equals("spotify:playlist:"+playlistId)||sent.get().getJSONObject("offset").getInt("position")!=51)throw new IllegalStateException("Selected playlist position was not sent to Spotify");
+            playResult.set(null);sent.set(null);mode.set(401);attempts.set(0);
+            mainCall(playerClient,"play",new Class<?>[]{String.class,int.class,callbackType},playlistId,-1,playCallback);
+            waitFor(()->playResult.get()!=null,"Spotify token refresh and playlist playback");
+            if(!"accepted".equals(playResult.get().optString("state"))||sent.get()==null||sent.get().has("offset")||refreshes.get()!=1||!((Boolean)call(playerClient,"playbackAuthorized",new Class<?>[]{})))throw new IllegalStateException("Playback refresh or scope persistence failed");
+            playResult.set(null);mode.set(404);
+            mainCall(playerClient,"play",new Class<?>[]{String.class,int.class,callbackType},playlistId,-1,playCallback);
+            waitFor(()->playResult.get()!=null,"Spotify unavailable-device error");
+            if(!"error".equals(playResult.get().optString("state"))||!playResult.get().optString("message").contains("먼저"))throw new IllegalStateException("Missing Spotify device was not explained");
+            call(client,"storeTokens",new Class<?>[]{JSONObject.class,boolean.class},authorized,false);output.putString("spotifyPlayback","ok");
 
             Log.i("PlaylistInstrumentation","Verifying OAuth callback");
 

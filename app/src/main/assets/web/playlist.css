@@ -11,7 +11,7 @@
 .playlist-detail-header{display:flex;align-items:center;gap:12px;padding:4px 0}.playlist-detail-header h3{flex:1;margin:0;font-size:15px;overflow-wrap:anywhere}
 .playlist-detail-header .mini-button{font-size:12px;margin:0;min-height:40px}
 .playlist-rename{display:flex;gap:8px;align-items:center;margin:6px 0}.playlist-rename input{flex:1;min-width:0;min-height:44px;padding:10px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08;color:#f4f8f3;font-size:13px}.playlist-rename button{min-height:44px;padding:8px;color:#d4edc8;font-size:12px}
-.playlist-order{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;color:#bdcbc0;font-size:12px}
+.playlist-order{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 0;color:#bdcbc0;font-size:12px}
 .playlist-order select{border:1px solid #ffffff22;border-radius:9px;background:#263238;color:#eff5ed;padding:9px;font-size:12px}
 .playlist-search{width:100%;min-height:44px;padding:10px 12px;margin:4px 0 6px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08;color:#f4f8f3;font-size:13px}
 .playlist-track-row{display:flex;align-items:center;border-bottom:1px solid #ffffff10}.playlist-track-row .playlist-track{flex:1;border:0}.playlist-track-remove{min-width:44px;min-height:44px;color:#b9cbb9;font-size:12px}
@@ -19,4 +19,4 @@
 .playlist-confirm span{flex:1}.playlist-confirm button{padding:8px;color:#d4edc8}
 .spotify-brand{display:flex;align-items:center;gap:8px;color:#f1f8f1;font-size:14px;margin:8px 0 14px}.spotify-brand img{width:22px;height:22px}
 .spotify-header{display:flex;align-items:center;gap:10px;margin:8px 0}.spotify-header h3{flex:1;font-size:15px;margin:0;overflow-wrap:anywhere}.spotify-header button{min-height:40px;color:#c3e8b3;font-size:12px}
-.spotify-row{display:flex;align-items:center;border-bottom:1px solid #ffffff10;gap:8px}.spotify-row .playlist-item{flex:1;border:0}.spotify-open{font-size:11px;color:#bde5ad;min-height:44px;padding:8px}.spotify-logout{margin-top:14px}
+.spotify-row{display:flex;align-items:center;border-bottom:1px solid #ffffff10;gap:8px}.spotify-row .playlist-item{flex:1;border:0}.spotify-play{font-size:12px;color:#bde5ad;min-height:44px;padding:8px}.spotify-play-all{margin:4px 0 8px}.spotify-logout{margin-top:14px}

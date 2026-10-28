@@ -21,7 +21,7 @@
   let controlsUntil=performance.now()+3500,keyboardNavigation=false,controlsHidden=false;
   let seeking = false, lastVisual = 0, lastCover = '', lastSheet = null, toastTimer = 0, lastFocus = null;
   let wasPreview=false,audioStatusSignature='';
-  let selectedLocal='',playlistTab='local',localTracks=[],pendingTrackRemoval=-1,localVisible=100,spotifyItems=[],spotifyListId='',spotifyLists=[];
+  let selectedLocal='',playlistTab='local',localTracks=[],pendingTrackRemoval=-1,localVisible=100,spotifyItems=[],spotifyListId='',spotifyLists=[],spotifyPlayPending=false;
   let demoTime = performance.now(), demoPosition = 14500, demoPlaying = true;
 
   function position(now = performance.now()) {
@@ -489,6 +489,7 @@
     const items=Array.isArray(data.items)?data.items:[],selected=data.selected&&Array.isArray(data.selected.tracks)?data.selected:null;
     const previous=selectedLocal;selectedLocal=selected?String(selected.id):'';if(previous!==selectedLocal){$('playlistSearch').value='';localVisible=100;}
     localTracks=selected?selected.tracks:[];pendingTrackRemoval=-1;$('trackRemoveConfirm').hidden=true;
+    $('localPlayAll').disabled=!localTracks.length;
     $('playlistOrder').value=['all','one','shuffle'].includes(data.mode)?data.mode:'all';
     $('localStop').hidden=!selectedLocal||data.activeId!==selectedLocal;
     $('localBrowse').hidden=!!selected;$('localDetail').hidden=!selected;$('playlistRemoveConfirm').hidden=true;$('playlistRenameForm').hidden=true;
@@ -524,10 +525,22 @@
     if(matches>localVisible){const more=document.createElement('button');more.className='secondary-button';more.textContent='더 보기';more.addEventListener('click',()=>{localVisible+=100;renderLocalTracks();});tracks.append(more);}
   }
 
+  function spotifyPlayback(input){
+    let data;try{data=typeof input==='string'?JSON.parse(input):input;}catch(_){return;}
+    if(!data||typeof data!=='object')return;spotifyPlayPending=data.state==='pending';
+    const status=$('spotifyPlayStatus');status.textContent=String(data.message||'');status.hidden=!status.textContent;
+    $('spotifyPlayReconnect').hidden=data.state!=='reauthorize';
+    if(data.state==='accepted'){if(lastSheet==='playlistSheet'&&playlistTab==='spotify')closeSheet();toast(status.textContent);}
+  }
+  function playSpotify(id,position){
+    if(spotifyPlayPending)return;
+    spotifyPlayback({state:'pending',message:'Spotify에 재생을 요청하는 중'});command('spotifyPlay',{id,position});
+  }
   function spotify(input){
     let data;try{data=typeof input==='string'?JSON.parse(input):input;}catch(_){return;}
     if(!data||typeof data!=='object')return;
     const root=$('spotifyContent');root.replaceChildren();const view=String(data.view||'disconnected');
+    if(view==='disconnected')spotifyPlayback({state:'',message:''});
     const button=(label,action,secondary=true)=>{const el=document.createElement('button');el.className=secondary?'secondary-button':'mini-button';el.textContent=label;el.addEventListener('click',action);return el;};
     const status=message=>{const el=document.createElement('p');el.className='playlist-status';el.setAttribute('role','status');el.textContent=message;root.append(el);};
     const open=(type,id)=>command('spotifyOpen',{type,id});
@@ -542,10 +555,10 @@
       else status(String(data.message||'Spotify 목록을 불러오지 못했습니다.'));
       if(!spotifyLists.length&&view==='lists'&&!data.more)status('저장된 플레이리스트가 없습니다.');
       for(const item of spotifyLists){
-        const row=document.createElement('div'),itemButton=document.createElement('button'),box=document.createElement('div'),title=document.createElement('strong'),sub=document.createElement('small'),external=button('Spotify에서 열기',()=>open('playlist',String(item.id)),false);
-        row.className='spotify-row';itemButton.className='playlist-item';external.className='spotify-open';
+        const row=document.createElement('div'),itemButton=document.createElement('button'),box=document.createElement('div'),title=document.createElement('strong'),sub=document.createElement('small'),play=button('재생',()=>playSpotify(String(item.id),-1),false);
+        row.className='spotify-row';itemButton.className='playlist-item';play.className='spotify-play';play.setAttribute('aria-label',String(item.name||'재생목록')+' 재생');
         title.textContent=String(item.name||'재생목록');sub.textContent=[item.owner,number(item.count,-1)>=0?number(item.count)+'곡':''].filter(Boolean).join(' · ');box.append(title,sub);itemButton.append(box);
-        itemButton.addEventListener('click',()=>{status('불러오는 중');command('spotifyTracks',{id:String(item.id),name:String(item.name||'재생목록')});});row.append(itemButton,external);root.append(row);
+        itemButton.addEventListener('click',()=>{status('불러오는 중');command('spotifyTracks',{id:String(item.id),name:String(item.name||'재생목록')});});row.append(itemButton,play);root.append(row);
       }
       if(data.truncated)status('최대 10,000개까지 표시됩니다.');
       if(data.more||view==='listsError'){const more=button(view==='listsError'?'다시 시도':'더 보기',()=>{more.disabled=true;command('spotifyPlaylists',{offset:view==='listsError'?number(data.offset):number(data.nextOffset)});});root.append(more);}
@@ -556,12 +569,13 @@
       }else if(spotifyListId!==String(data.id)||number(data.offset)===0){spotifyItems=[];spotifyListId=String(data.id);}
       const head=document.createElement('div'),name=document.createElement('h3');head.className='spotify-header';
       name.textContent=String(data.name||'재생목록');head.append(button('‹ 목록',()=>command('spotifyPlaylists'),false),name,button('Spotify에서 열기',()=>open('playlist',String(data.id)),false));root.append(head);
+      const playAll=button('전체 재생',()=>playSpotify(String(data.id),-1));playAll.classList.add('spotify-play-all');root.append(playAll);
       if(view==='tracksError')status(String(data.message||'재생목록을 불러오지 못했습니다.'));
       if(view==='tracks'&&!spotifyItems.length&&!data.more)status('곡이 없습니다.');
       spotifyItems.forEach((item,index)=>{
         const row=document.createElement('button'),position=document.createElement('span'),box=document.createElement('div'),title=document.createElement('strong'),sub=document.createElement('small');
         row.className='playlist-track';position.textContent=String(index+1);position.setAttribute('aria-hidden','true');title.textContent=String(item.title||'제목 없음');sub.textContent=String(item.artist||'');box.append(title,sub);row.append(position,box);
-        const type=item.type==='episode'?'episode':'track';row.disabled=!item.id;row.addEventListener('click',()=>open(type,String(item.id)));root.append(row);
+        const originalPosition=Number.isInteger(item.position)?item.position:index;row.disabled=!item.id;row.addEventListener('click',()=>playSpotify(String(data.id),originalPosition));root.append(row);
       });
       if(data.truncated)status('최대 10,000개까지 표시됩니다.');
       if(data.more||view==='tracksError'&&number(data.offset)>0){const more=button(view==='tracksError'?'다시 시도':'더 보기',()=>{more.disabled=true;command('spotifyTracks',{id:String(data.id),name:String(data.name||''),offset:view==='tracksError'?number(data.offset):number(data.nextOffset)});});root.append(more);}
@@ -607,7 +621,9 @@
     $('trackRemoveNo').addEventListener('click',()=>{$('trackRemoveConfirm').hidden=true;pendingTrackRemoval=-1;});
     $('trackRemoveYes').addEventListener('click',()=>{if(pendingTrackRemoval>=0)command('removeLocalTrack',{id:selectedLocal,index:pendingTrackRemoval});});
     $('playlistOrder').addEventListener('change',()=>command('localMode',{id:selectedLocal,mode:$('playlistOrder').value}));
+    $('localPlayAll').addEventListener('click',()=>{if(selectedLocal&&localTracks.length){command('playLocal',{id:selectedLocal,index:0});closeSheet();}});
     $('localStop').addEventListener('click',()=>command('stopLocal',{id:selectedLocal}));
+    $('spotifyPlayReconnect').addEventListener('click',()=>{spotifyPlayback({state:'',message:''});spotify({view:'connecting'});command('spotifyConnect');});
     $('playlistRemove').addEventListener('click',()=>{$('playlistRemoveConfirm').hidden=false;$('playlistRemoveYes').focus();});
     $('playlistRename').addEventListener('click',()=>{$('playlistRenameInput').value=$('playlistName').textContent;$('playlistRenameForm').hidden=false;$('playlistRenameInput').focus();});
     $('playlistRenameCancel').addEventListener('click',()=>{$('playlistRenameForm').hidden=true;$('playlistRename').focus();});
@@ -693,13 +709,14 @@
       receive({tick:true,track:{key:'browser-demo',position:demoPosition,playing:demoPlaying,speed:1,positionKnown:true}});
     } else if(action==='getPlaylists')playlists({items:[],selected:{},mode:'all'});
     else if(action==='spotifyPlaylists')spotify({view:'disconnected'});
+    else if(action==='spotifyPlay')spotifyPlayback({state:'error',message:'Spotify 연결은 앱에서 사용할 수 있습니다.'});
     else if(action==='search')setTimeout(()=>searchResults({items:[],error:'브라우저 데모에서는 온라인 검색을 실행하지 않아요.'}),500);
     else if(action==='refresh')toast('브라우저 미리보기입니다. 실제 음악 연결은 Android 앱에서 사용해 주세요.');
     else if(action==='setAppearance'){try{localStorage.setItem('betterlyrics.appearance.v1',JSON.stringify(data.appearance));}catch(_){}}
     else if(action!=='setSetting')toast('Android 앱에서 사용할 수 있는 기능이에요.');
   }
 
-  window.App={receive,audio:audioFrame,searchResults,playlists,playlistBusy,spotify,toast,back:closeSheet,handleBack:closeSheet,position:()=>position(),getState:()=>state};
+  window.App={receive,audio:audioFrame,searchResults,playlists,playlistBusy,spotify,spotifyPlayback,toast,back:closeSheet,handleBack:closeSheet,position:()=>position(),getState:()=>state};
   attachEvents();initAmbient();
   if(native){try{receive(window.Android.getBootstrap());}catch(_){updateSettings();updateEmpty();toast('음악 연결 정보를 읽지 못했어요. 설정에서 음악 감지를 확인해 주세요.');}}
   else {document.body.classList.add('demo-mode');$('demoBanner').hidden=false;const demo=demoState();try{demo.settings={appearance:window.Appearance.sanitize(JSON.parse(localStorage.getItem('betterlyrics.appearance.v1')||'null'))};}catch(_){}receive(demo);}

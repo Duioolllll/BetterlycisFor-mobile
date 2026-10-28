@@ -147,6 +147,7 @@ public final class MainActivity extends Activity {
             }
             case "spotifyPlaylists":SpotifyClient.get(this).playlists(data.optInt("offset",0),spotifyCallback());break;
             case "spotifyTracks":SpotifyClient.get(this).tracks(data.optString("id",""),data.optString("name",""),data.optInt("offset",0),spotifyCallback());break;
+            case "spotifyPlay":SpotifyClient.get(this).play(data.optString("id",""),data.optInt("position",-1),spotifyPlaybackCallback());break;
             case "spotifyDisconnect":SpotifyClient.get(this).disconnect();send("spotify",new JSONObject().put("view","disconnected").put("connected",false));break;
             case "spotifyOpen":openSpotify(data.optString("type",""),data.optString("id",""));break;
             case "about":new AlertDialog.Builder(this).setTitle("BetterLyrics Mobile "+getPackageManager().getPackageInfo(getPackageName(),0).versionName).setMessage("독립 비공식 앱\n원작: Zhe Fang / BetterLyrics contributors\nGPL-3.0").setPositiveButton("확인",null).show();break;
@@ -194,6 +195,10 @@ public final class MainActivity extends Activity {
     private SpotifyClient.Callback spotifyCallback(){
         WeakReference<MainActivity> activity=new WeakReference<>(this);
         return result->{MainActivity target=activity.get();if(target!=null&&!target.isDestroyed())target.send("spotify",result);};
+    }
+    private SpotifyClient.Callback spotifyPlaybackCallback(){
+        WeakReference<MainActivity> activity=new WeakReference<>(this);
+        return result->{MainActivity target=activity.get();if(target!=null&&!target.isDestroyed())target.send("spotifyPlayback",result);};
     }
     private void openSpotify(String type,String id){
         if(!SpotifyClient.validId(id)||!type.equals("playlist")&&!type.equals("track")&&!type.equals("episode")){toast("Spotify 항목을 열 수 없습니다.");return;}

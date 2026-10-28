@@ -29,6 +29,7 @@ public final class PlaylistRestoreInstrumentation extends Instrumentation {
             try(InputStream in=context.getContentResolver().openInputStream(uri)){byte[] header=new byte[4];if(in==null||in.read(header)!=4||!new String(header,"US-ASCII").equals("RIFF"))throw new IllegalStateException("saved music cannot be reopened");}
             Class<?> spotify=targetLoader.loadClass("io.betterlyrics.mobile.SpotifyClient");Constructor<?> ctor=spotify.getDeclaredConstructor(Context.class);ctor.setAccessible(true);Object client=ctor.newInstance(context);
             if(!((Boolean)call(client,"connected",new Class<?>[]{})))throw new IllegalStateException("encrypted Spotify session did not survive restart");
+            if(!((Boolean)call(client,"playbackAuthorized",new Class<?>[]{})))throw new IllegalStateException("Spotify playback scope did not survive restart");
             call(client,"disconnect",new Class<?>[]{});out.putString("restore","ok");code=Activity.RESULT_OK;
         }catch(Throwable error){Log.e("PlaylistInstrumentation","Restore test failed",error);out.putString("error",error.toString());}
         finish(code,out);

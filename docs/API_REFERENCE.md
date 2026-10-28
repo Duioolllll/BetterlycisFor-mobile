@@ -16,7 +16,7 @@
 | QQ Music, Kugou, NetEase WEAPI / 구형 검색 | **비공식·역설계 분석 대상** | 분석만 수행, APK 호출 안 함 |
 | Android ↔ WebView `Android` 브리지 | 이 프로젝트 내부 API | 로컬 자산만 사용 |
 
-Apple Music 앱의 Android 미디어 세션을 감지할 수 있다는 것은 Apple Music 가사 API를 사용한다는 뜻이 아니다. Spotify는 선택적으로 공식 Web API의 로그인과 플레이리스트 읽기를 사용하며, MusicKit과 Spotify 음원 다운로드는 사용하지 않는다. 로그인은 PKCE, 토큰은 Android Keystore 암호화를 사용한다. [플레이리스트 사용 및 제한](PLAYLISTS.md).
+Apple Music 앱의 Android 미디어 세션을 감지할 수 있다는 것은 Apple Music 가사 API를 사용한다는 뜻이 아니다. Spotify는 선택적으로 공식 Web API의 로그인, 플레이리스트 읽기와 활성 Spotify 기기의 재생 제어를 사용하며, MusicKit과 Spotify 음원 다운로드는 사용하지 않는다. 재생 제어에는 Premium 및 `user-modify-playback-state` 권한이 필요하다. 로그인은 PKCE, 토큰은 Android Keystore 암호화를 사용한다. [플레이리스트 사용 및 제한](PLAYLISTS.md).
 
 ## LRCLIB
 

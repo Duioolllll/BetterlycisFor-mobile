@@ -22,29 +22,33 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.net.ssl.HttpsURLConnection;
 
-/** Spotify authorization-code PKCE and read-only playlist access; no client secret is used. */
+/** Spotify authorization-code PKCE, playlist access and Connect playback control. */
 final class SpotifyClient {
     private static final String CLIENT_ID="32571da108f24ff8a022771cfdc65cf8";
     private static final String KEY_ALIAS="betterlyrics.spotify.v1";
     private static SpotifyClient instance;
     static synchronized SpotifyClient get(Context context){if(instance==null)instance=new SpotifyClient(context.getApplicationContext());return instance;}
     interface Callback {void done(JSONObject result);}
+    interface Transport {JSONObject request(String address,String method,String bearer,String payload,String contentType)throws Exception;}
     private final Context context;
+    private final Transport transport;
     private final Handler main=new Handler(Looper.getMainLooper());
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private volatile int epoch;
     private volatile boolean connecting;
     private volatile ServerSocket callbackServer;
-    private String access="",refresh="";private long expires;
-    private SpotifyClient(Context context){this.context=context;loadTokens();}
+    private String access="",refresh="",scopes="";private long expires;
+    private SpotifyClient(Context context){this(context,SpotifyClient::requestHttps);}
+    private SpotifyClient(Context context,Transport transport){this.context=context;this.transport=transport;loadTokens();}
     synchronized boolean connected(){return !refresh.isEmpty();}
+    private synchronized boolean playbackAuthorized(){return SpotifyProtocol.hasScope(scopes,SpotifyProtocol.PLAYBACK_SCOPE);}
     private JSONObject object(Object... values){
         JSONObject result=new JSONObject();try{for(int i=0;i<values.length;i+=2)result.put((String)values[i],values[i+1]);}catch(Exception error){throw new IllegalStateException(error);}return result;
     }
     private void deliver(int ticket,Callback callback,JSONObject result){main.post(()->{if(ticket==epoch)callback.done(result);});}
     private JSONObject failure(String message){return object("view","error","connected",connected(),"message",message);}
     private void closeServer(){ServerSocket server=callbackServer;callbackServer=null;if(server!=null)try{server.close();}catch(IOException ignored){}}
-    synchronized void disconnect(){epoch++;connecting=false;closeServer();access="";refresh="";expires=0;context.getSharedPreferences("spotify_auth",0).edit().clear().apply();}
+    synchronized void disconnect(){epoch++;connecting=false;closeServer();access="";refresh="";scopes="";expires=0;context.getSharedPreferences("spotify_auth",0).edit().clear().apply();}
 
     void connect(Activity activity,Callback callback){
         final int ticket;final String verifier=SpotifyProtocol.random(),state=SpotifyProtocol.random();final ServerSocket server;final String redirect;
@@ -93,18 +97,18 @@ final class SpotifyClient {
         OutputStream out=socket.getOutputStream();out.write(("HTTP/1.1 "+status+(status==200?" OK":" Bad Request")+"\r\nContent-Type: text/plain; charset=utf-8\r\nCache-Control: no-store\r\nConnection: close\r\nContent-Length: "+body.length+"\r\n\r\n").getBytes(StandardCharsets.US_ASCII));out.write(body);out.flush();
     }
     private static final class StatusException extends IOException {final int status;StatusException(int status){super("Spotify HTTP "+status);this.status=status;}}
-    private JSONObject request(String address,String method,String bearer,String form)throws Exception {
+    private static JSONObject requestHttps(String address,String method,String bearer,String payload,String contentType)throws Exception {
         URL url=new URL(address);if(!"https".equals(url.getProtocol())||!(url.getHost().equals("accounts.spotify.com")||url.getHost().equals("api.spotify.com")))throw new IOException("잘못된 Spotify 주소입니다.");
         HttpsURLConnection connection=(HttpsURLConnection)url.openConnection();
         try{
             connection.setInstanceFollowRedirects(false);connection.setConnectTimeout(12000);connection.setReadTimeout(15000);connection.setRequestMethod(method);connection.setRequestProperty("Accept","application/json");
             if(bearer!=null)connection.setRequestProperty("Authorization","Bearer "+bearer);
-            if(form!=null){connection.setDoOutput(true);connection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");byte[] bytes=form.getBytes(StandardCharsets.UTF_8);connection.setFixedLengthStreamingMode(bytes.length);try(OutputStream out=connection.getOutputStream()){out.write(bytes);}}
-            int status=connection.getResponseCode();if(status!=200)throw new StatusException(status);
+            if(payload!=null){connection.setDoOutput(true);connection.setRequestProperty("Content-Type",contentType);byte[] bytes=payload.getBytes(StandardCharsets.UTF_8);connection.setFixedLengthStreamingMode(bytes.length);try(OutputStream out=connection.getOutputStream()){out.write(bytes);}}
+            int status=connection.getResponseCode();if(status==204&&method.equals("PUT"))return new JSONObject();if(status!=200)throw new StatusException(status);
             try(InputStream in=connection.getInputStream()){return new JSONObject(new String(IoSupport.read(in,2*1024*1024,20000),StandardCharsets.UTF_8));}
         }finally{connection.disconnect();}
     }
-    private JSONObject tokenRequest(String form)throws Exception{return request("https://accounts.spotify.com/api/token","POST",null,form);}
+    private JSONObject tokenRequest(String form)throws Exception{return transport.request("https://accounts.spotify.com/api/token","POST",null,form,"application/x-www-form-urlencoded");}
     private String accessToken()throws Exception {
         final String previous;final int ticket;
         synchronized(this){
@@ -118,12 +122,12 @@ final class SpotifyClient {
     private synchronized void storeTokens(JSONObject token,boolean refreshing)throws Exception {
         String nextAccess=token.optString("access_token"),nextRefresh=token.optString("refresh_token");
         if(nextAccess.isEmpty()||(!refreshing&&nextRefresh.isEmpty()))throw new IOException("Spotify 연결을 완료하지 못했습니다.");
-        String savedRefresh=nextRefresh.isEmpty()?refresh:nextRefresh;long seconds=Math.max(60,Math.min(86400,token.optLong("expires_in",3600)));
-        JSONObject saved=object("access",nextAccess,"refresh",savedRefresh,"expires",System.currentTimeMillis()+seconds*1000);
+        String savedRefresh=nextRefresh.isEmpty()?refresh:nextRefresh,savedScopes=token.has("scope")?token.optString("scope",""):refreshing?scopes:"";long seconds=Math.max(60,Math.min(86400,token.optLong("expires_in",3600)));
+        JSONObject saved=object("access",nextAccess,"refresh",savedRefresh,"scope",savedScopes,"expires",System.currentTimeMillis()+seconds*1000);
         Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.ENCRYPT_MODE,key());
         String iv=Base64.getEncoder().encodeToString(cipher.getIV()),encrypted=Base64.getEncoder().encodeToString(cipher.doFinal(saved.toString().getBytes(StandardCharsets.UTF_8)));
         if(!context.getSharedPreferences("spotify_auth",0).edit().putString("iv",iv).putString("token",encrypted).commit())throw new IOException("Spotify 연결 정보를 저장하지 못했습니다.");
-        access=nextAccess;refresh=savedRefresh;expires=saved.optLong("expires");
+        access=nextAccess;refresh=savedRefresh;scopes=savedScopes;expires=saved.optLong("expires");
     }
     private SecretKey key()throws Exception {
         KeyStore store=KeyStore.getInstance("AndroidKeyStore");store.load(null);SecretKey key=(SecretKey)store.getKey(KEY_ALIAS,null);if(key!=null)return key;
@@ -134,16 +138,32 @@ final class SpotifyClient {
         try{
             android.content.SharedPreferences prefs=context.getSharedPreferences("spotify_auth",0);String iv=prefs.getString("iv",""),token=prefs.getString("token","");if(iv.isEmpty()||token.isEmpty())return;
             Cipher cipher=Cipher.getInstance("AES/GCM/NoPadding");cipher.init(Cipher.DECRYPT_MODE,key(),new GCMParameterSpec(128,Base64.getDecoder().decode(iv)));
-            JSONObject saved=new JSONObject(new String(cipher.doFinal(Base64.getDecoder().decode(token)),StandardCharsets.UTF_8));access=saved.optString("access");refresh=saved.optString("refresh");expires=saved.optLong("expires");
-        }catch(Exception ignored){access="";refresh="";expires=0;}
+            JSONObject saved=new JSONObject(new String(cipher.doFinal(Base64.getDecoder().decode(token)),StandardCharsets.UTF_8));access=saved.optString("access");refresh=saved.optString("refresh");scopes=saved.optString("scope");expires=saved.optLong("expires");
+        }catch(Exception ignored){access="";refresh="";scopes="";expires=0;}
     }
-    private JSONObject api(String path)throws Exception {
+    private JSONObject api(String path)throws Exception{return api(path,"GET",null);}
+    private JSONObject api(String path,String method,JSONObject payload)throws Exception {
         String token=accessToken();
-        try{return request("https://api.spotify.com/v1"+path,"GET",token,null);}
+        String body=payload==null?null:payload.toString(),contentType=body==null?null:"application/json";
+        try{return transport.request("https://api.spotify.com/v1"+path,method,token,body,contentType);}
         catch(StatusException error){
             if(error.status!=401)throw error;
-            synchronized(this){expires=0;}return request("https://api.spotify.com/v1"+path,"GET",accessToken(),null);
+            synchronized(this){expires=0;}return transport.request("https://api.spotify.com/v1"+path,method,accessToken(),body,contentType);
         }
+    }
+    void play(String id,int position,Callback callback){
+        int ticket=epoch;final JSONObject request;
+        try{request=SpotifyProtocol.playPlaylist(id,position);}catch(Exception invalid){callback.done(object("state","error","message","재생목록을 재생할 수 없습니다."));return;}
+        if(!connected()){callback.done(object("state","reauthorize","message","Spotify에 연결해 주세요."));return;}
+        if(!playbackAuthorized()){callback.done(object("state","reauthorize","message","재생 권한을 허용하려면 Spotify에 다시 연결해 주세요."));return;}
+        worker.execute(()->{
+            try{api("/me/player/play","PUT",request);deliver(ticket,callback,object("state","accepted","message","Spotify에 재생을 요청했습니다."));}
+            catch(StatusException error){
+                String state=error.status==401?"reauthorize":"error";
+                String message=error.status==404?"Spotify 앱에서 먼저 음악을 재생한 뒤 다시 시도해 주세요.":error.status==403?"Spotify Premium과 재생 기기의 권한을 확인해 주세요.":error.status==401?"Spotify에 다시 연결해 주세요.":error.status==429?"Spotify 요청이 많습니다. 잠시 후 다시 시도해 주세요.":"Spotify에서 재생을 시작하지 못했습니다.";
+                deliver(ticket,callback,object("state",state,"message",message));
+            }catch(Exception error){deliver(ticket,callback,object("state","error","message","Spotify에 연결하지 못했습니다. 다시 시도해 주세요."));}
+        });
     }
     void playlists(int offset,Callback callback){int ticket=epoch;if(connecting){callback.done(object("view","connecting","connected",false));return;}if(!connected()){callback.done(object("view","disconnected","connected",false));return;}if(offset<0||offset>=SpotifyProtocol.MAX_ITEMS){callback.done(failure("잘못된 Spotify 요청입니다."));return;}worker.execute(()->loadPlaylists(ticket,offset,callback));}
     private void loadPlaylists(int ticket,int offset,Callback callback){

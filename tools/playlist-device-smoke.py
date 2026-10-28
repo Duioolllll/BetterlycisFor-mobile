@@ -28,7 +28,7 @@ try:
     log_file=(Path(args.report).parent/'PLAYLIST_LOGCAT.txt').open('w')
     log_process=subprocess.Popen(['adb','-s',args.serial,'logcat','-v','threadtime','PlaylistInstrumentation:I','AndroidRuntime:E','MainActivity:W','DocumentsProvider:E','*:S'],stdout=log_file,stderr=subprocess.STDOUT,text=True)
     output=adb('shell','am','instrument','-w',host+'/.PlaylistInstrumentation',timeout=180)
-    for name in ('local','spotifyAuthorize','spotifyStorage','spotifyLoopback'):
+    for name in ('local','spotifyAuthorize','spotifyStorage','spotifyPlayback','spotifyLoopback'):
         assert 'INSTRUMENTATION_RESULT: '+name+'=ok' in output,output
     assert 'INSTRUMENTATION_CODE: -1' in output,output
     restored=adb('shell','am','instrument','-w',host+'/.PlaylistRestoreInstrumentation',timeout=90)
@@ -38,6 +38,7 @@ try:
         'local foreground audio playback, position, pause, seek, next, stop and media notification',
         'Spotify authorization opens the exact configured loopback URI, enforces state, reuses the port and reports port conflicts',
         'Spotify tokens encrypted by Android Keystore and reloaded',
+        'Spotify Connect playlist/track requests, legacy-scope reauthorization, token refresh and missing-device errors',
         'Spotify loopback callback rejects wrong state and accepts the expected state',
         'playlist, document-tree permission and encrypted Spotify session survive process restart',
     ]

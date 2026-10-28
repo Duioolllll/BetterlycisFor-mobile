@@ -18,13 +18,25 @@ public final class SpotifyProtocol {
     public static final int MAX_ITEMS=10000;
     public static final int CALLBACK_PORT=43123;
     public static final String REDIRECT_URI="http://127.0.0.1:"+CALLBACK_PORT+"/callback";
+    public static final String PLAYBACK_SCOPE="user-modify-playback-state";
     private SpotifyProtocol(){}
     public static String random(){byte[] bytes=new byte[48];new SecureRandom().nextBytes(bytes);return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);}
     public static String challenge(String verifier){try{return Base64.getUrlEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));}catch(Exception e){throw new IllegalStateException(e);}}
     public static String encode(String value){try{return URLEncoder.encode(value,"UTF-8");}catch(Exception e){throw new IllegalStateException(e);}}
     public static boolean validId(String id){return id!=null&&id.matches("[A-Za-z0-9]{22}");}
     public static String authorize(String clientId,String redirect,String state,String verifier){
-        return "https://accounts.spotify.com/authorize?response_type=code&client_id="+encode(clientId)+"&redirect_uri="+encode(redirect)+"&scope="+encode("playlist-read-private playlist-read-collaborative")+"&state="+encode(state)+"&code_challenge_method=S256&code_challenge="+encode(challenge(verifier));
+        return "https://accounts.spotify.com/authorize?response_type=code&client_id="+encode(clientId)+"&redirect_uri="+encode(redirect)+"&scope="+encode("playlist-read-private playlist-read-collaborative "+PLAYBACK_SCOPE)+"&state="+encode(state)+"&code_challenge_method=S256&code_challenge="+encode(challenge(verifier));
+    }
+    public static boolean hasScope(String scopes,String wanted){
+        if(scopes==null||wanted==null||wanted.isEmpty())return false;
+        for(String value:scopes.split("\\s+"))if(value.equals(wanted))return true;
+        return false;
+    }
+    public static JSONObject playPlaylist(String id,int position)throws JSONException{
+        if(!validId(id)||position < -1||position>=MAX_ITEMS)throw new IllegalArgumentException("invalid playlist position");
+        JSONObject result=new JSONObject().put("context_uri","spotify:playlist:"+id);
+        if(position>=0)result.put("offset",new JSONObject().put("position",position));
+        return result;
     }
     public static final class Callback {public final String code,error;Callback(String code,String error){this.code=code;this.error=error;}}
     public static Callback callback(String target,String expectedState){
@@ -63,7 +75,7 @@ public final class SpotifyProtocol {
             JSONObject row=items.optJSONObject(i);if(row==null)continue;JSONObject track=row.optJSONObject("item");if(track==null)track=row.optJSONObject("track");if(track==null)continue;
             String type=track.optString("type","track"),id=track.optString("id");StringBuilder artist=new StringBuilder();JSONArray artists=track.optJSONArray("artists");
             if(artists!=null)for(int j=0;j<artists.length();j++){JSONObject a=artists.optJSONObject(j);String name=a==null?"":a.optString("name");if(!name.isEmpty()){if(artist.length()>0)artist.append(", ");artist.append(name);}}
-            output.put(new JSONObject().put("id",validId(id)&&(type.equals("track")||type.equals("episode"))?id:"").put("type",type).put("title",track.optString("name","제목 없음")).put("artist",artist.toString()).put("duration",track.optLong("duration_ms",0)));
+            output.put(new JSONObject().put("id",validId(id)&&(type.equals("track")||type.equals("episode"))?id:"").put("type",type).put("title",track.optString("name","제목 없음")).put("artist",artist.toString()).put("duration",track.optLong("duration_ms",0)).put("position",offset+i));
         }
         return page(output,response,offset,items.length());
     }
