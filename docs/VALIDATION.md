@@ -1,3 +1,11 @@
+# 0.7.0 — 2026-10-28
+
+256 JVM checks, 2,073 bit-identical baseline audio frames, five packaging cases and 70 browser check groups passed. The API 36 emulator exercised persistent document grants, M3U import, LRC loading, local audio transport controls, encrypted test tokens and the OAuth loopback state check, alongside widget and WebView font checks. [Playlist guide](PLAYLISTS.md) · [Feature parity](PARITY.md) · [Release notes](../changelog/0.7.0.md).
+
+Publication requires the current APK's offline and signature checks, seven browser suites, Android 16 widget and playlist tests, and clean installation and updates from 0.3.0/0.4.1/0.4.3/0.4.4/0.5.0/0.6.0. The release workflow attaches its own validation reports. Real Spotify account login, physical phones, other Android versions, third-party launchers/music apps, long playback and battery behavior have not been verified.
+
+---
+
 # 0.6.0 — 2026-10-27
 
 233 JVM checks, 2,073 bit-identical audio frames, five packaging cases and 62 browser check groups passed. Four bundled Korean fonts were checked in Chromium; the Android 16 release gate also checks font loading and preference persistence in the real WebView. [Widget and font guide](HOME_WIDGET.md) · [Release notes](../changelog/0.6.0.md).

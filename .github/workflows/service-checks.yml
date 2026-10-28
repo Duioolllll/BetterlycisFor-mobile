@@ -5,6 +5,12 @@ on:
   pull_request:
     paths: ['app/**', 'tests/**', 'tools/**', '.github/workflows/service-checks.yml']
   workflow_dispatch:
+    inputs:
+      release_candidate:
+        description: Also validate the signed release APK and update paths without publishing
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -65,6 +71,28 @@ jobs:
         with:
           name: playlist-validation
           path: |
+            ${{ runner.temp }}/PLAYLIST_VALIDATION.json
+            ${{ runner.temp }}/PLAYLIST_LOGCAT.txt
+          if-no-files-found: ignore
+  release-candidate:
+    if: github.event_name == 'workflow_dispatch' && inputs.release_candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Exercise the signed APK and prior-version updates without publishing
+        run: bash tools/emulator-widget-ci.sh release
+      - name: Save release-candidate test evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-candidate-validation
+          path: |
+            ${{ runner.temp }}/INSTALL_VALIDATION.json
+            ${{ runner.temp }}/WIDGET_VALIDATION.json
+            ${{ runner.temp }}/WIDGET_LOGCAT.txt
             ${{ runner.temp }}/PLAYLIST_VALIDATION.json
             ${{ runner.temp }}/PLAYLIST_LOGCAT.txt
           if-no-files-found: ignore
