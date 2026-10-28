@@ -1,10 +1,10 @@
 {
-  "apk": "BetterLyrics-Mobile-0.9.1.apk",
-  "version": "0.9.1",
-  "versionCode": 19,
+  "apk": "BetterLyrics-Mobile-0.9.2.apk",
+  "version": "0.9.2",
+  "versionCode": 20,
   "variant": "release",
   "bytes": 2436183,
-  "sha256": "df55516d4dce9a4c12904a8298ac4869db3bf125131f2c6b27d8d6275ef85d64",
+  "sha256": "4b7bd8196bc7c54a9cd6b2677c5bb0509a15aa39b0b3de990e6d219a572b8b57",
   "resourceTable": {
     "compression": "stored",
     "dataOffset": 9220,
