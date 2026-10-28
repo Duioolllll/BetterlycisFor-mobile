@@ -20,9 +20,15 @@ public final class M3uPlaylist {
     public static final class Entry {
         public final String path, title;
         public final long durationMs;
-        Entry(String path, String title, long durationMs) {
-            this.path=path; this.title=title; this.durationMs=durationMs;
+        final boolean uriEncoded;
+        Entry(String path, String title, long durationMs,boolean uriEncoded) {
+            this.path=path; this.title=title; this.durationMs=durationMs;this.uriEncoded=uriEncoded;
         }
+    }
+
+    public static final class ExportEntry {
+        public final String path,title,artist;public final long durationMs;
+        public ExportEntry(String path,String title,String artist,long durationMs){this.path=path;this.title=title;this.artist=artist;this.durationMs=durationMs;}
     }
 
     public static final class Document {
@@ -66,11 +72,29 @@ public final class M3uPlaylist {
             if(result.entries.size()+result.unsupported>=MAX_ENTRIES)throw new IllegalArgumentException("재생목록은 최대 5,000곡까지 불러올 수 있습니다.");
             String path=localPath(line);
             if(path.isEmpty())result.unsupported++;
-            else result.entries.add(new Entry(path,title,duration));
+            else result.entries.add(new Entry(path,title,duration,line.regionMatches(true,0,"file:",0,5)));
             title="";duration=-1;
         }
         return result;
     }
+
+    public static boolean exportablePath(String value){
+        if(value==null||value.isEmpty()||value.length()>4096||!value.equals(value.trim())||value.startsWith("/")||value.indexOf('\\')>=0||value.indexOf('\n')>=0||value.indexOf('\r')>=0||value.indexOf('\0')>=0)return false;
+        for(String segment:value.split("/",-1))if(segment.isEmpty()||segment.equals(".")||segment.equals(".."))return false;
+        return true;
+    }
+    public static String export(List<ExportEntry> entries){
+        if(entries==null||entries.isEmpty()||entries.size()>MAX_ENTRIES)throw new IllegalArgumentException("내보낼 곡을 확인해 주세요.");
+        StringBuilder out=new StringBuilder("#EXTM3U\n");
+        for(ExportEntry entry:entries){
+            if(entry==null||!exportablePath(entry.path))throw new IllegalArgumentException("음악 파일 경로를 내보낼 수 없습니다.");
+            String title=cleanLabel(entry.title),artist=cleanLabel(entry.artist);long seconds=entry.durationMs>0?Math.min(86400,entry.durationMs/1000):-1;
+            out.append("#EXTINF:").append(seconds).append(',');if(!artist.isEmpty())out.append(artist).append(" - ");out.append(title).append('\n');
+            out.append("./").append(entry.path).append('\n');
+        }
+        return out.toString();
+    }
+    private static String cleanLabel(String value){if(value==null)return "";String clean=value.replace('\r',' ').replace('\n',' ').replace('\0',' ').trim();return clean.length()>512?clean.substring(0,512):clean;}
 
     private static String localPath(String value) {
         String text=value.trim();
@@ -112,10 +136,15 @@ public final class M3uPlaylist {
         }
         /** Returns the unique best suffix match; ambiguous names are left unmatched. */
         public Document match(Entry entry) {
-            List<String> names=parts(entry.path,true);String suffix="";Document best=null;
+            if(!entry.uriEncoded){Match literal=matchParts(parts(entry.path,false));if(literal.found)return literal.value;}
+            return matchParts(parts(entry.path,true)).value;
+        }
+        private static final class Match {boolean found;Document value;}
+        private Match matchParts(List<String> names){
+            String suffix="";Match best=new Match();
             for(int i=names.size()-1;i>=0;i--) {
                 suffix=names.get(i)+(suffix.isEmpty()?"":"/"+suffix);
-                if(suffixes.containsKey(suffix))best=suffixes.get(suffix);
+                if(suffixes.containsKey(suffix)){best.found=true;best.value=suffixes.get(suffix);}
             }
             return best;
         }

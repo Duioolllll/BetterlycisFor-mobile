@@ -20,6 +20,7 @@ public final class AppState {
     final SharedPreferences prefs;
     final LyricsRepository repository;
     final AudioEngine audio;
+    final ListeningStats listening;
     final ThreadPoolExecutor network=(ThreadPoolExecutor)Executors.newFixedThreadPool(2);
     final ThreadPoolExecutor artwork=(ThreadPoolExecutor)Executors.newFixedThreadPool(1);
     interface Listener {void changed(boolean full);}
@@ -39,7 +40,7 @@ public final class AppState {
     private String artFingerprint="";
     private int artGeneration;
     private long artRetryAt;
-    private AppState(Context c){context=c;prefs=c.getSharedPreferences("settings",0);repository=new LyricsRepository(c);audio=new AudioEngine(c);}
+    private AppState(Context c){context=c;prefs=c.getSharedPreferences("settings",0);repository=new LyricsRepository(c);audio=new AudioEngine(c);listening=new ListeningStats(c);}
     public boolean granted(){String enabled=Settings.Secure.getString(context.getContentResolver(),"enabled_notification_listeners");if(enabled==null)return false;ComponentName self=new ComponentName(context,LyricsListener.class);for(String entry:enabled.split(":"))if(self.equals(ComponentName.unflattenFromString(entry)))return true;return false;}
     public void emit(){notifyListeners(true);}
     private void notifyListeners(boolean full){for(Listener r:new ArrayList<>(listeners))r.changed(full);LyricsListener.refreshOverlay();LyricsListener.refreshWidget(context);}
@@ -51,7 +52,7 @@ public final class AppState {
         // Position/speed/action samples use the lightweight clock packet. Metadata
         // and track changes still publish a complete bootstrap, as do play/pause.
         if(!metadataChanged&&sameSession&&!song.key.isEmpty()){
-            notifyListeners(sourcesChanged||playbackChanged);return;
+            listening.observe(song,playing());notifyListeners(sourcesChanged||playbackChanged);return;
         }
         MediaMetadata m=next==null?null:next.getMetadata();
         if(m==null||value(m,MediaMetadata.METADATA_KEY_TITLE).isEmpty()){if(!song.key.isEmpty())reset();else emit();return;}
@@ -71,6 +72,7 @@ public final class AppState {
             if(lyrics==null||(!lyrics.manual&&!lyrics.provider.equals("Local")&&!LyricsRepository.eligible(song,lyrics)))fetch(true);
         }
         updateArtwork(m,changed);
+        listening.observe(song,playing());
         // Notification/session refreshes often repeat identical metadata. Artwork
         // completion emits its own full update if a new image actually loads.
         if(changed||durationChanged||sourcesChanged||playbackChanged)emit();else notifyListeners(false);
@@ -89,7 +91,7 @@ public final class AppState {
         });
     }
     private String value(MediaMetadata m,String key){String v=m.getString(key);return v==null?"":v;}
-    public void reset(){generation++;searchGeneration++;artGeneration++;artFingerprint="";if(pendingArt!=null)pendingArt.cancel(true);artwork.purge();cancelWork(pending);cancelWork(pendingSearch);song=new LyricsRepository.Song();controller=null;playback=null;lyrics=null;cover="";loading=false;status="음악을 재생해 주세요.";error="";emit();}
+    public void reset(){generation++;searchGeneration++;artGeneration++;artFingerprint="";if(pendingArt!=null)pendingArt.cancel(true);artwork.purge();cancelWork(pending);cancelWork(pendingSearch);song=new LyricsRepository.Song();controller=null;playback=null;listening.observe(song,false);lyrics=null;cover="";loading=false;status="음악을 재생해 주세요.";error="";emit();}
     public void fetch(boolean force){
         if(song.key.isEmpty())return;
         int ticket=++generation;LyricsRepository.Song selected=song.copy();cancelWork(pending);
@@ -113,7 +115,7 @@ public final class AppState {
         String provider=prefs.getString("provider","auto");
         pendingSearch=network.submit(()->{
             List<LyricsRepository.Result> all=new ArrayList<>();String failure="";
-            for(String name:provider.equals("auto")?new String[]{"lrclib","netease"}:new String[]{provider}){
+            for(String name:provider.equals("auto")?new String[]{"lrclib","netease","kugou"}:new String[]{provider}){
                 if(Thread.currentThread().isInterrupted())return;
                 try{all.addAll(repository.search(q,name));}catch(InterruptedException e){Thread.currentThread().interrupt();return;}catch(Exception e){if(Thread.currentThread().isInterrupted())return;failure="일부 가사 제공처에 연결하지 못했습니다.";}
             }
@@ -166,7 +168,7 @@ public final class AppState {
         else if(key.equals("fontSize"))e.putInt(key,Math.max(20,Math.min(48,((Number)value).intValue())));
         else if(key.equals("keepScreen")||key.equals("overlay"))e.putBoolean(key,Boolean.TRUE.equals(value));
         else if(key.equals("wordMode")&&Arrays.asList("auto","always","never").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
-        else if(key.equals("provider")&&Arrays.asList("auto","lrclib","netease").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
+        else if(key.equals("provider")&&Arrays.asList("auto","lrclib","netease","kugou").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
         else if(key.equals("searchMode")&&Arrays.asList("sequential","best").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
         else if(key.equals("backgroundMode")&&Arrays.asList("sound","ambient","static").contains(String.valueOf(value)))e.putString(key,String.valueOf(value));
         else if(key.equals("backgroundIntensity"))e.putInt(key,Math.max(0,Math.min(100,((Number)value).intValue())));

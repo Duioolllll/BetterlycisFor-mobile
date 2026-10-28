@@ -1,20 +1,21 @@
 .playlist-tabs{display:flex;gap:8px;border-bottom:1px solid #ffffff18;margin-bottom:14px}
 .playlist-tabs button{flex:1;min-height:44px;color:#adbbb3;font-size:13px;border-bottom:2px solid transparent}
 .playlist-tabs button[aria-selected=true]{color:#e8f6e4;border-color:#c5f7b1;font-weight:700}
-.playlist-tools{display:flex;gap:8px;margin-bottom:12px}.playlist-tools .secondary-button{flex:1;margin:0;font-size:12px}
+.playlist-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.playlist-tools .secondary-button{flex:1 1 120px;margin:0;font-size:12px}
+.library-views{display:flex;gap:6px;margin:8px 0}.library-views button{flex:1;min-height:44px;border-radius:9px;color:#b9cbb9;font-size:12px}.library-views button[aria-pressed=true]{background:#ffffff12;color:#e8f6e4;font-weight:700}
 .playlist-status{font-size:12px;color:#adbbb3;line-height:1.6;margin:14px 0}
 .playlist-item,.playlist-track{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:11px 2px;text-align:left;border-bottom:1px solid #ffffff10}
 .playlist-item strong,.playlist-track strong{display:block;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
 .playlist-item small,.playlist-track small{display:block;color:#aab9af;font-size:11px;margin-top:4px;line-height:1.4}
 .playlist-item>span,.playlist-track>span{flex-shrink:0;color:#b9d9af;font-size:12px}
 .playlist-item div,.playlist-track div{flex:1;min-width:0}
-.playlist-detail-header{display:flex;align-items:center;gap:12px;padding:4px 0}.playlist-detail-header h3{flex:1;margin:0;font-size:15px;overflow-wrap:anywhere}
+.playlist-detail-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0}.playlist-detail-header h3{flex:1;min-width:80px;margin:0;font-size:15px;overflow-wrap:anywhere}
 .playlist-detail-header .mini-button{font-size:12px;margin:0;min-height:40px}
 .playlist-rename{display:flex;gap:8px;align-items:center;margin:6px 0}.playlist-rename input{flex:1;min-width:0;min-height:44px;padding:10px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08;color:#f4f8f3;font-size:13px}.playlist-rename button{min-height:44px;padding:8px;color:#d4edc8;font-size:12px}
 .playlist-order{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 0;color:#bdcbc0;font-size:12px}
 .playlist-order select{border:1px solid #ffffff22;border-radius:9px;background:#263238;color:#eff5ed;padding:9px;font-size:12px}
 .playlist-search{width:100%;min-height:44px;padding:10px 12px;margin:4px 0 6px;border:1px solid #ffffff20;border-radius:10px;background:#ffffff08;color:#f4f8f3;font-size:13px}
-.playlist-track-row{display:flex;align-items:center;border-bottom:1px solid #ffffff10}.playlist-track-row .playlist-track{flex:1;border:0}.playlist-track-remove{min-width:44px;min-height:44px;color:#b9cbb9;font-size:12px}
+.playlist-track-row{display:flex;align-items:center;border-bottom:1px solid #ffffff10}.playlist-track-row .playlist-track{flex:1;min-width:0;border:0}.playlist-track-remove,.playlist-track-move{min-width:44px;min-height:44px;color:#b9cbb9;font-size:12px}.playlist-track-move:disabled{opacity:.35}
 .playlist-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;background:#ffffff0b;border-radius:10px;font-size:12px}
 .playlist-confirm span{flex:1}.playlist-confirm button{padding:8px;color:#d4edc8}
 .spotify-brand{display:flex;align-items:center;gap:8px;color:#f1f8f1;font-size:14px;margin:8px 0 14px}.spotify-brand img{width:22px;height:22px}

@@ -2,7 +2,7 @@
 
 변경 기록은 **[changelog/](changelog/README.md)**에서 관리합니다. / All change records now live in **[changelog/](changelog/README.md)**.
 
-- [최신 APK · 0.6.0 / Current APK release](changelog/0.6.0.md)
+- [최신 APK · 0.9.0 / Current APK release](changelog/0.9.0.md)
 - [전체 버전·배포 상태 / Version index and publication status](changelog/README.md)
 - [문서·배포 구성 변경 / Unreleased documentation changes](changelog/UNRELEASED.md)
 - [기존 누적 Changelog / Previous cumulative changelog](changelog/HISTORY.md)

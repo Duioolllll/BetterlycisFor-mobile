@@ -1,3 +1,9 @@
+# 0.9.0 — 2026-10-28
+
+281 JVM checks cover playlist export, Kugou KRC parsing, bounded retry, and listening-time accounting. Chromium playlist and settings smoke checks passed; the Android 16 release gate checks folder import, artist/album groups, M3U export, playback reordering, lyric-card PNG, private listening history, and prior-version updates using synthetic fixtures. Published reports contain the gate results. A live Kugou response for one song was decoded and yielded 47 word-timed lyric rows. Actual Spotify account playback, physical devices, third-party document providers and long-running background behavior remain unverified. [Playlist guide](PLAYLISTS.md) · [Feature parity](PARITY.md).
+
+---
+
 # 0.8.0 — 2026-10-28
 
 261 JVM checks cover Spotify playback scopes, playlist context and original positions. Seven browser suites cover 70 groups, including local/Spotify play, reauthorization and missing-device feedback. Android release checks use synthetic documents, audio, tokens and a simulated Spotify HTTP transport to exercise playlist playback requests, token refresh and errors, as well as signed APK updates from previous versions. Published reports contain the actual results. Real Spotify account playback and physical-device behavior remain unverified. [Playlist guide](PLAYLISTS.md) · [Release notes](../changelog/0.8.0.md).

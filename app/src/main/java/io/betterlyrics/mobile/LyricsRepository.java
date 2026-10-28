@@ -38,7 +38,7 @@ public final class LyricsRepository implements AutoCloseable {
     private final Object cacheLock=new Object();
     public interface Transport { String request(String address,String body)throws Exception; }
     private final Transport transport;
-    private final ThreadPoolExecutor providers=(ThreadPoolExecutor)Executors.newFixedThreadPool(2);
+    private final ThreadPoolExecutor providers=(ThreadPoolExecutor)Executors.newFixedThreadPool(3);
     public LyricsRepository(Context context) { this(context.getFilesDir()); }
     public LyricsRepository(File filesDirectory) { this(filesDirectory,LyricsRepository::request); }
     public LyricsRepository(File filesDirectory,Transport transport) { cache=new File(filesDirectory,"lyrics");cache.mkdirs();this.transport=transport; }
@@ -46,21 +46,24 @@ public final class LyricsRepository implements AutoCloseable {
     private String exchange(String address,String body)throws Exception {IoSupport.checkInterrupted();String text=transport.request(address,body);IoSupport.checkInterrupted();return text;}
     private String get(String address) throws Exception { return exchange(address,null); }
     private static String request(String address,String body) throws Exception {
-        IoSupport.checkInterrupted();
-        HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();
-        c.setConnectTimeout(8000);c.setReadTimeout(8000);c.setInstanceFollowRedirects(false);
-        c.setRequestProperty("User-Agent","BetterLyricsMobile/0.4.4 (Android; https://github.com/Duioolllll/BetterlycisFor-mobile)");
-        c.setRequestProperty("Accept","application/json");
-        c.setRequestProperty("Referer","https://music.163.com/");
-        try {
-            if(body!=null){c.setRequestMethod("POST");c.setDoOutput(true);c.setRequestProperty("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");byte[] payload=body.getBytes(StandardCharsets.UTF_8);c.setFixedLengthStreamingMode(payload.length);try(OutputStream out=c.getOutputStream()){out.write(payload);}}
-            int status=c.getResponseCode();if(status==404)return "";
-            if(status!=200)throw new IOException("HTTP "+status);
-            if(c.getContentLengthLong()>MAX_BYTES)throw new IOException("응답이 너무 큽니다.");
-            try(InputStream in=c.getInputStream()) {
-                return new String(IoSupport.read(in,MAX_BYTES,20000),StandardCharsets.UTF_8);
-            }
-        }finally{c.disconnect();}
+        for(int attempt=0;attempt<2;attempt++){
+            IoSupport.checkInterrupted();long retry=-1;HttpURLConnection c=(HttpURLConnection)new URL(address).openConnection();
+            c.setConnectTimeout(8000);c.setReadTimeout(8000);c.setInstanceFollowRedirects(false);
+            c.setRequestProperty("User-Agent","BetterLyricsMobile/0.4.4 (Android; https://github.com/Duioolllll/BetterlycisFor-mobile)");
+            c.setRequestProperty("Accept","application/json");c.setRequestProperty("Referer","https://music.163.com/");
+            try {
+                if(body!=null){c.setRequestMethod("POST");c.setDoOutput(true);c.setRequestProperty("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");byte[] payload=body.getBytes(StandardCharsets.UTF_8);c.setFixedLengthStreamingMode(payload.length);try(OutputStream out=c.getOutputStream()){out.write(payload);}}
+                int status=c.getResponseCode();if(status==404)return "";
+                if((status==429||status==503)&&attempt==0){retry=IoSupport.retryAfterMillis(c.getHeaderField("Retry-After"),System.currentTimeMillis());if(retry<0||retry>5000)throw new IOException("HTTP "+status);}
+                else if(status!=200)throw new IOException("HTTP "+status);
+                else{
+                    if(c.getContentLengthLong()>MAX_BYTES)throw new IOException("응답이 너무 큽니다.");
+                    try(InputStream in=c.getInputStream()){return new String(IoSupport.read(in,MAX_BYTES,20000),StandardCharsets.UTF_8);}
+                }
+            }finally{c.disconnect();}
+            IoSupport.checkInterrupted();if(retry>0)Thread.sleep(retry);
+        }
+        throw new IOException("가사 제공처 재시도 실패");
     }
     /** Port of the shipped Lyricify helper's EapiHelper, using public protocol constants. */
     private String eapi(String path,JSONObject payload) throws Exception {
@@ -103,6 +106,15 @@ public final class LyricsRepository implements AutoCloseable {
                 if(artists!=null)for(int k=0;k<artists.length();k++){JSONObject person=artists.getJSONObject(k);if(k>0)names.append(", ");names.append(person.optString("name"));aliases(person,r.artistAliases);}
                 r.artist=names.toString();JSONObject album=item.optJSONObject("album");if(album==null)album=item.optJSONObject("al");r.album=album==null?"":album.optString("name");r.duration=item.optLong("duration",item.optLong("dt"));r.trackKey=song.key;
                 score(song,r);result.add(r);
+            }
+        } else if(source.equals("kugou")) {
+            String keyword=MatchScore.searchTitle(song.title)+" "+MatchScore.searchArtist(song.artist);
+            String text=get("https://mobilecdn.kugou.com/api/v3/search/song?format=json&page=1&pagesize=20&showtype=1&keyword="+query(keyword));
+            JSONObject obj=text.isEmpty()?null:new JSONObject(text).optJSONObject("data");JSONArray a=obj==null?null:obj.optJSONArray("info");
+            if(a!=null)for(int i=0;i<Math.min(20,a.length());i++){
+                JSONObject item=a.optJSONObject(i);if(item==null)continue;String hash=item.optString("hash","");if(!hash.matches("(?i)[a-f0-9]{32}"))continue;
+                Result r=new Result();r.provider="Kugou";r.id="kugou:"+hash.toLowerCase(Locale.ROOT);r.title=item.optString("songname","");r.artist=item.optString("singername","");r.album=item.optString("album_name","");
+                r.duration=Math.max(0,item.optLong("duration",0))*1000;r.trackKey=song.key;score(song,r);result.add(r);
             }
         }
         result.sort((a,b)->Integer.compare(b.score,a.score));return result;
@@ -148,6 +160,21 @@ public final class LyricsRepository implements AutoCloseable {
             r.translation=lyric(item,useWord?"ytlrc":"tlyric");r.romanization=lyric(item,useWord?"yromalrc":"romalrc");
             if(r.translation.isEmpty())r.translation=lyric(item,"tlyric");if(r.romanization.isEmpty())r.romanization=lyric(item,"romalrc");
         }
+        if(r.provider.equals("Kugou")&&r.raw.isEmpty()){
+            String hash=r.id.startsWith("kugou:")?r.id.substring(6):"";if(!hash.matches("[a-f0-9]{32}"))throw new IOException("가사 검색 결과가 올바르지 않습니다.");
+            String search=get("https://lyrics.kugou.com/search?ver=1&man=yes&client=pc&hash="+hash);
+            JSONArray candidates=search.isEmpty()?null:new JSONObject(search).optJSONArray("candidates");
+            if(candidates!=null)for(int i=0;i<Math.min(20,candidates.length());i++){
+                JSONObject candidate=candidates.optJSONObject(i);if(candidate==null)continue;
+                String title=candidate.optString("song",r.title),artist=candidate.optString("singer",r.artist),id=candidate.optString("id",""),access=candidate.optString("accesskey","");
+                if(title.isEmpty())title=r.title;if(artist.isEmpty())artist=r.artist;
+                if(!MatchScore.automatic(r.title,r.artist,r.duration,title,artist,candidate.optLong("duration",0))||!id.matches("[0-9]{1,30}")||!access.matches("[a-zA-Z0-9]{1,128}"))continue;
+                String response=get("https://lyrics.kugou.com/download?ver=1&client=pc&fmt=krc&charset=utf8&id="+id+"&accesskey="+query(access));
+                String content=response.isEmpty()?"":new JSONObject(response).optString("content","");if(content.isEmpty()||content.length()>3*1024*1024)continue;
+                try{r.raw=LyricParser.decodeBytes(Base64.getDecoder().decode(content));}catch(IllegalArgumentException|IOException bad){continue;}
+                if(!r.raw.trim().isEmpty())break;
+            }
+        }
         if(r.raw.trim().isEmpty())throw new IOException("이 결과에는 가사가 없습니다.");
         r.lines=LyricParser.parse(r.raw,r.duration);
         LyricParser.applyTranslation(r.lines,r.translation,r.romanization);
@@ -165,7 +192,7 @@ public final class LyricsRepository implements AutoCloseable {
     public Result fetch(Song song,String source,String mode,boolean force) throws Exception {
         IoSupport.checkInterrupted();
         if(!force){Result r=load(song);if(r!=null&&sourceAllows(source,r.provider))return r;}
-        String[] active=source.equals("auto")?new String[]{"lrclib","netease"}:new String[]{source};
+        String[] active=source.equals("auto")?new String[]{"lrclib","netease","kugou"}:new String[]{source};
         Result best=null;Exception last=null;
         if(mode.equals("best")&&active.length>1) {
             List<Future<Result>> tasks=new ArrayList<>();
@@ -184,11 +211,11 @@ public final class LyricsRepository implements AutoCloseable {
             if(Thread.currentThread().isInterrupted())throw new InterruptedException();
             if(r.score<70||!eligible(song,r))continue;
             try{hydrate(r);if(!plausible(r))continue;if(best==null||quality(song,r)>quality(song,best))best=r;}catch(InterruptedException e){throw e;}catch(Exception ignored){IoSupport.checkInterrupted();}
-            if(provider.equals("netease")&&++attempts>=(best!=null&&best.masked?6:3))break;
+            if((provider.equals("netease")||provider.equals("kugou"))&&++attempts>=(best!=null&&best.masked?6:3))break;
         }
         return best;
     }
-    private boolean sourceAllows(String setting,String provider) { return setting.equals("auto")||provider.equals("Local")||setting.equals("lrclib")&&provider.equals("LRCLIB")||setting.equals("netease")&&provider.equals("NetEase"); }
+    private boolean sourceAllows(String setting,String provider) { return setting.equals("auto")||provider.equals("Local")||setting.equals("lrclib")&&provider.equals("LRCLIB")||setting.equals("netease")&&provider.equals("NetEase")||setting.equals("kugou")&&provider.equals("Kugou"); }
     private File file(Song s) throws Exception {
         String key=s.title.trim()+"|"+s.artist.trim()+"|"+s.album.trim()+"|"+Math.round(s.duration/1000.0);
         byte[] digest=MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8));return new File(cache,IoSupport.hex(digest,false)+".json");

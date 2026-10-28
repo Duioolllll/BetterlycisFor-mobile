@@ -39,6 +39,9 @@ if hashlib.sha256(json_jar.read_bytes()).hexdigest()!=JSON_SHA256:
 
 selected=[
     'RepositoryRegressionCheck',
+    'KugouProviderTests',
+    'ListeningLedgerTests',
+    'RetryAfterTests',
     'AppearanceCheck',
     'TextPolicyTests',
     'ParserTests',
@@ -59,6 +62,7 @@ sources=[
     'AudioSignal.java',
     'UiAppearance.java',
     'LyricsRepository.java',
+    'ListeningLedger.java',
     'IoSupport.java',
     'WidgetLyrics.java',
     'M3uPlaylist.java',

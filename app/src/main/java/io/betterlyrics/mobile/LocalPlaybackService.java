@@ -67,6 +67,13 @@ public final class LocalPlaybackService extends Service {
         if(replacement<0){service.index=Math.min(service.index,updated.tracks.size()-1);service.load(wasPlaying);}
         else {service.index=replacement;service.session.setMetadata(service.metadata(updated.tracks.get(replacement),service.duration));service.publish(true);}
     }
+    static void libraryMoved(Context context,String id,int from,int to){
+        LocalPlaybackService service=live;if(service==null||service.playlist==null||!service.playlist.id.equals(id))return;
+        LocalLibrary.Playlist updated=LocalLibrary.get(context).get(id);if(updated==null){service.stopPlayback();return;}
+        int current=service.index;if(current==from)current=to;else if(from<current&&to>=current)current--;else if(from>current&&to<=current)current++;
+        if(current<0||current>=updated.tracks.size()){service.stopPlayback();return;}
+        service.playlist=updated;service.index=current;service.history.clear();service.session.setMetadata(service.metadata(updated.tracks.get(current),service.duration));service.publish(true);
+    }
     static boolean refreshWidget(){
         LocalPlaybackService service=live;if(service==null||service.session==null)return false;
         AppState state=AppState.get(service);if(state.controller==null||!state.controller.getSessionToken().equals(service.session.getSessionToken()))return false;

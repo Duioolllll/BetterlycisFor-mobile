@@ -40,6 +40,7 @@ EAPI의 고정 암호화 포맷 상수는 공개 프로토콜 재구현 값으�
 | REA / ILSpy / Windows DLL / Lyricify helper | 과거 분석 도구/대상 | APK나 공개 소스 번들에 포함하지 않음. helper 전체 라이선스 검토를 이번에 완료했다고 주장하지 않음 |
 | LRCLIB | 공개 API 문서 확인 | 가사 콘텐츠 저작권은 서버 코드 라이선스와 별개 |
 | NetEase EAPI | 비공식 형식; 약관 본문 조회 실패 | 사용/배포 권한 검토 미완료. 접근 가능성을 허가로 해석하지 않음 |
+| Kugou | 비공식 검색 및 KRC 경로 | 제공처 정책과 가사 이용 권리 확인 미완료 |
 | 앨범 아트/가사/상표 | 각 권리자 소유 | 실제 음악 콘텐츠를 APK/테스트 결과에 번들하지 않음; README는 합성 예시 |
 
 원본 배포물과 디컴파일 소스를 공개하지 않으며 정적 분석 내역과 직접 작성한 Android 구현을 구분한다. GPL을 적용했다고 모든 외부 콘텐츠/API의 이용 조건이 해결되는 것은 아니다. NetEase 등의 서비스 사용 허가, 모든 콘텐츠의 배포 권리 확인은 남아 있다. [원본 LICENSE](https://github.com/jayfunc/BetterLyrics/blob/v1.3.527.0/LICENSE), [LRCLIB 문서](https://lrclib.net/docs), [NetEase 약관](https://st.music.163.com/official-terms/service).

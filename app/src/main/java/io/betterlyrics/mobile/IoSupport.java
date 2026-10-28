@@ -1,6 +1,8 @@
 package io.betterlyrics.mobile;
 
 import java.io.*;
+import java.text.*;
+import java.util.*;
 
 /** Shared bounded reads; callers retain ownership of the input stream. */
 public final class IoSupport {
@@ -31,5 +33,11 @@ public final class IoSupport {
         char[] digits=(upper?"0123456789ABCDEF":"0123456789abcdef").toCharArray(),out=new char[bytes.length*2];
         for(int i=0;i<bytes.length;i++){int value=bytes[i]&255;out[i*2]=digits[value>>>4];out[i*2+1]=digits[value&15];}
         return new String(out);
+    }
+    /** RFC Retry-After delta seconds or HTTP date. Negative means invalid. */
+    public static long retryAfterMillis(String value,long now){
+        if(value==null||value.trim().isEmpty())return -1;value=value.trim();
+        if(value.matches("[0-9]{1,9}"))try{return Long.parseLong(value)*1000;}catch(NumberFormatException ignored){return -1;}
+        try{SimpleDateFormat format=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz",Locale.US);format.setLenient(false);ParsePosition pos=new ParsePosition(0);Date date=format.parse(value,pos);return date==null||pos.getIndex()!=value.length()?-1:Math.max(0,date.getTime()-now);}catch(IllegalArgumentException ignored){return -1;}
     }
 }

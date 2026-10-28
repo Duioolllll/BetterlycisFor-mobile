@@ -44,7 +44,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Log.i("PlaylistInstrumentation","Requesting fixture document grants");
             context.startActivity(new Intent().setClassName("io.betterlyrics.widgettest","io.betterlyrics.widgettest.GrantActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             Uri tree=DocumentsContract.buildTreeDocumentUri("io.betterlyrics.widgettest.documents","root"),file=DocumentsContract.buildDocumentUriUsingTree(tree,"playlist");
-            waitFor(()->{try{context.getContentResolver().takePersistableUriPermission(file,Intent.FLAG_GRANT_READ_URI_PERMISSION);context.getContentResolver().takePersistableUriPermission(tree,Intent.FLAG_GRANT_READ_URI_PERMISSION);return true;}catch(SecurityException error){return false;}},"document grants");
+            waitFor(()->{try{context.getContentResolver().takePersistableUriPermission(file,Intent.FLAG_GRANT_READ_URI_PERMISSION);context.getContentResolver().takePersistableUriPermission(tree,Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);return true;}catch(SecurityException error){return false;}},"document grants");
             Log.i("PlaylistInstrumentation","Importing M3U");
             Field pending=activity.getClass().getDeclaredField("pendingPlaylist");pending.setAccessible(true);
             runOnMainSync(()->{try{pending.set(activity,file);}catch(Exception error){throw new RuntimeException(error);}});
@@ -60,6 +60,17 @@ public final class PlaylistInstrumentation extends Instrumentation {
             }
             JSONObject summary=((JSONArray)call(library,"list",new Class<?>[]{})).getJSONObject(0);String id=summary.getString("id");JSONObject detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);
             if(detail.getJSONArray("tracks").length()!=2||!detail.getJSONArray("tracks").getJSONObject(0).getString("title").equals("Sample One"))throw new IllegalStateException("M3U path resolution or order failed");
+            Object folderResult=call(library,"importFolder",new Class<?>[]{Uri.class},tree);Field folderPlaylist=folderResult.getClass().getDeclaredField("playlist");folderPlaylist.setAccessible(true);Object folder=folderPlaylist.get(folderResult);Field folderId=folder.getClass().getDeclaredField("id");folderId.setAccessible(true);String addedFolder=(String)folderId.get(folder);
+            JSONObject groups=(JSONObject)call(library,"grouped",new Class<?>[]{});JSONArray artists=groups.getJSONArray("artists"),albums=groups.getJSONArray("albums");
+            if(artists.length()!=1||albums.length()!=1||artists.getJSONObject(0).getInt("count")!=2)throw new IllegalStateException("Library groups did not deduplicate imported files");
+            JSONObject grouped=(JSONObject)call(library,"detail",new Class<?>[]{String.class},artists.getJSONObject(0).getString("id"));if(!grouped.optBoolean("readOnly")||grouped.getJSONArray("tracks").length()!=2)throw new IllegalStateException("Artist group did not open");
+            if(!((Boolean)call(library,"remove",new Class<?>[]{String.class},addedFolder)))throw new IllegalStateException("Folder test cleanup failed");
+            Object export=call(library,"exportM3u",new Class<?>[]{String.class,Uri.class},id,tree);Field exportName=export.getClass().getDeclaredField("name");exportName.setAccessible(true);String wanted=(String)exportName.get(export),exportId="";
+            Uri children=DocumentsContract.buildChildDocumentsUriUsingTree(tree,"root");
+            try(android.database.Cursor cursor=context.getContentResolver().query(children,new String[]{DocumentsContract.Document.COLUMN_DOCUMENT_ID,DocumentsContract.Document.COLUMN_DISPLAY_NAME},null,null,null)){while(cursor!=null&&cursor.moveToNext())if(wanted.equals(cursor.getString(1))){exportId=cursor.getString(0);break;}}
+            if(exportId.isEmpty())throw new IllegalStateException("Exported playlist was not created");
+            try(java.io.InputStream input=context.getContentResolver().openInputStream(DocumentsContract.buildDocumentUriUsingTree(tree,exportId))){java.io.ByteArrayOutputStream bytes=new java.io.ByteArrayOutputStream();byte[] buffer=new byte[1024];for(int n;(n=input.read(buffer))>=0;)bytes.write(buffer,0,n);String text=new String(bytes.toByteArray(),StandardCharsets.UTF_8);if(!text.startsWith("#EXTM3U\n")||text.indexOf("./Album/one.wav")<0||text.indexOf("./Album/two.wav")<=text.indexOf("./Album/one.wav"))throw new IllegalStateException("M3U export did not preserve paths and order");}
+            output.putString("library","ok");
             mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"renamePlaylist",new JSONObject().put("id",id).put("name","Saved playlist"));
             detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);if(!detail.optString("name").equals("Saved playlist"))throw new IllegalStateException("playlist rename failed");
             Constructor<?> fresh=libraryClass.getDeclaredConstructor(Context.class);fresh.setAccessible(true);Object restored=fresh.newInstance(context);
@@ -69,11 +80,22 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Class<?> stateClass=targetLoader.loadClass("io.betterlyrics.mobile.AppState");Object app=stateClass.getMethod("get",Context.class).invoke(null,context);
             Method track=stateClass.getMethod("track");
             waitFor(()->{JSONObject t=(JSONObject)track.invoke(app);return t.optBoolean("playing")&&t.optString("title").equals("Sample One");},"local audio starts");
+            mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"moveLocalTrack",new JSONObject().put("id",id).put("from",0).put("to",1));
+            detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);if(!"two".equals(detail.getJSONArray("tracks").getJSONObject(0).getString("title"))||!"Sample One".equals(((JSONObject)track.invoke(app)).optString("title")))throw new IllegalStateException("Reordering interrupted the playing song");
+            mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"moveLocalTrack",new JSONObject().put("id",id).put("from",1).put("to",0));
             Log.i("PlaylistInstrumentation","Verifying playback controls and lyrics");
             Method snapshot=stateClass.getMethod("snapshot");waitFor(()->{JSONObject lyrics=((JSONObject)snapshot.invoke(app)).optJSONObject("lyrics");return lyrics!=null&&lyrics.optJSONArray("lines")!=null&&lyrics.optJSONArray("lines").length()>0&&lyrics.optJSONArray("lines").optJSONObject(0).optString("text").equals("Fixture local lyric");},"sidecar lyric");
+            Class<?> cardClass=targetLoader.loadClass("io.betterlyrics.mobile.LyricCard"),cardData=targetLoader.loadClass("io.betterlyrics.mobile.LyricCard$Data");
+            Method capture=cardClass.getDeclaredMethod("capture",stateClass);capture.setAccessible(true);Object card=capture.invoke(null,app);if(card==null)throw new IllegalStateException("Current lyric was not captured");
+            Uri cardFile=DocumentsContract.createDocument(context.getContentResolver(),DocumentsContract.buildDocumentUriUsingTree(tree,"root"),"image/png","fixture-card.png");
+            Method writeCard=cardClass.getDeclaredMethod("write",Context.class,Uri.class,cardData);writeCard.setAccessible(true);writeCard.invoke(null,context,cardFile,card);
+            try(java.io.InputStream input=context.getContentResolver().openInputStream(cardFile)){android.graphics.Bitmap image=android.graphics.BitmapFactory.decodeStream(input);if(image==null||image.getWidth()!=1080||image.getHeight()!=1080||image.getPixel(0,0)==image.getPixel(540,540))throw new IllegalStateException("Lyric card PNG is invalid");image.recycle();}output.putString("card","ok");
             Log.i("PlaylistInstrumentation","Local lyric loaded");
             JSONObject started=(JSONObject)track.invoke(app);long first=started.optLong("position");
             waitFor(()->((JSONObject)track.invoke(app)).optLong("position")>first+300,"audio position advances");
+            Field listeningField=stateClass.getDeclaredField("listening");listeningField.setAccessible(true);Object listening=listeningField.get(app);
+            JSONObject observed=(JSONObject)mainCall(listening,"snapshot",new Class<?>[]{});if(observed.optLong("total")<=0||observed.optJSONArray("items").length()==0)throw new IllegalStateException("Playing time was not recorded");
+            JSONObject cleared=(JSONObject)mainCall(listening,"clear",new Class<?>[]{});if(cleared.optLong("total")!=0)throw new IllegalStateException("Listening history was not cleared");output.putString("listening","ok");
             Log.i("PlaylistInstrumentation","Playback position advances");
             Field controllerField=stateClass.getDeclaredField("controller");controllerField.setAccessible(true);MediaController controller=(MediaController)controllerField.get(app);
             if(controller==null)throw new IllegalStateException("media controller unavailable");

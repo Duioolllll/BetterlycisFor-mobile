@@ -11,10 +11,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -48,8 +52,13 @@ final class LocalLibrary {
         final Playlist playlist;final int added,missing,unsupported;
         ImportResult(Playlist playlist,int added,int missing,int unsupported){this.playlist=playlist;this.added=added;this.missing=missing;this.unsupported=unsupported;}
     }
+    static final class ExportResult {
+        final int exported,skipped;final String name;
+        ExportResult(int exported,int skipped,String name){this.exported=exported;this.skipped=skipped;this.name=name;}
+    }
     private final Context context;
     private final ArrayList<Playlist> playlists=new ArrayList<>();
+    private Map<String,Playlist> groups;private JSONArray artists,albums;private boolean groupsTruncated;
     private LocalLibrary(Context context){this.context=context;load();}
 
     private void load(){
@@ -72,14 +81,37 @@ final class LocalLibrary {
         JSONArray all=new JSONArray();
         for(Playlist playlist:playlists){JSONArray tracks=new JSONArray();for(Track track:playlist.tracks)tracks.put(track.json());all.put(object("id",playlist.id,"name",playlist.name,"tracks",tracks));}
         context.getSharedPreferences("local_music",0).edit().putString("playlists",all.toString()).apply();
+        groups=null;artists=null;albums=null;
     }
-    synchronized Playlist get(String id){for(Playlist item:playlists)if(item.id.equals(id))return item;return null;}
+    synchronized Playlist get(String id){for(Playlist item:playlists)if(item.id.equals(id))return item;if(id!=null&&id.startsWith("group:")){ensureGroups();return groups.get(id);}return null;}
     synchronized JSONArray list(){
         JSONArray out=new JSONArray();for(Playlist item:playlists)out.put(object("id",item.id,"name",item.name,"count",item.tracks.size()));return out;
     }
     synchronized JSONObject detail(String id){
         Playlist item=get(id);if(item==null)return new JSONObject();JSONArray rows=new JSONArray();for(Track track:item.tracks)rows.put(track.display());
-        return object("id",item.id,"name",item.name,"tracks",rows);
+        return object("id",item.id,"name",item.name,"tracks",rows,"readOnly",item.id.startsWith("group:"));
+    }
+    synchronized JSONObject grouped(){ensureGroups();return object("artists",artists,"albums",albums,"truncated",groupsTruncated);}
+    private static String groupValue(String text,String fallback){String clean=text==null?"":text.trim();return clean.isEmpty()||clean.equals("<unknown>")?fallback:clean;}
+    private static String groupId(String kind,String value){return "group:"+kind+":"+UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8));}
+    private static String groupKey(String value){return java.text.Normalizer.normalize(value,java.text.Normalizer.Form.NFC).toLowerCase(Locale.ROOT);}
+    private synchronized void ensureGroups(){
+        if(groups!=null)return;
+        LinkedHashMap<String,ArrayList<Track>> byArtist=new LinkedHashMap<>(),byAlbum=new LinkedHashMap<>();
+        Map<String,String> artistLabels=new HashMap<>(),albumLabels=new HashMap<>(),albumArtists=new HashMap<>();Set<String> seen=new HashSet<>();groupsTruncated=false;
+        outer:for(Playlist playlist:playlists)for(Track track:playlist.tracks){
+            String identity=documentIdentity(Uri.parse(track.uri));if(!seen.add(identity))continue;
+            if(seen.size()>20000){groupsTruncated=true;break outer;}
+            String artist=groupValue(track.artist,"아티스트 정보 없음"),album=groupValue(track.album,"앨범 정보 없음");
+            String ak=groupKey(artist),bk=groupKey(album)+"\n"+ak;
+            byArtist.computeIfAbsent(ak,k->new ArrayList<>()).add(track);artistLabels.putIfAbsent(ak,artist);
+            byAlbum.computeIfAbsent(bk,k->new ArrayList<>()).add(track);albumLabels.putIfAbsent(bk,album);albumArtists.putIfAbsent(bk,artist);
+        }
+        groups=new HashMap<>();artists=groupRows("artist",byArtist,artistLabels,null);albums=groupRows("album",byAlbum,albumLabels,albumArtists);
+    }
+    private JSONArray groupRows(String kind,Map<String,ArrayList<Track>> source,Map<String,String> labels,Map<String,String> subtitles){
+        ArrayList<String> keys=new ArrayList<>(source.keySet());Collections.sort(keys,(a,b)->{int n=String.CASE_INSENSITIVE_ORDER.compare(labels.get(a),labels.get(b));return n!=0?n:a.compareTo(b);});
+        JSONArray out=new JSONArray();for(String key:keys){String id=groupId(kind,key),name=labels.get(key);Playlist group=new Playlist(id,name,source.get(key));groups.put(id,group);out.put(object("id",id,"name",name,"subtitle",subtitles==null?"":subtitles.get(key),"count",group.tracks.size()));}return out;
     }
     synchronized boolean remove(String id){
         boolean removed=playlists.removeIf(item->item.id.equals(id));if(removed)save();return removed;
@@ -96,6 +128,13 @@ final class LocalLibrary {
             if(tracks.isEmpty())playlists.remove(i);else playlists.set(i,new Playlist(old.id,old.name,tracks));save();return true;
         }
         return false;
+    }
+    synchronized boolean moveTrack(String id,int from,int to){
+        for(int i=0;i<playlists.size();i++){
+            Playlist old=playlists.get(i);if(!old.id.equals(id))continue;
+            if(from<0||to<0||from>=old.tracks.size()||to>=old.tracks.size()||from==to)return false;
+            ArrayList<Track> tracks=new ArrayList<>(old.tracks);Track moved=tracks.remove(from);tracks.add(to,moved);playlists.set(i,new Playlist(old.id,old.name,tracks));save();return true;
+        }return false;
     }
     private synchronized Playlist add(String name,List<Track> tracks){
         if(tracks.isEmpty())throw new IllegalArgumentException("불러올 수 있는 곡이 없습니다.");
@@ -139,6 +178,45 @@ final class LocalLibrary {
         }
         IoSupport.checkInterrupted();String name=displayName(file).replaceFirst("(?i)\\.m3u8?$","").trim();if(name.isEmpty())name="재생목록";
         return new ImportResult(add(name,tracks),tracks.size(),missing,parsed.unsupported);
+    }
+    ImportResult importFolder(Uri tree)throws Exception {
+        List<M3uPlaylist.Document> documents=scan(tree);Map<String,String> lyrics=new HashMap<>();
+        for(M3uPlaylist.Document document:documents)if(document.path.matches("(?i).*\\.lrc$")){String key=lyricKey(document.path);if(lyrics.containsKey(key))lyrics.put(key,"");else lyrics.put(key,document.uri);}
+        ArrayList<Track> tracks=new ArrayList<>();
+        for(M3uPlaylist.Document document:documents){
+            IoSupport.checkInterrupted();if(document.path.matches("(?i).*\\.(lrc|m3u|m3u8)$"))continue;
+            if(tracks.size()>=MAX_TRACKS)throw new IOException("폴더의 음악은 최대 5,000곡까지 불러올 수 있습니다.");
+            tracks.add(metadata(Uri.parse(document.uri),document.path,"",0,lyrics.getOrDefault(lyricKey(document.path),"")));
+        }
+        Uri root=DocumentsContract.buildDocumentUriUsingTree(tree,DocumentsContract.getTreeDocumentId(tree));String name=displayName(root).trim();
+        if(name.isEmpty())name="음악 폴더";if(name.length()>80)name=name.substring(0,80);
+        return new ImportResult(add(name,tracks),tracks.size(),0,0);
+    }
+    private static String documentIdentity(Uri uri){
+        try{return String.valueOf(uri.getAuthority())+"|"+DocumentsContract.getDocumentId(uri);}catch(Exception ignored){return uri.toString();}
+    }
+    ExportResult exportM3u(String id,Uri tree)throws Exception {
+        Playlist source=get(id);if(source==null||id.startsWith("group:"))throw new IOException("내보낼 재생목록을 선택해 주세요.");
+        List<M3uPlaylist.Document> docs=scan(tree);Map<String,String> paths=new HashMap<>();Map<String,Integer> counts=new HashMap<>();
+        for(M3uPlaylist.Document doc:docs){
+            if(!M3uPlaylist.exportablePath(doc.path))continue;
+            String identity=documentIdentity(Uri.parse(doc.uri)),key=groupKey(doc.path);counts.put(key,counts.getOrDefault(key,0)+1);
+            if(paths.containsKey(identity)&&!doc.path.equals(paths.get(identity)))paths.put(identity,"");else if(!paths.containsKey(identity))paths.put(identity,doc.path);
+        }
+        ArrayList<M3uPlaylist.ExportEntry> entries=new ArrayList<>();int skipped=0;
+        for(Track track:source.tracks){IoSupport.checkInterrupted();String path=paths.get(documentIdentity(Uri.parse(track.uri)));
+            if(path==null||path.isEmpty()||counts.getOrDefault(groupKey(path),0)!=1){skipped++;continue;}
+            entries.add(new M3uPlaylist.ExportEntry(path,track.title,track.artist,track.duration));
+        }
+        if(entries.isEmpty())throw new IOException("선택한 폴더에서 재생목록의 음악을 찾지 못했습니다.");
+        String safe=source.name.replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]","_").trim();if(safe.isEmpty())safe="재생목록";if(safe.length()>60)safe=safe.substring(0,60);
+        String name=safe+"-"+UUID.randomUUID().toString().substring(0,8)+".m3u8";
+        Uri root=DocumentsContract.buildDocumentUriUsingTree(tree,DocumentsContract.getTreeDocumentId(tree));Uri output=null;
+        try{
+            output=DocumentsContract.createDocument(context.getContentResolver(),root,"audio/x-mpegurl",name);if(output==null)throw new IOException("재생목록 파일을 만들 수 없습니다.");
+            try(OutputStream stream=context.getContentResolver().openOutputStream(output,"w")){if(stream==null)throw new IOException("재생목록 파일을 열 수 없습니다.");stream.write(M3uPlaylist.export(entries).getBytes(StandardCharsets.UTF_8));}
+        }catch(Exception error){if(output!=null)try{DocumentsContract.deleteDocument(context.getContentResolver(),output);}catch(Exception ignored){}throw error;}
+        return new ExportResult(entries.size(),skipped,name);
     }
     private String displayName(Uri uri){
         try(Cursor c=context.getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME},null,null,null)){

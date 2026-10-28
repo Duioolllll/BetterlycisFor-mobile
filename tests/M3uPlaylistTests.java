@@ -21,6 +21,12 @@ public final class M3uPlaylistTests {
         M3uPlaylist.Document duplicate=new M3uPlaylist.Document("Else/same.mp3","content://tree/5");
         ok(M3uPlaylist.match(folder.entries.get(0),Arrays.asList(wrong,duplicate))==null,"ambiguous filename is not chosen");
         ok(M3uPlaylist.match(folder.entries.get(0),Collections.emptyList())==null,"missing file remains unmatched");
+        M3uPlaylist.Document percent=new M3uPlaylist.Document("Album/#100%20.wav","content://tree/6");
+        String exported=M3uPlaylist.export(Arrays.asList(new M3uPlaylist.ExportEntry(percent.path,"노래\n이름","가수",123000),new M3uPlaylist.ExportEntry(song.path,"다음 곡","",0)));
+        M3uPlaylist.Result exportedList=M3uPlaylist.parse(exported);
+        ok(exportedList.entries.size()==2&&M3uPlaylist.match(exportedList.entries.get(0),Arrays.asList(percent,song))==percent&&M3uPlaylist.match(exportedList.entries.get(1),Arrays.asList(percent,song))==song,"export preserves order and literal percent-encoded names");
+        ok(exportedList.entries.get(0).durationMs==123000&&exportedList.entries.get(0).title.equals("가수 - 노래 이름"),"export sanitizes labels and retains duration");
+        ok(!M3uPlaylist.exportablePath("../outside.mp3")&&!M3uPlaylist.exportablePath("a\n#EXTINF:0,evil")&&M3uPlaylist.exportablePath("Album/#track.wav"),"export rejects traversal and line injection");
         ok(M3uPlaylist.parse("spotify:track:abc\ncontent://other/42\n").unsupported==2,"non-file schemes are not read");
         ok(M3uPlaylist.decode("노래.mp3".getBytes(java.nio.charset.Charset.forName("MS949"))).equals("노래.mp3"),"Korean Windows playlist encoding");
         StringBuilder many=new StringBuilder();for(int i=0;i<=M3uPlaylist.MAX_ENTRIES;i++)many.append("song.mp3\n");
