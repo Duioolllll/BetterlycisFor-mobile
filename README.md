@@ -9,3 +9,20 @@ BetterLyrics Mobile은 Android에서 재생 중인 음악에 맞춰 가사를 �
 Android 8.0 이상에서 사용할 수 있습니다. 설치 파일은 [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest)에서 받습니다. 자세한 사용 방법은 [설치 안내](docs/INSTALL_KO.md)와 [플레이리스트 안내](docs/PLAYLISTS.md)를 참고하세요.
 
 원본의 모든 기능이 구현된 것은 아닙니다. 현재 지원 범위와 남은 항목은 [기능 대응 현황](docs/PARITY.md)에 정리되어 있습니다. 이 프로젝트는 [GPL-3.0](LICENSE)으로 배포됩니다.
+
+
+EN
+
+# BetterLyrics Mobile
+
+BetterLyrics Mobile is an unofficial Android app that displays synchronized lyrics for the music you're listening to. It is inspired by the original BetterLyrics project and has been adapted for Android.
+
+The app lets you import and play music from your phone's local music folders and M3U playlists. You can browse your music library by artist or album, as well as edit and export playlists. You can also view playlists from your Spotify account and control playback on active Spotify devices. **Spotify Premium is required for Spotify playback control.**
+
+Lyrics can be searched through LRCLIB, NetEase, and Kugou, or imported from local files. Additional features include lyric timing adjustments, saving lyric cards, appearance customization, floating lyrics, and home screen widgets. Listening history is stored locally on your device.
+
+**Android 8.0 or later is required.** Download the latest APK from [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest). For detailed instructions, see the [Installation Guide](docs/INSTALL_EN.md) and [Playlist Guide](docs/PLAYLISTS.md).
+
+Not all features from the original BetterLyrics project have been implemented. For details on currently supported features and remaining work, see the [Feature Compatibility Status](docs/PARITY.md).
+
+This project is distributed under the [GPL-3.0 License](LICENSE).
