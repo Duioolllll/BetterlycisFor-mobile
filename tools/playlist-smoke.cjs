@@ -12,6 +12,8 @@ const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,pos
    await page.addInitScript(s=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(s),command:(action,json)=>commands.push({action,data:JSON.parse(json)})};},initial);
    await page.goto(url);await page.locator('#playlistButton').click();
    await page.waitForFunction(()=>document.querySelector('#playlistSheet').getBoundingClientRect().bottom<=innerHeight+0.1);
+   // Allow the sheet and button press transitions to finish before measuring hit areas.
+   await page.waitForFunction(()=>['playlistButton','localTab','spotifyTab'].every(id=>{const r=document.getElementById(id).getBoundingClientRect();return r.width>=43.5&&r.height>=43.5;}),null,{timeout:3000});
    assert(await page.locator('#playlistSheet').isVisible());
    const geometry=await page.evaluate(()=>{const r=document.querySelector('#playlistSheet').getBoundingClientRect();return {left:r.left,right:r.right,bottom:r.bottom,width:document.documentElement.scrollWidth,viewport:innerWidth,height:innerHeight}});
    assert(geometry.left>=-0.1&&geometry.right<=viewport.width+0.1&&geometry.bottom<=viewport.height+0.1&&geometry.width<=viewport.width,'playlist sheet fits '+JSON.stringify({viewport,geometry}));
