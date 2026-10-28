@@ -10,7 +10,63 @@ concurrency:
   group: betterlyrics-release
   cancel-in-progress: false
 jobs:
+  widget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify Android 16 widget and fonts
+        run: bash tools/emulator-widget-ci.sh widget
+      - name: Save widget evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-validation-widget
+          path: |
+            ${{ runner.temp }}/WIDGET_VALIDATION.json
+            ${{ runner.temp }}/WIDGET_LOGCAT.txt
+          if-no-files-found: error
+          overwrite: true
+  playlist:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify Android 16 playlist and playback
+        run: bash tools/emulator-widget-ci.sh playlist
+      - name: Save playlist evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-validation-playlist
+          path: |
+            ${{ runner.temp }}/PLAYLIST_VALIDATION.json
+            ${{ runner.temp }}/PLAYLIST_LOGCAT.txt
+          if-no-files-found: error
+          overwrite: true
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify signed APK installation and previous-version updates
+        run: bash tools/emulator-widget-ci.sh install
+      - name: Save installation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-validation-install
+          path: ${{ runner.temp }}/INSTALL_VALIDATION.json
+          if-no-files-found: error
+          overwrite: true
   release:
+    needs: [widget, playlist, install]
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -77,8 +133,25 @@ jobs:
                     'scope': 'Chromium with a synthetic Android bridge; not a physical device', 'suites': suites}
           (Path(os.environ['RUNNER_TEMP']) / 'UI_VALIDATION.json').write_text(json.dumps(report, indent=2) + '\n')
           PY_UI
-      - name: Android 16 widget, installation and update regression
-        run: bash tools/emulator-widget-ci.sh release
+      - name: Collect Android verification reports
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: android-validation-*
+          path: ${{ runner.temp }}/android-validation
+          merge-multiple: true
+      - name: Confirm Android reports belong to this APK
+        run: |
+          python3 - <<'PY_ANDROID'
+          import json, os
+          from pathlib import Path
+          reports=Path(os.environ['RUNNER_TEMP'])/'android-validation'
+          meta=json.loads(Path('downloads/release.json').read_text())
+          for name in ('WIDGET_VALIDATION.json', 'PLAYLIST_VALIDATION.json', 'INSTALL_VALIDATION.json'):
+              report=json.loads((reports/name).read_text())
+              assert report['passed'], name+' did not pass'
+              if name=='INSTALL_VALIDATION.json':
+                  assert report['version']==meta['version'] and report['sha256']==meta['sha256']
+          PY_ANDROID
       - name: Create release with APK and checksum
         env:
           GH_TOKEN: ${{ github.token }}
@@ -89,7 +162,7 @@ jobs:
             echo "Release already exists; refusing to replace published assets."
             exit 1
           fi
-          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/INSTALL_VALIDATION.json" "$RUNNER_TEMP/UI_VALIDATION.json" "$RUNNER_TEMP/WIDGET_VALIDATION.json" "$RUNNER_TEMP/PLAYLIST_VALIDATION.json" --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
+          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/android-validation/INSTALL_VALIDATION.json" "$RUNNER_TEMP/UI_VALIDATION.json" "$RUNNER_TEMP/android-validation/WIDGET_VALIDATION.json" "$RUNNER_TEMP/android-validation/PLAYLIST_VALIDATION.json" --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
           gh release edit "$tag" --draft=false --latest
           curl --fail --location --retry 3 --retry-delay 2 --output "$RUNNER_TEMP/published.apk" "https://github.com/${GH_REPO}/releases/download/${tag}/${RELEASE_APK}"
           python3 - "$RUNNER_TEMP/published.apk" <<'PY_HASH'
