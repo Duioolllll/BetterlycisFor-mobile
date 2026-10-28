@@ -30,10 +30,17 @@ def tree():
 def find(tree_root,name):
     return next((node for node in tree_root.iter('node') if node.attrib.get('resource-id','').endswith(':id/'+name)),None)
 def wait_for(predicate,description,attempts=25):
-    latest=''
+    latest='';launcher_anrs=0
     for _ in range(attempts):
         try:
             current=tree();latest=' | '.join(node.attrib.get('text','') for node in current.iter('node') if node.attrib.get('text'))
+            # A cold emulator can show its own Pixel Launcher ANR over the test
+            # host. Dismiss only that system-app dialog; target-app ANRs still fail.
+            if "Pixel Launcher isn't responding" in latest and launcher_anrs<2:
+                close=next((node for node in current.iter('node') if node.attrib.get('text')=='Close app'),None)
+                if close is not None:
+                    print('Closing an unresponsive emulator launcher',flush=True)
+                    click(close);launcher_anrs+=1;time.sleep(1);continue
             if predicate(current):return current
         except (RuntimeError,ET.ParseError,ValueError):pass
         time.sleep(1)
