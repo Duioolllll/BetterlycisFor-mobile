@@ -24,6 +24,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
         volatile Intent launched;
         @Override public void startActivity(Intent intent){launched=intent;}
     }
+    private CaptureActivity captureActivity(){AtomicReference<CaptureActivity> result=new AtomicReference<>();runOnMainSync(()->result.set(new CaptureActivity()));return result.get();}
     private void waitFor(Probe probe,String name)throws Exception{for(int i=0;i<100;i++){if(probe.ready())return;Thread.sleep(200);}throw new IllegalStateException("Timed out: "+name);}
     private Object call(Object target,String method,Class<?>[] types,Object... args)throws Exception{Method m=target.getClass().getDeclaredMethod(method,types);m.setAccessible(true);return m.invoke(target,args);}
     private Object mainCall(Object target,String method,Class<?>[] types,Object... args)throws Exception{
@@ -94,7 +95,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Class<?> callbackType=targetLoader.loadClass("io.betterlyrics.mobile.SpotifyClient$Callback");
             AtomicReference<JSONObject> authResult=new AtomicReference<>();
             Object authCallback=java.lang.reflect.Proxy.newProxyInstance(targetLoader,new Class<?>[]{callbackType},(proxy,method,arguments)->{if(method.getName().equals("done"))authResult.set((JSONObject)arguments[0]);return null;});
-            CaptureActivity browser=new CaptureActivity();
+            CaptureActivity browser=captureActivity();
             mainCall(client,"connect",new Class<?>[]{Activity.class,callbackType},browser,authCallback);
             if(browser.launched==null||browser.launched.getData()==null)throw new IllegalStateException("Spotify browser request missing");
             Uri authorization=browser.launched.getData();String redirect=authorization.getQueryParameter("redirect_uri"),state=authorization.getQueryParameter("state");
@@ -112,7 +113,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
             }
             if(occupied==null)throw new IllegalStateException("Callback port could not be reused after authorization");
             try{
-                Object blocked=ctor.newInstance(context);CaptureActivity blockedBrowser=new CaptureActivity();AtomicReference<JSONObject> blockedResult=new AtomicReference<>();
+                Object blocked=ctor.newInstance(context);CaptureActivity blockedBrowser=captureActivity();AtomicReference<JSONObject> blockedResult=new AtomicReference<>();
                 Object blockedCallback=java.lang.reflect.Proxy.newProxyInstance(targetLoader,new Class<?>[]{callbackType},(proxy,method,arguments)->{if(method.getName().equals("done"))blockedResult.set((JSONObject)arguments[0]);return null;});
                 mainCall(blocked,"connect",new Class<?>[]{Activity.class,callbackType},blockedBrowser,blockedCallback);
                 if(blockedBrowser.launched!=null||blockedResult.get()==null||!"error".equals(blockedResult.get().optString("view")))throw new IllegalStateException("Occupied callback port was not reported");
