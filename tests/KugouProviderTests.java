@@ -37,6 +37,14 @@ public final class KugouProviderTests {
             ok(result.lines.get(0).text.equals("fixture words")&&downloads.get()==1,"mismatched lyric candidate is not downloaded");
             LyricsRepository.Result cached=repo.fetch(song,"kugou","best",false);ok(cached.cached&&cached.lines.size()==2&&downloads.get()==1,"selected provider cache retains decoded lyrics");
         }
+        AtomicInteger searches=new AtomicInteger();
+        try(LyricsRepository repo=new LyricsRepository(Files.createTempDirectory("bl-kugou-limit-").toFile(),(address,body)->{
+            if(address.contains("mobilecdn"))return new JSONObject().put("data",new JSONObject().put("info",new JSONArray().put(item).put(new JSONObject(item.toString()).put("hash","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")))).toString();
+            searches.incrementAndGet();throw new LyricsRepository.ProviderUnavailableException(429);
+        })){
+            boolean failed=false;try{repo.fetch(song,"kugou","sequential",true);}catch(IOException expected){failed=true;}
+            ok(failed&&searches.get()==1,"rate-limited provider is not queried for additional candidates");
+        }
         System.out.println("KugouProviderTests: "+checks+" checks passed");
     }
 }

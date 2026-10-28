@@ -1,6 +1,6 @@
 # 0.9.0 — 2026-10-28
 
-281 JVM checks cover playlist export, Kugou KRC parsing, bounded retry, and listening-time accounting. Chromium playlist and settings smoke checks passed; the Android 16 release gate checks folder import, artist/album groups, M3U export, playback reordering, lyric-card PNG, private listening history, and prior-version updates using synthetic fixtures. Published reports contain the gate results. A live Kugou response for one song was decoded and yielded 47 word-timed lyric rows. Actual Spotify account playback, physical devices, third-party document providers and long-running background behavior remain unverified. [Playlist guide](PLAYLISTS.md) · [Feature parity](PARITY.md).
+282 JVM checks cover playlist export, Kugou KRC parsing, bounded retry, and listening-time accounting. Chromium playlist and settings smoke checks passed; the Android 16 release gate checks folder import, artist/album groups, M3U export, playback reordering, lyric-card PNG, private listening history, and prior-version updates using synthetic fixtures. Published reports contain the gate results. A live Kugou response for one song was decoded and yielded 47 word-timed lyric rows. Actual Spotify account playback, physical devices, third-party document providers and long-running background behavior remain unverified. [Playlist guide](PLAYLISTS.md) · [Feature parity](PARITY.md).
 
 ---
 

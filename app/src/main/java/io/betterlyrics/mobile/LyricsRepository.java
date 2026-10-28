@@ -36,6 +36,8 @@ public final class LyricsRepository implements AutoCloseable {
     private final File cache;
     private static final int MAX_BYTES=3*1024*1024;
     private final Object cacheLock=new Object();
+    /** Stop querying this provider when it explicitly asks us to slow down. */
+    public static final class ProviderUnavailableException extends IOException {public ProviderUnavailableException(int status){super("HTTP "+status);}}
     public interface Transport { String request(String address,String body)throws Exception; }
     private final Transport transport;
     private final ThreadPoolExecutor providers=(ThreadPoolExecutor)Executors.newFixedThreadPool(3);
@@ -54,7 +56,8 @@ public final class LyricsRepository implements AutoCloseable {
             try {
                 if(body!=null){c.setRequestMethod("POST");c.setDoOutput(true);c.setRequestProperty("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");byte[] payload=body.getBytes(StandardCharsets.UTF_8);c.setFixedLengthStreamingMode(payload.length);try(OutputStream out=c.getOutputStream()){out.write(payload);}}
                 int status=c.getResponseCode();if(status==404)return "";
-                if((status==429||status==503)&&attempt==0){retry=IoSupport.retryAfterMillis(c.getHeaderField("Retry-After"),System.currentTimeMillis());if(retry<0||retry>5000)throw new IOException("HTTP "+status);}
+                if((status==429||status==503)&&attempt==0){retry=IoSupport.retryAfterMillis(c.getHeaderField("Retry-After"),System.currentTimeMillis());if(retry<0||retry>5000)throw new ProviderUnavailableException(status);}
+                else if(status==429||status==503)throw new ProviderUnavailableException(status);
                 else if(status!=200)throw new IOException("HTTP "+status);
                 else{
                     if(c.getContentLengthLong()>MAX_BYTES)throw new IOException("응답이 너무 큽니다.");
@@ -210,7 +213,7 @@ public final class LyricsRepository implements AutoCloseable {
         for(Result r:search(song,provider)) {
             if(Thread.currentThread().isInterrupted())throw new InterruptedException();
             if(r.score<70||!eligible(song,r))continue;
-            try{hydrate(r);if(!plausible(r))continue;if(best==null||quality(song,r)>quality(song,best))best=r;}catch(InterruptedException e){throw e;}catch(Exception ignored){IoSupport.checkInterrupted();}
+            try{hydrate(r);if(!plausible(r))continue;if(best==null||quality(song,r)>quality(song,best))best=r;}catch(InterruptedException e){throw e;}catch(ProviderUnavailableException e){if(best!=null)return best;throw e;}catch(Exception ignored){IoSupport.checkInterrupted();}
             if((provider.equals("netease")||provider.equals("kugou"))&&++attempts>=(best!=null&&best.masked?6:3))break;
         }
         return best;
