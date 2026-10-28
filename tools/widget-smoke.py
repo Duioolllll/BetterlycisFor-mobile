@@ -63,8 +63,8 @@ try:
     adb('shell','am','start','-W','-n',component)
     wait_for(text_is('widget_lyric','음악 감지 연결'),'widget without permission')
     report['checks'].append('widget is hosted and requests music detection when permission is missing')
-    fixture={'title':'Widget Test','artist':'Artist','album':'Album','provider':'Local','duration':60000,'raw':'[00:00.00]Widget line one\n[00:05.00]Widget line two\n[00:30.00]Widget line three','score':100}
-    filename=hashlib.sha256(b'Widget Test|Artist|Album|60').hexdigest()+'.json'
+    fixture={'title':'Widget Test','artist':'Artist','album':'Album','provider':'Local','duration':600000,'raw':'[00:00.00]Widget line one\n[00:05.00]Widget line two\n[05:00.00]Widget line three','score':100}
+    filename=hashlib.sha256(b'Widget Test|Artist|Album|600').hexdigest()+'.json'
     with tempfile.NamedTemporaryFile(mode='w',encoding='utf-8',suffix='.json',delete=False) as temp:
         json.dump(fixture,temp);temp_path=Path(temp.name)
     try:

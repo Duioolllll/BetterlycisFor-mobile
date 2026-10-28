@@ -60,11 +60,11 @@ public final class WidgetHostActivity extends Activity {
         session.setCallback(new MediaSession.Callback(){
             @Override public void onPlay(){position=4500;playing=true;publish();}
             @Override public void onPause(){position=currentPosition();playing=false;publish();}
-            @Override public void onSkipToNext(){position=30000;publish();}
+            @Override public void onSkipToNext(){position=300000;publish();}
             @Override public void onSkipToPrevious(){position=1000;publish();}
             @Override public void onSeekTo(long value){position=value;publish();}
         });
-        session.setMetadata(new MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_MEDIA_ID,"widget-test").putString(MediaMetadata.METADATA_KEY_TITLE,"Widget Test").putString(MediaMetadata.METADATA_KEY_ARTIST,"Artist").putString(MediaMetadata.METADATA_KEY_ALBUM,"Album").putLong(MediaMetadata.METADATA_KEY_DURATION,60000).build());
+        session.setMetadata(new MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_MEDIA_ID,"widget-test").putString(MediaMetadata.METADATA_KEY_TITLE,"Widget Test").putString(MediaMetadata.METADATA_KEY_ARTIST,"Artist").putString(MediaMetadata.METADATA_KEY_ALBUM,"Album").putLong(MediaMetadata.METADATA_KEY_DURATION,600000).build());
         publish();session.setActive(true);
         NotificationManager notifications=getSystemService(NotificationManager.class);
         notifications.createNotificationChannel(new NotificationChannel("widget-test","Widget test",NotificationManager.IMPORTANCE_LOW));
