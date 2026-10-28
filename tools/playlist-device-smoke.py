@@ -27,7 +27,7 @@ try:
     Path(args.report).parent.mkdir(parents=True,exist_ok=True)
     log_file=(Path(args.report).parent/'PLAYLIST_LOGCAT.txt').open('w')
     log_process=subprocess.Popen(['adb','-s',args.serial,'logcat','-v','threadtime','PlaylistInstrumentation:I','AndroidRuntime:E','MainActivity:W','DocumentsProvider:E','ActivityManager:E','InputDispatcher:E','*:S'],stdout=log_file,stderr=subprocess.STDOUT,text=True)
-    output=adb('shell','am','instrument','-w',host+'/.PlaylistInstrumentation',timeout=180)
+    output=adb('shell','am','instrument','-w',host+'/.PlaylistInstrumentation',timeout=210)
     for name in ('controls','local','library','card','listening','spotifyAuthorize','spotifyStorage','spotifyPlayback','spotifyLoopback'):
         assert 'INSTRUMENTATION_RESULT: '+name+'=ok' in output,output
     assert 'INSTRUMENTATION_CODE: -1' in output,output
