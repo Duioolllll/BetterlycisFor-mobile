@@ -45,6 +45,7 @@ import json, os, subprocess, sys
 from pathlib import Path
 apk=Path('dist')/json.loads(Path('dist/build-info-debug.json').read_text())['apk']
 subprocess.run([sys.executable,'tools/widget-smoke.py','--serial','emulator-5554','--sdk',os.environ['ANDROID_HOME'],'--apk',str(apk),'--report',str(Path(os.environ['RUNNER_TEMP'])/'WIDGET_VALIDATION.json')],check=True)
+subprocess.run([sys.executable,'tools/playlist-device-smoke.py','--serial','emulator-5554','--sdk',os.environ['ANDROID_HOME'],'--apk',str(apk),'--report',str(Path(os.environ['RUNNER_TEMP'])/'PLAYLIST_VALIDATION.json')],check=True)
 PY
 if [ "$mode" = release ]; then
   python3 tools/install-smoke.py --serial emulator-5554 --report "$RUNNER_TEMP/INSTALL_VALIDATION.json"

@@ -157,7 +157,7 @@ button { transition: background .18s ease, color .18s ease, transform .18s ease;
   .track-card h1 { font-size: 17px; }
   .empty-state h2 { font-size: 29px; }
 }
-@media (max-width: 359px) {
+@media (max-width: 439px) {
   .player { height: 174px; grid-template-columns: minmax(0, 1fr); grid-template-rows: 30px 52px 44px; gap: 6px; padding-top: 10px; padding-bottom: 10px; }
   .transport { grid-column: 1; grid-row: 2; justify-content: center; }
   .player-actions { grid-column: 1; grid-row: 3; justify-content: center; gap: 16px; }

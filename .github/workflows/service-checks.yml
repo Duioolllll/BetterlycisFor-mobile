@@ -49,4 +49,6 @@ jobs:
             ${{ runner.temp }}/WIDGET_PREVIEW.png
             ${{ runner.temp }}/WIDGET_CUSTOM.png
             ${{ runner.temp }}/WIDGET_LOGCAT.txt
+            ${{ runner.temp }}/PLAYLIST_VALIDATION.json
+            ${{ runner.temp }}/PLAYLIST_LOGCAT.txt
           if-no-files-found: ignore

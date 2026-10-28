@@ -54,7 +54,7 @@ public final class LyricsListener extends NotificationListenerService {
     private void scheduleRefresh(){handler.removeCallbacks(refreshTask);handler.postDelayed(refreshTask,200);}
     public static void refresh(Context context){LyricsListener service=live;if(service!=null)service.handler.post(service.refreshTask);else if(AppState.get(context).granted())try{requestRebind(new ComponentName(context,LyricsListener.class));}catch(Exception ignored){}}
     public static void refreshOverlay(){LyricsListener service=live;if(service!=null){service.handler.removeCallbacks(service.overlayTick);service.handler.post(service.overlayTick);}}
-    public static void refreshWidget(Context context){LyricsListener service=live;if(service!=null){service.handler.removeCallbacks(service.widgetTick);service.handler.post(service.widgetTick);}else LyricsWidgetProvider.refreshAll(context,AppState.get(context),false);}
+    public static void refreshWidget(Context context){LyricsListener service=live;if(service!=null){service.handler.removeCallbacks(service.widgetTick);service.handler.post(service.widgetTick);}else if(!LocalPlaybackService.refreshWidget())LyricsWidgetProvider.refreshAll(context,AppState.get(context),false);}
     static ArtworkResolver.Source notificationArtwork(MediaController controller){
         ArtworkResolver.Source source=new ArtworkResolver.Source();LyricsListener service=live;
         if(service==null||controller==null)return source;

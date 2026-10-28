@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Exercise the real launcher widget on a dedicated, disposable emulator."""
-import argparse, hashlib, json, os, re, subprocess, sys, tempfile, time, xml.etree.ElementTree as ET, zipfile
+import argparse, hashlib, json, os, re, subprocess, sys, tempfile, time, xml.etree.ElementTree as ET
 from pathlib import Path
+from widget_harness import build_host
 
 root=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser()
 parser.add_argument('--serial',required=True);parser.add_argument('--sdk',required=True);parser.add_argument('--apk',required=True);parser.add_argument('--report',required=True)
 args=parser.parse_args()
 if not re.fullmatch(r'emulator-\d+',args.serial):raise SystemExit('Use a dedicated disposable emulator, never a physical device.')
-sdk=Path(args.sdk).resolve();bt=sdk/'build-tools/36.0.0';android=sdk/'platforms/android-36/android.jar';work=root/'build/widget-harness'
+sdk=Path(args.sdk).resolve()
 target='io.betterlyrics.mobile';host='io.betterlyrics.widgettest';component=host+'/.WidgetHostActivity'
 report={'passed':False,'serial':args.serial,'checks':[],'physicalDeviceTested':False}
 installed_target=installed_host=bound=False
@@ -22,20 +23,6 @@ def package_present(name):
     result=subprocess.run(['adb','-s',args.serial,'shell','pm','path',name],capture_output=True,text=True,timeout=120)
     if result.returncode not in (0,1):raise RuntimeError('Unable to check installed packages')
     return result.stdout.strip().startswith('package:')
-def build_host():
-    work.mkdir(parents=True,exist_ok=True);classes=work/'classes';dex=work/'dex';classes.mkdir(exist_ok=True);dex.mkdir(exist_ok=True)
-    manifest=root/'tools/widget-harness/AndroidManifest.xml';linked=work/'linked.apk';unsigned=work/'unsigned.apk';aligned=work/'aligned.apk';apk=work/'widget-host.apk'
-    run([bt/'aapt2','link','-I',android,'--manifest',manifest,'--min-sdk-version','26','--target-sdk-version','28','-o',linked])
-    run(['java','-m','jdk.compiler/com.sun.tools.javac.Main','--release','8','-encoding','UTF-8','-classpath',android,'-d',classes,*sorted((root/'tools/widget-harness').glob('*.java'))])
-    run(['java','-cp',bt/'lib/d8.jar','com.android.tools.r8.D8','--min-api','26','--lib',android,'--output',dex,*sorted(classes.rglob('*.class'))])
-    with zipfile.ZipFile(linked) as source,zipfile.ZipFile(unsigned,'w') as dest:
-        for name in source.namelist():dest.writestr(name,source.read(name),compress_type=zipfile.ZIP_STORED if name=='resources.arsc' else zipfile.ZIP_DEFLATED)
-        dest.writestr('classes.dex',(dex/'classes.dex').read_bytes(),compress_type=zipfile.ZIP_DEFLATED)
-    run([bt/'zipalign','-f','4',unsigned,aligned])
-    env=os.environ.copy();env['WIDGET_TEST_DEBUG_PASSWORD']='android'
-    run(['java','-jar',bt/'lib/apksigner.jar','sign','--ks',root/'.signing/debug.p12','--ks-key-alias','androiddebugkey','--ks-pass','env:WIDGET_TEST_DEBUG_PASSWORD','--key-pass','env:WIDGET_TEST_DEBUG_PASSWORD','--out',apk,aligned],env=env)
-    return apk
-
 def tree():
     adb('shell','uiautomator','dump','/sdcard/betterlyrics-widget-test.xml')
     xml=adb('shell','cat','/sdcard/betterlyrics-widget-test.xml')
@@ -62,7 +49,7 @@ try:
     assert adb('shell','getprop','ro.kernel.qemu').strip()=='1','Refusing a non-emulator device'
     assert int(adb('shell','getprop','ro.build.version.sdk').strip())==36,'API36 required'
     assert not package_present(target) and not package_present(host),'Emulator already has target data; refusing to overwrite it'
-    harness=build_host()
+    harness=build_host(root,sdk)
     adb('install','--no-streaming',Path(args.apk).resolve());installed_target=True
     adb('install','--no-streaming',harness);installed_host=True
     try:adb('shell','appwidget','grantbind','--package',host,'--user','0')

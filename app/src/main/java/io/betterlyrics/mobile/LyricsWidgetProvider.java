@@ -49,7 +49,8 @@ public final class LyricsWidgetProvider extends AppWidgetProvider {
         int[] ids=manager.getAppWidgetIds(new ComponentName(context,LyricsWidgetProvider.class));
         if(ids.length==0){hasWidgets=false;rendered.clear();return;}
         Set<Integer> active=new HashSet<>();for(int id:ids)active.add(id);rendered.keySet().retainAll(active);
-        boolean permission=state.connected||state.granted(),playing=state.playing();
+        boolean local=state.controller!=null&&context.getPackageName().equals(state.controller.getPackageName());
+        boolean permission=local||state.connected||state.granted(),connected=local||state.connected,playing=state.playing();
         long actions=state.playbackActions();
         boolean canPlay=(actions&(playing?(PlaybackState.ACTION_PAUSE|PlaybackState.ACTION_PLAY_PAUSE):(PlaybackState.ACTION_PLAY|PlaybackState.ACTION_PLAY_PAUSE)))!=0;
         boolean canPrevious=(actions&PlaybackState.ACTION_SKIP_TO_PREVIOUS)!=0,canNext=(actions&PlaybackState.ACTION_SKIP_TO_NEXT)!=0;
@@ -57,7 +58,7 @@ public final class LyricsWidgetProvider extends AppWidgetProvider {
         String artist=state.song.artist;
         String lyric;
         if(!permission)lyric=context.getString(R.string.widget_connect);
-        else if(!state.connected)lyric="음악 연결 중";
+        else if(!connected)lyric="음악 연결 중";
         else if(state.song.key.isEmpty())lyric="음악 재생 대기";
         else if(state.loading)lyric="가사 검색 중";
         else if(state.lyrics==null||state.lyrics.lines.isEmpty())lyric="가사 없음";
