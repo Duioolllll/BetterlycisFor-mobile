@@ -50,6 +50,13 @@ public final class LocalPlaybackService extends Service {
     }
     static void removeIfPlaying(String id){LocalPlaybackService service=live;if(service!=null&&service.playlist!=null&&service.playlist.id.equals(id))service.stopPlayback();}
     static String currentPlaylist(){LocalPlaybackService service=live;return service!=null&&service.playlist!=null?service.playlist.id:"";}
+    static boolean restoreState(){
+        LocalPlaybackService service=live;if(service==null||service.playlist==null||service.session==null)return false;
+        AppState state=AppState.get(service);
+        if(!service.playWhenReady&&(state.controller==null||!state.controller.getSessionToken().equals(service.session.getSessionToken())))return false;
+        android.media.session.MediaController controller=service.session.getController();PlaybackState playback=controller.getPlaybackState();if(playback==null)return false;
+        state.accept(controller,playback,true,false);return true;
+    }
     static void libraryChanged(Context context,String id){
         LocalPlaybackService service=live;if(service==null||service.playlist==null||!service.playlist.id.equals(id))return;
         LocalLibrary.Playlist updated=LocalLibrary.get(context).get(id);if(updated==null){service.stopPlayback();return;}

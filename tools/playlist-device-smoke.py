@@ -26,7 +26,7 @@ try:
     adb('shell','cmd','notification','disallow_listener',target+'/'+target+'.LyricsListener',required=False)
     Path(args.report).parent.mkdir(parents=True,exist_ok=True)
     log_file=(Path(args.report).parent/'PLAYLIST_LOGCAT.txt').open('w')
-    log_process=subprocess.Popen(['adb','-s',args.serial,'logcat','-v','threadtime','PlaylistInstrumentation:I','AndroidRuntime:E','*:S'],stdout=log_file,stderr=subprocess.STDOUT,text=True)
+    log_process=subprocess.Popen(['adb','-s',args.serial,'logcat','-v','threadtime','PlaylistInstrumentation:I','AndroidRuntime:E','MainActivity:W','DocumentsProvider:E','*:S'],stdout=log_file,stderr=subprocess.STDOUT,text=True)
     output=adb('shell','am','instrument','-w',host+'/.PlaylistInstrumentation',timeout=180)
     for name in ('local','spotifyStorage','spotifyLoopback'):
         assert 'INSTRUMENTATION_RESULT: '+name+'=ok' in output,output

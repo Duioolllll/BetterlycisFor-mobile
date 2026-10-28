@@ -44,7 +44,12 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Intent picked=new Intent().setData(tree).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
             mainCall(activity,"onActivityResult",new Class<?>[]{int.class,int.class,Intent.class},303,Activity.RESULT_OK,picked);
             Class<?> libraryClass=Class.forName("io.betterlyrics.mobile.LocalLibrary");Method get=libraryClass.getDeclaredMethod("get",Context.class);get.setAccessible(true);Object library=get.invoke(null,context);
-            waitFor(()->((JSONArray)call(library,"list",new Class<?>[]{})).length()==1,"M3U import");
+            try{waitFor(()->((JSONArray)call(library,"list",new Class<?>[]{})).length()==1,"M3U import");}
+            catch(IllegalStateException timeout){
+                try{call(library,"importM3u",new Class<?>[]{Uri.class,Uri.class},file,tree);}
+                catch(InvocationTargetException failure){throw new IllegalStateException("Direct M3U import failed",failure.getCause());}
+                throw new IllegalStateException("Activity M3U import timed out although direct import succeeded",timeout);
+            }
             JSONObject summary=((JSONArray)call(library,"list",new Class<?>[]{})).getJSONObject(0);String id=summary.getString("id");JSONObject detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);
             if(detail.getJSONArray("tracks").length()!=2||!detail.getJSONArray("tracks").getJSONObject(0).getString("title").equals("Sample One"))throw new IllegalStateException("M3U path resolution or order failed");
             Constructor<?> fresh=libraryClass.getDeclaredConstructor(Context.class);fresh.setAccessible(true);Object restored=fresh.newInstance(context);

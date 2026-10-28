@@ -46,7 +46,7 @@ public final class LyricsListener extends NotificationListenerService {
     private void cleanup(){
         if(registered&&manager!=null)try{manager.removeOnActiveSessionsChangedListener(active);}catch(Exception ignored){}
         registered=false;for(Map.Entry<MediaController,MediaController.Callback> e:callbacks.entrySet())try{e.getKey().unregisterCallback(e.getValue());}catch(Exception ignored){}callbacks.clear();appLabels.clear();handler.removeCallbacksAndMessages(null);removeOverlay();
-        if(live==this){live=null;state.connected=false;state.reset();}
+        if(live==this){live=null;state.connected=false;if(!LocalPlaybackService.restoreState())state.reset();}
     }
     private boolean mediaNotification(Notification notification){return Notification.CATEGORY_TRANSPORT.equals(notification.category)||notification.extras!=null&&notification.extras.containsKey(Notification.EXTRA_MEDIA_SESSION);}
     @Override public void onNotificationPosted(StatusBarNotification sbn){if(mediaNotification(sbn.getNotification()))scheduleRefresh();}
@@ -74,7 +74,7 @@ public final class LyricsListener extends NotificationListenerService {
     }
     private void refreshSessions(){
         if(manager==null)return;
-        try{bindSessions(manager.getActiveSessions(new ComponentName(this,LyricsListener.class)));}catch(SecurityException e){state.connected=false;state.reset();removeOverlay();}
+        try{bindSessions(manager.getActiveSessions(new ComponentName(this,LyricsListener.class)));}catch(SecurityException e){state.connected=false;if(!LocalPlaybackService.restoreState())state.reset();removeOverlay();}
     }
     private void bindSessions(List<MediaController> current){
         if(current==null)current=Collections.emptyList();
@@ -102,7 +102,7 @@ public final class LyricsListener extends NotificationListenerService {
             try{list.put(new JSONObject().put("packageName",c.getPackageName()).put("name",name).put("playing",playing));}catch(Exception ignored){}
         }
         boolean sourcesChanged=!list.toString().equals(state.sources.toString());
-        state.sources=list;state.accept(best,bestPlayback,metadataChanged,sourcesChanged);
+        state.sources=list;if(best==null&&LocalPlaybackService.restoreState())return;state.accept(best,bestPlayback,metadataChanged,sourcesChanged);
     }
     private int dp(float f){return Math.round(f*getResources().getDisplayMetrics().density);}
     private void syncOverlay(){

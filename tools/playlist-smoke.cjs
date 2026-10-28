@@ -40,8 +40,10 @@ const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,pos
   assert(await page.locator('.spotify-brand img').evaluate(el=>el.complete&&el.naturalWidth>0));
   await page.evaluate(()=>App.spotify({view:'disconnected'}));await page.locator('#spotifyContent button').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='spotifyConnect')));
   const id='0123456789ABCDEFGHIJKL';
-  await page.evaluate(id=>App.spotify({view:'lists',connected:true,items:[{id,name:'Spotify 목록',owner:'가수',count:1}]}),id);
-  await page.locator('#spotifyContent .playlist-item').click();assert(await page.evaluate(id=>commands.some(c=>c.action==='spotifyTracks'&&c.data.id===id),id));
+  await page.evaluate(id=>App.spotify({view:'lists',connected:true,offset:0,nextOffset:50,more:true,items:[{id,name:'Spotify 목록',owner:'가수',count:1}]}),id);
+  await page.getByRole('button',{name:'더 보기'}).click();assert(await page.evaluate(()=>commands.some(c=>c.action==='spotifyPlaylists'&&c.data.offset===50)));
+  await page.evaluate(id=>App.spotify({view:'lists',connected:true,offset:50,more:false,items:[{id,name:'두 번째 목록',count:1}]}),id);assert.equal(await page.locator('#spotifyContent .playlist-item').count(),2);
+  await page.locator('#spotifyContent .playlist-item').first().click();assert(await page.evaluate(id=>commands.some(c=>c.action==='spotifyTracks'&&c.data.id===id),id));
   await page.evaluate(id=>App.spotify({view:'tracks',connected:true,id,name:'Spotify 목록',offset:0,nextOffset:50,more:true,items:[{id,type:'track',title:'노래',artist:'가수'}]}),id);
   await page.getByRole('button',{name:'더 보기'}).click();assert(await page.evaluate(()=>commands.some(c=>c.action==='spotifyTracks'&&c.data.offset===50)));
   await page.evaluate(id=>App.spotify({view:'tracks',connected:true,id,name:'Spotify 목록',offset:50,more:false,items:[{id,type:'track',title:'다음 노래',artist:'가수'}]}),id);assert.equal(await page.locator('#spotifyContent .playlist-track').count(),2);

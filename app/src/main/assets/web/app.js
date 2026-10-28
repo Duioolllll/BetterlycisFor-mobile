@@ -21,7 +21,7 @@
   let controlsUntil=performance.now()+3500,keyboardNavigation=false,controlsHidden=false;
   let seeking = false, lastVisual = 0, lastCover = '', lastSheet = null, toastTimer = 0, lastFocus = null;
   let wasPreview=false,audioStatusSignature='';
-  let selectedLocal='',playlistTab='local',localTracks=[],pendingTrackRemoval=-1,localVisible=100,spotifyItems=[],spotifyListId='';
+  let selectedLocal='',playlistTab='local',localTracks=[],pendingTrackRemoval=-1,localVisible=100,spotifyItems=[],spotifyListId='',spotifyLists=[];
   let demoTime = performance.now(), demoPosition = 14500, demoPlaying = true;
 
   function position(now = performance.now()) {
@@ -532,14 +532,17 @@
     if(view==='error'){
       status(String(data.message||'Spotify에 연결하지 못했습니다.'));
       root.append(button(data.connected?'다시 불러오기':'다시 연결',()=>command(data.connected?'spotifyPlaylists':'spotifyConnect')));
-    }else if(view==='lists'){
-      const items=Array.isArray(data.items)?data.items:[];if(!items.length)status('저장된 플레이리스트가 없습니다.');
-      for(const item of items){
+    }else if(view==='lists'||view==='listsError'){
+      if(view==='lists'){if(number(data.offset)===0)spotifyLists=[];spotifyLists.push(...(Array.isArray(data.items)?data.items:[]));}
+      else status(String(data.message||'Spotify 목록을 불러오지 못했습니다.'));
+      if(!spotifyLists.length&&view==='lists'&&!data.more)status('저장된 플레이리스트가 없습니다.');
+      for(const item of spotifyLists){
         const row=document.createElement('div'),itemButton=document.createElement('button'),box=document.createElement('div'),title=document.createElement('strong'),sub=document.createElement('small'),external=button('Spotify에서 열기',()=>open('playlist',String(item.id)),false);
         row.className='spotify-row';itemButton.className='playlist-item';external.className='spotify-open';
         title.textContent=String(item.name||'재생목록');sub.textContent=[item.owner,number(item.count,-1)>=0?number(item.count)+'곡':''].filter(Boolean).join(' · ');box.append(title,sub);itemButton.append(box);
         itemButton.addEventListener('click',()=>{status('불러오는 중');command('spotifyTracks',{id:String(item.id),name:String(item.name||'재생목록')});});row.append(itemButton,external);root.append(row);
       }
+      if(data.more||view==='listsError'){const more=button(view==='listsError'?'다시 시도':'더 보기',()=>{more.disabled=true;command('spotifyPlaylists',{offset:view==='listsError'?number(data.offset):number(data.nextOffset)});});root.append(more);}
     }else if(view==='tracks'||view==='tracksError'){
       if(view==='tracks'){
         if(number(data.offset)===0||spotifyListId!==String(data.id)){spotifyItems=[];spotifyListId=String(data.id);}

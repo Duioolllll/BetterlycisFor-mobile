@@ -140,7 +140,7 @@ public final class MainActivity extends Activity {
             case "spotifyConnect":{
                 send("spotify",new JSONObject().put("view","connecting"));SpotifyClient.get(this).connect(this,spotifyCallback());break;
             }
-            case "spotifyPlaylists":SpotifyClient.get(this).playlists(spotifyCallback());break;
+            case "spotifyPlaylists":SpotifyClient.get(this).playlists(data.optInt("offset",0),spotifyCallback());break;
             case "spotifyTracks":SpotifyClient.get(this).tracks(data.optString("id",""),data.optString("name",""),data.optInt("offset",0),spotifyCallback());break;
             case "spotifyDisconnect":SpotifyClient.get(this).disconnect();send("spotify",new JSONObject().put("view","disconnected").put("connected",false));break;
             case "spotifyOpen":openSpotify(data.optString("type",""),data.optString("id",""));break;

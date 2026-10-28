@@ -64,7 +64,7 @@ final class SpotifyClient {
                 String body="grant_type=authorization_code&client_id="+SpotifyProtocol.encode(CLIENT_ID)+"&code="+SpotifyProtocol.encode(response.code)+"&redirect_uri="+SpotifyProtocol.encode(redirect)+"&code_verifier="+SpotifyProtocol.encode(verifier);
                 JSONObject token=tokenRequest(body);
                 synchronized(this){if(ticket!=epoch)return;storeTokens(token,false);connecting=false;}
-                loadPlaylists(ticket,callback);
+                loadPlaylists(ticket,0,callback);
             }catch(Exception error){synchronized(this){if(ticket!=epoch)return;connecting=false;}deliver(ticket,callback,failure(safeMessage(error)));}
             finally{if(callbackServer==server)closeServer();else try{server.close();}catch(IOException ignored){}}
         });
@@ -145,20 +145,17 @@ final class SpotifyClient {
             synchronized(this){expires=0;}return request("https://api.spotify.com/v1"+path,"GET",accessToken(),null);
         }
     }
-    void playlists(Callback callback){int ticket=epoch;if(connecting){callback.done(object("view","connecting","connected",false));return;}if(!connected()){callback.done(object("view","disconnected","connected",false));return;}worker.execute(()->loadPlaylists(ticket,callback));}
-    private void loadPlaylists(int ticket,Callback callback){
+    void playlists(int offset,Callback callback){int ticket=epoch;if(connecting){callback.done(object("view","connecting","connected",false));return;}if(!connected()){callback.done(object("view","disconnected","connected",false));return;}if(offset<0||offset>=5000){callback.done(failure("잘못된 Spotify 요청입니다."));return;}worker.execute(()->loadPlaylists(ticket,offset,callback));}
+    private void loadPlaylists(int ticket,int offset,Callback callback){
         try{
-            JSONArray result=new JSONArray();
-            for(int offset=0;offset<500;offset+=50){
-                JSONObject page=api("/me/playlists?limit=50&offset="+offset);JSONArray items=page.optJSONArray("items");if(items==null)break;
-                for(int i=0;i<items.length();i++){JSONObject item=items.optJSONObject(i);if(item==null)continue;String id=item.optString("id");if(!validId(id))continue;
-                    JSONObject owner=item.optJSONObject("owner"),tracks=item.optJSONObject("items");if(tracks==null)tracks=item.optJSONObject("tracks");
-                    result.put(object("id",id,"name",item.optString("name","재생목록"),"owner",owner==null?"":owner.optString("display_name"),"count",tracks==null?-1:tracks.optInt("total",-1)));
-                }
-                if(items.length()==0||page.isNull("next")||!page.has("next"))break;
+            JSONArray result=new JSONArray();JSONObject page=api("/me/playlists?limit=50&offset="+offset);JSONArray items=page.optJSONArray("items");if(items==null)items=new JSONArray();
+            for(int i=0;i<items.length();i++){JSONObject item=items.optJSONObject(i);if(item==null)continue;String id=item.optString("id");if(!validId(id))continue;
+                JSONObject owner=item.optJSONObject("owner"),tracks=item.optJSONObject("items");if(tracks==null)tracks=item.optJSONObject("tracks");
+                result.put(object("id",id,"name",item.optString("name","재생목록"),"owner",owner==null?"":owner.optString("display_name"),"count",tracks==null?-1:tracks.optInt("total",-1)));
             }
-            deliver(ticket,callback,object("view","lists","connected",true,"items",result));
-        }catch(Exception error){deliver(ticket,callback,failure(safeMessage(error)));}
+            int nextOffset=offset+items.length();boolean more=items.length()>0&&page.has("next")&&!page.isNull("next")&&nextOffset<5000;
+            deliver(ticket,callback,object("view","lists","connected",true,"items",result,"offset",offset,"nextOffset",nextOffset,"more",more));
+        }catch(Exception error){deliver(ticket,callback,offset==0?failure(safeMessage(error)):object("view","listsError","connected",connected(),"offset",offset,"message",safeMessage(error)));}
     }
     void tracks(String id,String name,int offset,Callback callback){
         int ticket=epoch;if(!validId(id)||offset<0||offset>=5000){callback.done(failure("잘못된 Spotify 재생목록입니다."));return;}
