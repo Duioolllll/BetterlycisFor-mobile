@@ -2,7 +2,7 @@ const {chromium}=require('playwright');
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'build/playlist-qa');
 const url=process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html');
-const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,position:1000,positionKnown:true,playing:false,actions:822,packageName:'qa'},lyrics:{lines:[]},settings:{backgroundMode:'static',appearance:{controls:'always'}},permissions:{notifications:true,connected:true},sources:[]};
+const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,position:1000,positionKnown:true,playing:false,actions:822,packageName:'qa'},lyrics:{lines:[]},settings:{backgroundMode:'static',appearance:{version:2,controls:'always'}},permissions:{notifications:true,connected:true},sources:[]};
 (async()=>{
  fs.mkdirSync(out,{recursive:true});const result={passed:false,checks:[],errors:[]};
  const browser=await chromium.launch({headless:true,executablePath:process.env.BETTERLYRICS_CHROME||undefined,args:['--no-sandbox','--enable-unsafe-swiftshader']});

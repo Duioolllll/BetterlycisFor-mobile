@@ -8,13 +8,15 @@ public final class UiAppearance {
     public static JSONObject sanitize(JSONObject input) {
         JSONObject in=input==null?new JSONObject():input,out=new JSONObject();
         try {
-            out.put("version",1);
+            out.put("version",2);
             choice(in,out,"preset","original","original","focus","album","custom");
             choice(in,out,"layout","auto","auto","immersive","split","reverse");
             choice(in,out,"align","left","left","center","right");
             choice(in,out,"font","system","system","serif","rounded","nanum-gothic","nanum-myeongjo","jua","nanum-pen");
             choice(in,out,"controls","auto","auto","always","minimal");
-            if("album".equals(out.optString("preset"))&&"always".equals(out.optString("controls")))out.put("controls","auto");
+            // Before v2 the album preset's always-visible setting survived
+            // unrelated customization, so its origin cannot be determined.
+            if(in.optInt("version",1)<2&&"always".equals(out.optString("controls")))out.put("controls","auto");
             choice(in,out,"flow","continuous","continuous","line");
             number(in,out,"weight",700,400,900);number(in,out,"lineHeight",135,110,180);
             number(in,out,"lineGap",18,4,40);number(in,out,"opacity",42,15,80);

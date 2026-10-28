@@ -9,7 +9,7 @@ const url = process.env.BETTERLYRICS_PREVIEW_URL || 'file://' + path.join(root, 
 const initial = {
   track: {key:'review', title:'밤의 여백', artist:'화면 미리보기', album:'밤의 기록', appName:'테스트 음악 앱', packageName:'qa.player', position:24500, duration:120000, playing:false, positionKnown:true, actions:822},
   lyrics: {provider:'Local', lines:Array.from({length:16}, (_, i) => ({start:i*4000, end:(i+1)*4000, text:'함께 걷는 이 밤의 멜로디 ' + i, words:[]}))},
-  settings: {fontSize:31, backgroundMode:'static', appearance:{controls:'always'}},
+  settings: {fontSize:31, backgroundMode:'static', appearance:{version:2,controls:'always'}},
   permissions: {notifications:true, connected:true}, sources:[], volume:{available:true, level:6, max:15}
 };
 

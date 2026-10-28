@@ -49,11 +49,13 @@ public final class PlaylistInstrumentation extends Instrumentation {
         Bundle output=new Bundle();int result=Activity.RESULT_CANCELED;
         try{
             Log.i("PlaylistInstrumentation","Starting activity");
-            Context context=getTargetContext();context.getSharedPreferences("settings",0).edit().putString("backgroundMode","static").apply();
+            Context context=getTargetContext();context.getSharedPreferences("settings",0).edit().putString("backgroundMode","static")
+                .putString("appearance","{\"version\":1,\"preset\":\"custom\",\"controls\":\"always\",\"font\":\"jua\"}").commit();
             Intent launch=new Intent(Intent.ACTION_MAIN).setClassName("io.betterlyrics.mobile","io.betterlyrics.mobile.MainActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Activity activity=startActivitySync(launch);waitForIdleSync();
             Log.i("PlaylistInstrumentation","Waiting for idle playback controls to hide");
             waitFor(()->"true".equals(webValue(activity,"!!(window.App&&document.getElementById('app').classList.contains('controls-hidden')&&document.getElementById('playerControls').inert)")),"idle playback controls hide in WebView");
+            if(!"true".equals(webValue(activity,"Appearance.get().version===2&&Appearance.get().controls==='auto'&&Appearance.get().font==='jua'")))throw new IllegalStateException("Legacy appearance migration lost the control mode or font");
             long now=android.os.SystemClock.uptimeMillis();android.view.MotionEvent down=android.view.MotionEvent.obtain(now,now,android.view.MotionEvent.ACTION_DOWN,10,200,0),up=android.view.MotionEvent.obtain(now,now+40,android.view.MotionEvent.ACTION_UP,10,200,0);
             down.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);up.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);
             try{runOnMainSync(()->{activity.dispatchTouchEvent(down);activity.dispatchTouchEvent(up);});}finally{down.recycle();up.recycle();}

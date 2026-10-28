@@ -2,7 +2,7 @@
 
 // Persist only this versioned, bounded visual schema; never arbitrary CSS/HTML.
 window.Appearance = (() => {
-  const defaults = Object.freeze({version:1,preset:'original',layout:'auto',align:'left',font:'system',weight:700,lineHeight:135,lineGap:18,opacity:42,blur:1,brightness:85,coverSize:100,lyricWidth:90,focusPosition:50,controls:'auto',showCover:true,showInfo:true,showTranslation:true,showRomanization:false,glow:true,flow:'continuous',textColor:'#ffffff'});
+  const defaults = Object.freeze({version:2,preset:'original',layout:'auto',align:'left',font:'system',weight:700,lineHeight:135,lineGap:18,opacity:42,blur:1,brightness:85,coverSize:100,lyricWidth:90,focusPosition:50,controls:'auto',showCover:true,showInfo:true,showTranslation:true,showRomanization:false,glow:true,flow:'continuous',textColor:'#ffffff'});
   const ranges={weight:[400,900],lineHeight:[110,180],lineGap:[4,40],opacity:[15,80],blur:[0,5],brightness:[25,100],coverSize:[60,130],lyricWidth:[60,100],focusPosition:[30,65]};
   const fonts={system:['기본',"Arial,'Noto Sans KR',Roboto,sans-serif"], 'nanum-gothic':['나눔고딕',"'BL Nanum Gothic',sans-serif"], 'nanum-myeongjo':['나눔명조',"'BL Nanum Myeongjo',serif"], jua:['주아',"'BL Jua',sans-serif"], 'nanum-pen':['나눔손글씨',"'BL Nanum Pen',cursive"], serif:['시스템 명조',"'Noto Serif KR',serif"], rounded:['시스템 둥근 글꼴',"'Arial Rounded MT Bold','Noto Sans KR',sans-serif"]};
   const choices={preset:['original','focus','album','custom'],layout:['auto','immersive','split','reverse'],align:['left','center','right'],font:Object.keys(fonts),controls:['auto','always','minimal'],flow:['continuous','line']};
@@ -13,8 +13,9 @@ window.Appearance = (() => {
     const s=input&&typeof input==='object'&&!Array.isArray(input)?input:{},out={...defaults};
     for(const [key,[min,max]] of Object.entries(ranges))if(typeof s[key]==='number'&&Number.isFinite(s[key]))out[key]=Math.max(min,Math.min(max,s[key]));
     for(const [key,values] of Object.entries(choices))if(values.includes(s[key]))out[key]=s[key];
-    // Older album presets forced controls visible; a user's explicit choice uses preset=custom.
-    if(s.preset==='album'&&s.controls==='always')out.controls='auto';
+    // Older album presets forced controls visible, including after any unrelated
+    // customization. Reset legacy values once; new explicit choices use v2.
+    if((!Number.isInteger(s.version)||s.version<2)&&out.controls==='always')out.controls='auto';
     for(const key of ['showCover','showInfo','showTranslation','showRomanization','glow'])if(typeof s[key]==='boolean')out[key]=s[key];
     if(typeof s.textColor==='string'&&/^#[0-9a-f]{6}$/i.test(s.textColor))out.textColor=s.textColor.toLowerCase();
     return out;

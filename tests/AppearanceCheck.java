@@ -14,7 +14,11 @@ public class AppearanceCheck {
   for(String font:new String[]{"nanum-gothic","nanum-myeongjo","jua","nanum-pen"})assert UiAppearance.parse("{\"font\":\""+font+"\"}").getString("font").equals(font);
   assert UiAppearance.parse("{\"font\":\"url(bad)\"}").getString("font").equals("system");
   assert UiAppearance.parse("{\"preset\":\"album\",\"controls\":\"always\"}").getString("controls").equals("auto");
-  assert UiAppearance.parse("{\"preset\":\"custom\",\"controls\":\"always\"}").getString("controls").equals("always");
-  System.out.println("AppearanceCheck: 21 assertions passed");
+  JSONObject legacy=UiAppearance.parse("{\"version\":1,\"preset\":\"custom\",\"controls\":\"always\",\"font\":\"jua\"}");
+  assert legacy.getString("controls").equals("auto");assert legacy.getString("font").equals("jua");
+  assert legacy.getInt("version")==2;
+  assert UiAppearance.parse("{\"version\":2,\"preset\":\"custom\",\"controls\":\"always\"}").getString("controls").equals("always");
+  assert UiAppearance.parse("{\"version\":2,\"preset\":\"album\",\"controls\":\"always\"}").getString("controls").equals("always");
+  System.out.println("AppearanceCheck: 25 assertions passed");
  }
 }

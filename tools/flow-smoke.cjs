@@ -5,7 +5,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'build','ui-qa');
 fs.mkdirSync(out,{recursive:true});
 const rows=Array.from({length:25},(_,i)=>({start:i*4000,end:(i+1)*4000,text:'흐르는 가사 '+i,realTiming:true,words:[{start:i*4000,end:i*4000+1600,text:'흐르는 '},{start:i*4000+1600,end:(i+1)*4000,text:'가사 '+i}]}));
-function initial(lines=rows){return {track:{key:'flow-qa',title:'흐름 확인',artist:'테스트',position:24500,duration:120000,positionKnown:true,playing:false,speed:1,packageName:'qa',actions:822},lyrics:{provider:'Local',lines},settings:{fontSize:31,offset:0,wordMode:'auto',backgroundMode:'static',appearance:{controls:'always'}},permissions:{notifications:true,connected:true}};}
+function initial(lines=rows){return {track:{key:'flow-qa',title:'흐름 확인',artist:'테스트',position:24500,duration:120000,positionKnown:true,playing:false,speed:1,packageName:'qa',actions:822},lyrics:{provider:'Local',lines},settings:{fontSize:31,offset:0,wordMode:'auto',backgroundMode:'static',appearance:{version:2,controls:'always'}},permissions:{notifications:true,connected:true}};}
 (async()=>{
  const browser=await chromium.launch({headless:true,executablePath:process.env.BETTERLYRICS_CHROME||undefined,args:['--no-sandbox','--enable-unsafe-swiftshader']});
  const result={checks:[],errors:[]};

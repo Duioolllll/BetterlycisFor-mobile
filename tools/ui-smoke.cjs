@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const root=path.resolve(__dirname,'..');
 const out=path.join(root,'build','ui-qa');fs.mkdirSync(out,{recursive:true});
 const track={key:'qa',title:'동기화 확인',artist:'테스트 아티스트',album:'QA',duration:120000,position:2200,playing:false,speed:1,positionKnown:true,packageName:'qa.player',appName:'테스트 플레이어',actions:822};
-function state(lines){return {volume:{available:true,level:6,max:15},track:{...track},lyrics:{revision:1,status:'가사 연결됨',loading:false,error:'',provider:'Local',score:100,lines},settings:{offset:0,fontSize:31,wordMode:'auto',provider:'auto',searchMode:'sequential',keepScreen:true,overlay:false,appearance:{controls:'always'}},permissions:{notifications:true,overlay:true,connected:true},sources:[{packageName:'qa.player',name:'테스트 플레이어',playing:false}]};}
+function state(lines){return {volume:{available:true,level:6,max:15},track:{...track},lyrics:{revision:1,status:'가사 연결됨',loading:false,error:'',provider:'Local',score:100,lines},settings:{offset:0,fontSize:31,wordMode:'auto',provider:'auto',searchMode:'sequential',keepScreen:true,overlay:false,appearance:{version:2,controls:'always'}},permissions:{notifications:true,overlay:true,connected:true},sources:[{packageName:'qa.player',name:'테스트 플레이어',playing:false}]};}
 const lines=[{start:0,end:6000,text:'첫 번째 목소리',agent:'v1',bg:false,realTiming:true,words:[{start:0,end:3000,text:'첫 번째 '},{start:3000,end:6000,text:'목소리'}]},{start:1500,end:4500,text:'겹쳐 부르는 코러스',agent:'v2',bg:true,realTiming:false,translation:'같은 시간에 함께 표시',words:[]}];
 (async()=>{
  const browser=await chromium.launch({headless:true,executablePath:process.env.BETTERLYRICS_CHROME||undefined,args:['--no-sandbox','--enable-unsafe-swiftshader']});

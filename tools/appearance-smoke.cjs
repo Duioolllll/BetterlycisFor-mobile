@@ -11,7 +11,7 @@ const initial={track:{key:'custom',title:'노래가 머무는 순간',artist:'Be
    await page.addInitScript(s=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(s),command:(action,json)=>commands.push({action,data:JSON.parse(json)})};},initial);
    await page.goto(process.env.BETTERLYRICS_PREVIEW_URL||'file://'+path.join(root,'app/src/main/assets/web/index.html'));await page.waitForTimeout(200);
    for(const layout of ['auto','immersive','reverse']){
-    await page.evaluate(layout=>App.receive({settings:{appearance:{layout,controls:'always'}}}),layout);
+    await page.evaluate(layout=>App.receive({settings:{appearance:{version:2,layout,controls:'always'}}}),layout);
     await page.locator('#lyricsButton').click();await page.waitForTimeout(160);
     const bounds=await page.evaluate(()=>{const c=document.querySelector('.cover').getBoundingClientRect(),t=document.querySelector('.track-info').getBoundingClientRect(),p=document.querySelector('.player').getBoundingClientRect();return {cover:c.bottom,title:t.bottom,player:p.top,size:c.width};});
     assert(bounds.cover<=bounds.player+1&&bounds.title<=bounds.player+1&&bounds.size>=90,'all layouts retain usable album view');
@@ -36,7 +36,7 @@ const initial={track:{key:'custom',title:'노래가 머무는 순간',artist:'Be
    await page.evaluate(()=>App.receive({settings:{appearance:{controls:'auto'}},track:{playing:true,position:24000}}));
    await page.waitForTimeout(3800);assert(await page.locator('#app').evaluate(e=>e.classList.contains('controls-hidden')));assert(await page.locator('.player').evaluate(e=>e.inert));
    await page.locator('#controlsToggle').click();assert(await page.locator('.player').isVisible());
-   await page.evaluate(()=>App.receive({track:{playing:false,position:24000},settings:{appearance:{controls:'always'}}}));
+   await page.evaluate(()=>App.receive({track:{playing:false,position:24000},settings:{appearance:{version:2,controls:'always'}}}));
    await page.keyboard.press('Tab');assert.equal(await page.locator('.player').evaluate(e=>e.inert),false);
    result.checks.push(viewport.width+': presets, live preferences, modal focus, reset/clock/offset isolation, hide/reveal');
    await page.close();

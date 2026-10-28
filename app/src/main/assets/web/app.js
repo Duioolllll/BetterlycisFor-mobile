@@ -19,8 +19,8 @@
   let seekPreview = null, pendingSeek = null;
   let lyricsVisible=true,volumeSeeking=false,lastVolumeSent=0;
   const CONTROL_IDLE_MS=3500;
-  let controlsUntil=performance.now()+CONTROL_IDLE_MS,keyboardNavigation=false,controlsHidden=false;
-  const controlPointers=new Set();
+  let controlsUntil=performance.now()+CONTROL_IDLE_MS,keyboardNavigation=false,controlsHidden=false,controlsTimer=0;
+  const controlPointers=new Map();
   let seeking = false, lastVisual = 0, lastCover = '', lastSheet = null, toastTimer = 0, lastFocus = null;
   let wasPreview=false,audioStatusSignature='';
   let selectedLocal='',playlistTab='local',localTracks=[],localItems=[],localGroups={artists:[],albums:[]},localView='playlists',localReadOnly=false,pendingTrackRemoval=-1,localVisible=100,spotifyItems=[],spotifyListId='',spotifyLists=[],spotifyPlayPending=false;
@@ -78,7 +78,7 @@
     });
     if (!Array.isArray(state.lyrics.lines)) state.lyrics.lines=[];
     if (!Array.isArray(state.sources)) state.sources=[];
-    if (changed) { manualUntil=0; currentAnchor=-1; $('lyricsViewport').scrollTop=0; controlsUntil=performance.now()+CONTROL_IDLE_MS; }
+    if (changed) { manualUntil=0; currentAnchor=-1; $('lyricsViewport').scrollTop=0; resetControlIdle(); }
     updateMetadata();
     updateSettings();
     if(incoming.audio)audioFrame(incoming.audio);
@@ -183,10 +183,22 @@
     toggle.setAttribute('aria-hidden',String(!hidden));toggle.tabIndex=hidden?0:-1;toggle.hidden=mode==='always';
   }
 
+  function scheduleControlVisibility() {
+    clearTimeout(controlsTimer);
+    if(document.hidden)return;
+    // The hide deadline must also run if the animation frame loop is interrupted.
+    controlsTimer=setTimeout(()=>{controlsTimer=0;updateControlVisibility(performance.now());},Math.max(0,controlsUntil-performance.now())+30);
+  }
+
+  function resetControlIdle() {
+    const now=performance.now();controlsUntil=now+CONTROL_IDLE_MS;
+    updateControlVisibility(now);scheduleControlVisibility();
+  }
+
   function updateSettings() {
     const s=state.settings;
     const size=clamp(number(s.fontSize,28),22,46);
-    if(window.Appearance.apply(s.appearance)){flowLayoutDirty=true;currentAnchor=-1;scrollMotion=null;snapFollow=true;}
+    if(window.Appearance.apply(s.appearance)){flowLayoutDirty=true;currentAnchor=-1;scrollMotion=null;snapFollow=true;scheduleControlVisibility();}
     document.documentElement.style.setProperty('--line-size',size+'px');
     $('offset').value=clamp(number(s.offset),-5000,5000);
     $('offsetValue').textContent=(number(s.offset)>0?'+':'')+number(s.offset)+' ms';
@@ -362,6 +374,7 @@
     clock={base:target,at:now,playing:!!state.track.playing,speed:number(state.track.speed,1),correction:0};
     pendingSeek=native?{position:target,at:now}:null;
     command('transport',{action:'seek',position:Math.round(target)});
+    resetControlIdle();
   }
 
   function frame(now) {
@@ -469,7 +482,7 @@
   function closeSheet() {
     if(!lastSheet)return false;$('app').inert=false;
     $(lastSheet).hidden=true;lastSheet=null;$('sheetBackdrop').hidden=true;document.body.classList.remove('sheet-open','appearance-open');
-    controlsUntil=performance.now()+CONTROL_IDLE_MS;flowLayoutDirty=true;snapFollow=true;
+    resetControlIdle();flowLayoutDirty=true;snapFollow=true;
     const focusTarget=lastFocus&&lastFocus.getClientRects().length?lastFocus:$('settingsButton');
     focusTarget.focus({preventScroll:true});return true;
   }
@@ -624,16 +637,18 @@
   function attachEvents() {
     window.Appearance.mount(next=>{state.settings.appearance=next;updateSettings();command('setAppearance',{appearance:next});});
     $('appearanceButton').addEventListener('click',()=>openSheet('appearanceSheet'));
-    $('controlsToggle').addEventListener('click',()=>{controlsUntil=controlsHidden?performance.now()+CONTROL_IDLE_MS:0;updateControlVisibility(performance.now());});
+    $('controlsToggle').addEventListener('click',()=>{controlsUntil=controlsHidden?performance.now()+CONTROL_IDLE_MS:0;updateControlVisibility(performance.now());scheduleControlVisibility();});
     document.addEventListener('pointerdown',e=>{
       keyboardNavigation=false;if(e.target instanceof Element&&e.target.closest('#controlsToggle'))return;
-      controlPointers.add(e.pointerId);controlsUntil=performance.now()+CONTROL_IDLE_MS;updateControlVisibility(performance.now());
+      controlPointers.set(e.pointerId,e.pointerType);resetControlIdle();
     },{passive:true});
-    const releaseControlPointer=e=>{if(controlPointers.delete(e.pointerId))controlsUntil=performance.now()+CONTROL_IDLE_MS;};
+    const releaseControlPointer=e=>{if(controlPointers.delete(e.pointerId))resetControlIdle();};
     window.addEventListener('pointerup',releaseControlPointer,{passive:true});window.addEventListener('pointercancel',releaseControlPointer,{passive:true});
-    document.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&window.Appearance.get().controls!=='always')controlsUntil=performance.now()+CONTROL_IDLE_MS;},{passive:true});
-    document.addEventListener('keydown',e=>{if(e.key==='Tab'){keyboardNavigation=true;controlsUntil=performance.now()+CONTROL_IDLE_MS;updateControlVisibility(performance.now());}});
-    window.addEventListener('blur',()=>controlPointers.clear());
+    const releaseTouches=e=>{if(e.touches.length)return;let released=false;for(const [id,type] of controlPointers)if(type==='touch'){controlPointers.delete(id);released=true;}if(released)resetControlIdle();};
+    window.addEventListener('touchend',releaseTouches,{passive:true});window.addEventListener('touchcancel',releaseTouches,{passive:true});
+    document.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!controlsHidden&&window.Appearance.get().controls!=='always'){controlsUntil=performance.now()+CONTROL_IDLE_MS;scheduleControlVisibility();}},{passive:true});
+    document.addEventListener('keydown',e=>{if(e.key==='Tab'){keyboardNavigation=true;resetControlIdle();}});
+    window.addEventListener('blur',()=>{controlPointers.clear();seeking=false;seekPreview=null;volumeSeeking=false;scheduleControlVisibility();});
     if(window.ResizeObserver)new ResizeObserver(()=>{flowLayoutDirty=true;snapFollow=true;}).observe($('lyricsViewport'));
     $('settingsButton').addEventListener('click',()=>openSheet('settingsSheet'));
     $('saveLyricCard').addEventListener('click',()=>command('saveLyricCard'));
@@ -676,8 +691,8 @@
     $('settingsImport').addEventListener('click',()=>command('importLyrics'));
     $('lyricsButton').addEventListener('click',toggleLyrics);$('collapseButton').addEventListener('click',toggleLyrics);
     $('volume').addEventListener('input',()=>{volumeSeeking=true;sendVolume();});
-    $('volume').addEventListener('change',()=>{sendVolume(true);volumeSeeking=false;});
-    $('volume').addEventListener('pointercancel',()=>{volumeSeeking=false;updateVolume();});
+    $('volume').addEventListener('change',()=>{sendVolume(true);volumeSeeking=false;resetControlIdle();});
+    $('volume').addEventListener('pointercancel',()=>{volumeSeeking=false;updateVolume();resetControlIdle();});
     $('retryLyrics').addEventListener('click',()=>{command('refresh');closeSheet();});
     $('clearCache').addEventListener('click',()=>command('clearCache'));
     $('about').addEventListener('click',()=>command('about'));
@@ -705,7 +720,14 @@
       $('positionLabel').textContent=formatTime(seekPreview);$('seek').style.setProperty('--seek-progress',$('seek').value/10+'%');
     });
     $('seek').addEventListener('change',()=>seekTo(number($('seek').value)/1000*state.track.duration));
-    $('seek').addEventListener('pointercancel',()=>{seeking=false;seekPreview=null;snapFollow=true;lastVisual=0;});
+    $('seek').addEventListener('pointercancel',()=>{seeking=false;seekPreview=null;snapFollow=true;lastVisual=0;resetControlIdle();});
+    // Some WebViews end a range gesture without emitting a change event.
+    const finishRangeGesture=e=>{const id=e.target&&e.target.id;if(id!=='seek'&&id!=='volume')return;setTimeout(()=>{
+      if(controlPointers.size)return;
+      if(id==='seek'&&seeking)seekTo(number($('seek').value)/1000*state.track.duration);
+      if(id==='volume'&&volumeSeeking){sendVolume(true);volumeSeeking=false;resetControlIdle();}
+    },0);};
+    window.addEventListener('pointerup',finishRangeGesture,{passive:true});window.addEventListener('touchend',finishRangeGesture,{passive:true});
     $('lyricsViewport').addEventListener('pointerdown',e=>{pointerStart={x:e.clientX,y:e.clientY};dragging=false;},{passive:true});
     $('lyricsViewport').addEventListener('pointermove',e=>{if(pointerStart&&Math.abs(e.clientY-pointerStart.y)+Math.abs(e.clientX-pointerStart.x)>9){dragging=true;manualUntil=performance.now()+3000;scrollMotion=null;suppressClickUntil=performance.now()+350;}},{passive:true});
     const endDrag=()=>{pointerStart=null;if(dragging){manualUntil=performance.now()+3000;suppressClickUntil=performance.now()+350;}dragging=false;};
@@ -724,7 +746,7 @@
     $('searchForm').addEventListener('submit',e=>{e.preventDefault();const title=$('searchTrack').value.trim(),artist=$('searchArtist').value.trim();if(!title){$('searchTrack').focus();return;}$('searchResults').replaceChildren();$('searchStatus').textContent='가사를 검색하고 있어요…';$('submitSearch').disabled=true;$('submitSearch').textContent='검색 중…';command('search',{title,artist});});
     window.addEventListener('resize',()=>{currentAnchor=-1;flowLayoutDirty=true;resizeAmbient();});
     if(document.fonts && document.fonts.ready){const changed=()=>{flowLayoutDirty=true;currentAnchor=-1;};document.fonts.ready.then(changed);if(document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',changed);}
-    document.addEventListener('visibilitychange',()=>{if(document.hidden){controlPointers.clear();return;}controlsUntil=performance.now()+CONTROL_IDLE_MS;updateControlVisibility(performance.now());if(native){try{receive(window.Android.getBootstrap());}catch(_){}if(lastSheet==='playlistSheet'&&playlistTab==='spotify')command('spotifyPlaylists');}});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){controlPointers.clear();seeking=false;seekPreview=null;volumeSeeking=false;clearTimeout(controlsTimer);return;}resetControlIdle();if(native){try{receive(window.Android.getBootstrap());}catch(_){}if(lastSheet==='playlistSheet'&&playlistTab==='spotify')command('spotifyPlaylists');}});
   }
 
   function initAmbient(){window.ReactiveAmbient.init();}
@@ -758,5 +780,5 @@
   attachEvents();initAmbient();
   if(native){try{receive(window.Android.getBootstrap());}catch(_){updateSettings();updateEmpty();toast('음악 연결 정보를 읽지 못했어요. 설정에서 음악 감지를 확인해 주세요.');}}
   else {document.body.classList.add('demo-mode');$('demoBanner').hidden=false;const demo=demoState();try{demo.settings={appearance:window.Appearance.sanitize(JSON.parse(localStorage.getItem('betterlyrics.appearance.v1')||'null'))};}catch(_){}receive(demo);}
-  requestAnimationFrame(frame);
+  scheduleControlVisibility();requestAnimationFrame(frame);
 })();
