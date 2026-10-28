@@ -1,3 +1,9 @@
+# 0.7.1 — 2026-10-28
+
+257 JVM checks include a fixed Spotify redirect URI regression. The Android release gate checks the actual authorization request, callback state, port reuse and port conflicts with synthetic credentials, as well as playlists, playback, widgets and installation/update from 0.7.0. Its published reports contain the actual results. Real Spotify account login and physical-device behavior remain unverified. [Spotify setup](PLAYLISTS.md) · [Release notes](../changelog/0.7.1.md).
+
+---
+
 # 0.7.0 — 2026-10-28
 
 256 JVM checks, 2,073 bit-identical baseline audio frames, five packaging cases and 70 browser check groups passed. The API 36 emulator exercised persistent document grants, M3U import, LRC loading, local audio transport controls, encrypted test tokens and the OAuth loopback state check, alongside widget and WebView font checks. [Playlist guide](PLAYLISTS.md) · [Feature parity](PARITY.md) · [Release notes](../changelog/0.7.0.md).

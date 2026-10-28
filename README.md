@@ -7,13 +7,13 @@
 음악 앱의 재생 흐름을 따라가는 Android 가사 플레이어.<br>
 큰 가사, 앨범색 그라데이션, 내 취향대로 바꾸는 화면.
 
-[![Release 0.7.0](https://img.shields.io/badge/release-0.7.0-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.7.0)
+[![Release 0.7.1](https://img.shields.io/badge/release-0.7.1-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.7.1)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square)](docs/INSTALL_KO.md)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-### [↓ Android APK 다운로드 · v0.7.0](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/BetterLyrics-Mobile-0.7.0.apk)
+### [↓ Android APK 다운로드 · v0.7.1](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/BetterLyrics-Mobile-0.7.1.apk)
 
-**2026.10.28 배포** · Android 8.0 이상 · 2.3 MiB · versionCode 15
+**2026.10.28 배포** · Android 8.0 이상 · 2.3 MiB · versionCode 16
 
 [릴리스 / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [설치 안내](docs/INSTALL_KO.md) · [변경 기록](changelog/README.md) · [English](README.en.md) · [简体中文安装](docs/INSTALL_ZH.md)
 
@@ -21,7 +21,7 @@
 
 </div>
 
-> **처음 설치하나요?** 위의 **APK 다운로드**를 누르세요. Source code ZIP은 Android 설치 파일이 아닙니다. 다운로드가 열리지 않으면 [대체 경로](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.7.0.apk)를 이용할 수 있습니다.
+> **처음 설치하나요?** 위의 **APK 다운로드**를 누르세요. Source code ZIP은 Android 설치 파일이 아닙니다. 다운로드가 열리지 않으면 [대체 경로](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.7.1.apk)를 이용할 수 있습니다.
 
 ## 음악에 맞춰 흐르는 가사
 
@@ -51,7 +51,7 @@ LRCLIB / NetEase 가사 검색, 직접 후보 선택, 로컬 가사 가져오기
 
 ## 3단계로 시작하기
 
-1. **[v0.7.0 APK 다운로드](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/BetterLyrics-Mobile-0.7.0.apk)** → 파일을 엽니다. 필요하면 해당 브라우저·파일 앱에만 **이 출처의 앱 설치 허용**을 설정합니다.
+1. **[v0.7.1 APK 다운로드](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/BetterLyrics-Mobile-0.7.1.apk)** → 파일을 엽니다. 필요하면 해당 브라우저·파일 앱에만 **이 출처의 앱 설치 허용**을 설정합니다.
 2. 앱 실행 → **··· → 음악 감지**에서 알림 접근을 허용합니다. 음악 앱에서 노래를 재생한 뒤 돌아옵니다.
 3. **··· → 화면 꾸미기**에서 가사·배경·배치를 선택합니다. 소리 반응과 플로팅 가사는 선택 기능입니다.
 
@@ -59,36 +59,35 @@ LRCLIB / NetEase 가사 검색, 직접 후보 선택, 로컬 가사 가져오기
 
 Play Protect 경고 내용을 확인하고, 위험 앱으로 차단되면 설치를 중단하세요. 설치 후 출처별 설치 권한은 해제할 수 있습니다. 업데이트는 같은 패키지·서명이 필요하며, 앱 삭제 시 설정·가사 캐시가 사라질 수 있습니다. 설치 실패 원인과 권한별 설명은 설치 안내에서 확인하세요.
 
-## 이번 릴리스 · 0.7.0
+## 이번 릴리스 · 0.7.1
 
-- **내 음악:** 휴대폰 음악과 M3U/M3U8 목록을 불러와 직접 재생하고, 검색·추가·제거·이름 변경과 반복·무작위를 사용할 수 있습니다.
-- **Spotify:** 계정의 플레이리스트와 곡을 살펴보고 Spotify에서 엽니다. Spotify 음원은 Spotify 앱에서 재생합니다.
-- **가사와 재생:** M3U 폴더의 같은 이름 LRC 가사를 읽으며 화면·알림·위젯에서 로컬 재생 상태를 표시합니다.
+- **Spotify 연결 수정:** 인증 요청의 리디렉션 주소를 고정해 Spotify Developer Dashboard에 등록된 주소와 정확히 맞출 수 있습니다.
+- **계속 사용할 수 있는 기능:** 휴대폰 음악·M3U 가져오기와 로컬 재생, Spotify 플레이리스트 조회, 가사와 위젯을 지원합니다.
 
-[플레이리스트 사용 방법](docs/PLAYLISTS.md) · [0.7.0 릴리스 노트](changelog/0.7.0.md) · [원본 기능 대응 현황](docs/PARITY.md) · [모든 버전](changelog/README.md)
+Spotify 개발자 앱에 `http://127.0.0.1:43123/callback`을 Redirect URI로 추가해야 합니다. [플레이리스트 사용 방법](docs/PLAYLISTS.md) · [0.7.1 릴리스 노트](changelog/0.7.1.md) · [원본 기능 대응 현황](docs/PARITY.md)
 
-0.4.0에는 확인된 설치 오류가 있습니다. **현재 배포인 0.7.0을 받으세요.** 0.4.2는 소스 기록만 있으며 별도 APK 릴리스가 없습니다.
+0.4.0에는 확인된 설치 오류가 있습니다. **현재 배포인 0.7.1을 받으세요.** 0.4.2는 소스 기록만 있으며 별도 APK 릴리스가 없습니다.
 
 <details>
 <summary><strong>다운로드 정보 · SHA-256 · 실제 검증 결과</strong></summary>
 
 | 항목 | 값 / 결과 |
 | --- | --- |
-| 파일 | `BetterLyrics-Mobile-0.7.0.apk` · 2,419,799 bytes |
-| 패키지 / 버전 | `io.betterlyrics.mobile` · 0.7.0 (15) |
+| 파일 | `BetterLyrics-Mobile-0.7.1.apk` · 2,419,799 bytes |
+| 패키지 / 버전 | `io.betterlyrics.mobile` · 0.7.1 (16) |
 | Android | 최소 8.0 (API 26) · compile / target 16 (API 36) |
 | APK 구조 | Universal · 네이티브 `.so` 없음 |
-| 오프라인 검사 | 256개 통과 · 기준 오디오 2,073프레임 출력 동일 · 패키징 5개 통과 |
+| 오프라인 검사 | 257개 통과 · 기준 오디오 2,073프레임 출력 동일 · 패키징 5개 통과 |
 | 서명 / 빌드 | v2/v3 · 기존 인증서 일치 · ZIP 정렬 · 같은 환경의 2회 빌드 바이트 일치 |
 | 브라우저 UI | 7개 suite · 70개 검사 묶음 통과 |
 | Android 16 AVD | 위젯·폰트·플레이리스트·설치·업데이트 검사 · 첨부 보고서 참조 |
 | 공개 파일 | 게시 후 APK 재다운로드·SHA-256 검증 단계 |
 
 ```text
-003ab9d703937e1c155226bfeb6a44c1e9ab98ef67b7405b15157107b38202ef
+f29c0759f87ce4a22f08cb1e4aa8f0dae74ea651956d0ab58f62b0319ff69a2e
 ```
 
-[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/RELEASE_VALIDATION.json) · [UI_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/UI_VALIDATION.json) · [WIDGET_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/WIDGET_VALIDATION.json) · [PLAYLIST_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/PLAYLIST_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/INSTALL_VALIDATION.json) · [실행 로그](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [검증 범위](docs/VALIDATION.md)
+[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/RELEASE_VALIDATION.json) · [UI_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/UI_VALIDATION.json) · [WIDGET_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/WIDGET_VALIDATION.json) · [PLAYLIST_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/PLAYLIST_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/INSTALL_VALIDATION.json) · [실행 로그](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [검증 범위](docs/VALIDATION.md)
 
 </details>
 

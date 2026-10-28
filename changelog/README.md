@@ -2,13 +2,13 @@
 
 [프로젝트 홈](../README.md) · [English](../README.en.md) · [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases)
 
-## 현재 배포 · v0.7.0
+## 현재 배포 · v0.7.1
 
-**2026-10-28 · Android 8.0+ · versionCode 15**
+**2026-10-28 · Android 8.0+ · versionCode 16**
 
-**[↓ APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.0/BetterLyrics-Mobile-0.7.0.apk)** · [Release / 검증 첨부 파일](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.7.0) · [0.7.0 전체 노트](0.7.0.md)
+**[↓ APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/BetterLyrics-Mobile-0.7.1.apk)** · [Release / 검증 첨부 파일](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.7.1) · [0.7.1 전체 노트](0.7.1.md)
 
-휴대폰 음악과 M3U 재생목록, 로컬 재생, Spotify 플레이리스트 조회를 추가했습니다. 게시 검사 결과는 Release 첨부 보고서를 확인하세요.
+Spotify 로그인 주소를 고정해 개발자 설정과 정확히 일치하도록 수정했습니다. 게시 검사 결과는 Release 첨부 보고서를 확인하세요.
 
 설치: [한국어](../docs/INSTALL_KO.md) · [English](../docs/INSTALL_EN.md) · [简体中文](../docs/INSTALL_ZH.md)
 
@@ -17,7 +17,8 @@
 | 버전 / 문서 | 배포 상태 / Status | 주요 내용 / Highlights |
 | --- | --- | --- |
 | [Unreleased](UNRELEASED.md) | 문서·배포 구성 변경 / Documentation only | 첫 화면과 변경 기록 정리. 새 APK 없음 / Landing page and history organization; no new APK |
-| [0.7.0](0.7.0.md) | **최신 APK / Current APK** | 로컬·Spotify 재생목록 / Local and Spotify playlists |
+| [0.7.1](0.7.1.md) | **최신 APK / Current APK** | Spotify 로그인 주소 수정 / Spotify redirect URI fix |
+| [0.7.0](0.7.0.md) | 이전 공개 APK / Previous public APK | 로컬·Spotify 재생목록 / Local and Spotify playlists |
 | [0.6.0](0.6.0.md) | 이전 공개 APK / Previous public APK | 홈 화면 위젯·한글 글꼴 / Home widget and Korean fonts |
 | [0.5.0](0.5.0.md) | 이전 공개 APK / Previous public APK | 화면 현대화·상태·접근성 수정 / Refined UI and state/accessibility fixes |
 | [0.4.4](0.4.4.md) | 이전 공개 APK / Previous public APK | FFT 계수 재사용 / Cached FFT plan |
