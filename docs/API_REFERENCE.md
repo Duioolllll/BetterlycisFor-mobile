@@ -1,4 +1,4 @@
-# API reference — 0.9.0
+# API reference — 0.9.1
 
 이 문서는 현재 모바일 앱의 호출 경로를 설명한다. 입력 제한/취소/블로킹 시간의 범위는 [서비스 최적화 기록](SERVICE_OPTIMIZATION.md)을 따른다.
 

@@ -4,7 +4,7 @@ BetterLyrics Mobile은 Android에서 재생 중인 음악에 맞춰 가사를 �
 
 휴대폰 음악 폴더와 M3U 재생목록을 불러와 재생하고, 아티스트·앨범별로 탐색하거나 재생목록을 편집·내보낼 수 있습니다. Spotify 계정의 재생목록을 확인하고 활성 Spotify 기기에서 재생할 수도 있습니다. Spotify 재생 제어에는 Premium 계정이 필요합니다.
 
-가사는 LRCLIB, NetEase, Kugou에서 검색하거나 파일로 불러올 수 있습니다. 가사 시간 조정, 가사 카드 저장, 화면 꾸미기, 플로팅 가사와 홈 화면 위젯을 지원합니다. 청취 기록은 기기에 저장합니다.
+가사는 LRCLIB, NetEase, Kugou에서 검색하거나 파일로 불러올 수 있습니다. 반투명 재생 컨트롤은 사용하지 않으면 숨겨지고 화면을 터치하면 다시 나타납니다. 가사 시간 조정, 가사 카드 저장, 플로팅 가사와 홈 화면 위젯을 지원합니다. 청취 기록은 기기에 저장합니다.
 
 Android 8.0 이상에서 사용할 수 있습니다. 설치 파일은 [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest)에서 받습니다. 자세한 사용 방법은 [설치 안내](docs/INSTALL_KO.md)와 [플레이리스트 안내](docs/PLAYLISTS.md)를 참고하세요.
 

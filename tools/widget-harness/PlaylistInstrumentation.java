@@ -18,6 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /** Actual Android document-grant, player, media-session and encrypted-token checks. */
 public final class PlaylistInstrumentation extends Instrumentation {
@@ -34,6 +36,12 @@ public final class PlaylistInstrumentation extends Instrumentation {
         runOnMainSync(()->{try{result.set(call(target,method,types,args));}catch(Throwable error){failure.set(error);}});
         if(failure.get()!=null)throw new IllegalStateException(method,failure.get());return result.get();
     }
+    private String webValue(Activity activity,String script)throws Exception{
+        Field field=activity.getClass().getDeclaredField("web");field.setAccessible(true);android.webkit.WebView web=(android.webkit.WebView)field.get(activity);
+        if(web==null)return "";CountDownLatch done=new CountDownLatch(1);AtomicReference<String> value=new AtomicReference<>("");
+        runOnMainSync(()->web.evaluateJavascript(script,result->{value.set(result);done.countDown();}));
+        if(!done.await(5,TimeUnit.SECONDS))throw new IllegalStateException("WebView did not answer");return value.get();
+    }
     @Override public void onCreate(Bundle args){super.onCreate(args);start();}
     @Override public void onStart(){
         Bundle output=new Bundle();int result=Activity.RESULT_CANCELED;
@@ -42,6 +50,10 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Context context=getTargetContext();context.getSharedPreferences("settings",0).edit().putString("backgroundMode","static").apply();
             Intent launch=new Intent(Intent.ACTION_MAIN).setClassName("io.betterlyrics.mobile","io.betterlyrics.mobile.MainActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Activity activity=startActivitySync(launch);waitForIdleSync();
+            waitFor(()->"true".equals(webValue(activity,"!!(window.App&&document.getElementById('app').classList.contains('controls-hidden')&&document.getElementById('playerControls').inert)")),"idle playback controls hide in WebView");
+            long now=android.os.SystemClock.uptimeMillis();android.view.MotionEvent down=android.view.MotionEvent.obtain(now,now,android.view.MotionEvent.ACTION_DOWN,10,200,0),up=android.view.MotionEvent.obtain(now,now+40,android.view.MotionEvent.ACTION_UP,10,200,0);
+            try{sendPointerSync(down);sendPointerSync(up);}finally{down.recycle();up.recycle();}
+            waitFor(()->"true".equals(webValue(activity,"!!(window.App&&!document.getElementById('app').classList.contains('controls-hidden')&&!document.getElementById('playerControls').inert)")),"touch reveals playback controls");output.putString("controls","ok");
             Log.i("PlaylistInstrumentation","Requesting fixture document grants");
             context.startActivity(new Intent().setClassName("io.betterlyrics.widgettest","io.betterlyrics.widgettest.GrantActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             Uri tree=DocumentsContract.buildTreeDocumentUri("io.betterlyrics.widgettest.documents","root"),file=DocumentsContract.buildDocumentUriUsingTree(tree,"playlist");

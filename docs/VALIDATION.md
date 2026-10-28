@@ -1,6 +1,12 @@
+# 0.9.1 — 2026-10-28
+
+284 JVM checks and eight browser suites covering 79 groups passed locally. The player uses a compact frosted surface with a longer progress rail and hides after inactivity in lyric, album, paused and no-lyric states. Dedicated browser checks exercise touch reveal, the bottom handle, seeking, keyboard access, saved display modes and reduced motion. Android 16 release checks cover installation and upgrades, including the signed 0.9.0 candidate, plus idle and touch behavior in WebView. Actual physical phones and a real Spotify account remain unverified.
+
+---
+
 # 0.9.0 — 2026-10-28
 
-282 JVM checks cover playlist export, Kugou KRC parsing, bounded retry, and listening-time accounting. Chromium playlist and settings smoke checks passed; the Android 16 release gate checks folder import, artist/album groups, M3U export, playback reordering, lyric-card PNG, private listening history, and prior-version updates using synthetic fixtures. Published reports contain the gate results. A live Kugou response for one song was decoded and yielded 47 word-timed lyric rows. Actual Spotify account playback, physical devices, third-party document providers and long-running background behavior remain unverified. [Playlist guide](PLAYLISTS.md) · [Feature parity](PARITY.md).
+282 JVM checks cover playlist export, Kugou KRC parsing, bounded retry, and listening-time accounting. Chromium playlist and settings smoke checks passed; the Android 16 release gate checks folder import, artist/album groups, M3U export, playback reordering, lyric-card PNG, private listening history, and prior-version updates using synthetic fixtures. The signed candidate was not published as a GitHub Release. A live Kugou response for one song was decoded and yielded 47 word-timed lyric rows. Actual Spotify account playback, physical devices, third-party document providers and long-running background behavior remain unverified. [Playlist guide](PLAYLISTS.md) · [Feature parity](PARITY.md).
 
 ---
 

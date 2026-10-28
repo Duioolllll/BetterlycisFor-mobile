@@ -5,7 +5,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'build','ui-qa');
 fs.mkdirSync(out,{recursive:true});
 const lines=Array.from({length:20},(_,i)=>({start:i*4000,end:(i+1)*4000,text:'밤의 여백을 따라 흐르는 노래 '+i,realTiming:false,words:[]}));
-const state={track:{key:'player-qa',title:'밤의 여백',artist:'화면 미리보기',album:'밤의 기록',position:24500,duration:120000,positionKnown:true,playing:false,speed:1,packageName:'qa',appName:'테스트 음악 앱',actions:822},lyrics:{provider:'Local',lines},settings:{fontSize:31,offset:0,wordMode:'auto',backgroundMode:'static'},volume:{available:true,level:6,max:15},permissions:{notifications:true,connected:true,overlay:true},sources:[{packageName:'qa',name:'테스트 음악 앱',playing:false}]};
+const state={track:{key:'player-qa',title:'밤의 여백',artist:'화면 미리보기',album:'밤의 기록',position:24500,duration:120000,positionKnown:true,playing:false,speed:1,packageName:'qa',appName:'테스트 음악 앱',actions:822},lyrics:{provider:'Local',lines},settings:{fontSize:31,offset:0,wordMode:'auto',backgroundMode:'static',appearance:{controls:'always'}},volume:{available:true,level:6,max:15},permissions:{notifications:true,connected:true,overlay:true},sources:[{packageName:'qa',name:'테스트 음악 앱',playing:false}]};
 (async()=>{
  const browser=await chromium.launch({headless:true,executablePath:process.env.BETTERLYRICS_CHROME||undefined,args:['--no-sandbox','--enable-unsafe-swiftshader']});
  const result={checks:[],errors:[],viewports:[]};

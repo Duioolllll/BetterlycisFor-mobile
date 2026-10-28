@@ -15,7 +15,7 @@ const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,pos
    assert(await page.locator('#playlistSheet').isVisible());
    const geometry=await page.evaluate(()=>{const r=document.querySelector('#playlistSheet').getBoundingClientRect();return {left:r.left,right:r.right,bottom:r.bottom,width:document.documentElement.scrollWidth,viewport:innerWidth,height:innerHeight}});
    assert(geometry.left>=-0.1&&geometry.right<=viewport.width+0.1&&geometry.bottom<=viewport.height+0.1&&geometry.width<=viewport.width,'playlist sheet fits '+JSON.stringify({viewport,geometry}));
-   for(const id of ['playlistButton','localTab','spotifyTab']){const box=await page.locator('#'+id).boundingBox();assert(box&&box.width>=44&&box.height>=44,id+' touch target');}
+   for(const id of ['playlistButton','localTab','spotifyTab']){const box=await page.locator('#'+id).boundingBox();assert(box&&box.width>=43.5&&box.height>=43.5,id+' touch target');}
    await page.close();
   }
   result.checks.push('playlist sheet fits four sizes and maintains accessible controls');

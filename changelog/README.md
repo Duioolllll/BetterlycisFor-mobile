@@ -2,13 +2,13 @@
 
 [프로젝트 홈](../README.md) · [English](../README.en.md) · [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases)
 
-## 현재 배포 · v0.9.0
+## 현재 배포 · v0.9.1
 
-**2026-10-28 · Android 8.0+ · versionCode 18**
+**2026-10-28 · Android 8.0+ · versionCode 19**
 
-**[↓ APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.9.0/BetterLyrics-Mobile-0.9.0.apk)** · [Release / 검증 첨부 파일](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.9.0) · [0.9.0 전체 노트](0.9.0.md)
+**[↓ APK 다운로드 / Download APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.9.1/BetterLyrics-Mobile-0.9.1.apk)** · [Release / 검증 첨부 파일](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.9.1) · [0.9.1 전체 노트](0.9.1.md)
 
-음악 폴더·아티스트·앨범 탐색과 재생목록 편집, Kugou 가사와 가사 카드 저장을 지원합니다. 게시 검사 결과는 Release 첨부 보고서를 확인하세요.
+유리형 재생바와 자동 숨김, 음악 폴더 탐색과 재생목록 편집, Kugou 가사와 가사 카드 저장을 지원합니다. 게시 검사 결과는 Release 첨부 보고서를 확인하세요.
 
 설치: [한국어](../docs/INSTALL_KO.md) · [English](../docs/INSTALL_EN.md) · [简体中文](../docs/INSTALL_ZH.md)
 
@@ -17,7 +17,8 @@
 | 버전 / 문서 | 배포 상태 / Status | 주요 내용 / Highlights |
 | --- | --- | --- |
 | [Unreleased](UNRELEASED.md) | 문서·배포 구성 변경 / Documentation only | 첫 화면과 변경 기록 정리. 새 APK 없음 / Landing page and history organization; no new APK |
-| [0.9.0](0.9.0.md) | **최신 APK / Current APK** | 음악 라이브러리와 가사 / Music library and lyrics |
+| [0.9.1](0.9.1.md) | **최신 APK / Current APK** | 유리형 재생바와 자동 숨김 / Glass playback controls and auto-hide |
+| [0.9.0](0.9.0.md) | 미게시 빌드 / Unpublished candidate | 음악 라이브러리와 가사 / Music library and lyrics |
 | [0.8.0](0.8.0.md) | 이전 공개 APK / Previous public APK | 플레이리스트 바로 재생 / Direct playlist playback |
 | [0.7.1](0.7.1.md) | 이전 공개 APK / Previous public APK | Spotify 로그인 주소 수정 / Spotify redirect URI fix |
 | [0.7.0](0.7.0.md) | 이전 공개 APK / Previous public APK | 로컬·Spotify 재생목록 / Local and Spotify playlists |

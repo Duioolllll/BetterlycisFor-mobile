@@ -60,7 +60,7 @@
       <div id="emptyState" class="empty-state"><h2 id="emptyTitle">노래를 켜면,<br>가사가 따라와요.</h2><button id="emptyAction" class="primary-button">음악 감지 연결하기 <span aria-hidden="true">↗</span></button><button id="emptySecondary" class="text-button">가사 직접 검색</button></div>
       <button id="followButton" class="follow-button" hidden><svg><use href="#i-follow"/></svg>현재 가사로</button>
     </section>
-    <footer class="player" aria-label="재생 제어">
+    <footer id="playerControls" class="player" aria-label="재생 제어">
       <div class="seek-wrap"><input id="seek" class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="재생 위치" disabled><div class="time-row"><span id="positionLabel">0:00</span><span id="durationLabel">—:—</span></div></div>
       <div class="transport"><div class="transport-main"><button id="previousButton" class="icon-button" aria-label="이전 곡" disabled><svg class="filled-icon"><use href="#i-previous"/></svg></button><button id="playButton" class="play-button" aria-label="재생" disabled><svg class="filled-icon"><use id="playIcon" href="#i-play"/></svg></button><button id="nextButton" class="icon-button" aria-label="다음 곡" disabled><svg class="filled-icon"><use href="#i-next"/></svg></button></div></div>
 
@@ -71,7 +71,7 @@
         <button id="sourceButton" class="player-action source-button" aria-label="재생 앱 선택"><svg class="filled-icon"><use href="#i-sources"/></svg><span id="sourceDot" class="sr-only"></span><span id="sourceName" class="sr-only">음악 연결 대기</span></button>
       </div>
     </footer>
-    <button id="controlsToggle" class="controls-toggle icon-button" aria-label="재생 컨트롤 펼치기" aria-expanded="true"><svg class="filled-icon"><use href="#i-more"/></svg></button>
+    <button id="controlsToggle" class="controls-toggle icon-button" aria-label="재생 컨트롤 펼치기" aria-controls="playerControls" aria-expanded="true"><span aria-hidden="true"></span></button>
   </main>
 
   <div id="sheetBackdrop" class="sheet-backdrop" hidden></div>

@@ -2,8 +2,8 @@
 
 [한국어](INSTALL_KO.md) · [English](INSTALL_EN.md) · [简体中文](INSTALL_ZH.md) · [홈](../README.md)
 
-**0.9.0 · Android 8.0 이상(API26+) · 패키지 `io.betterlyrics.mobile` · versionCode 18**
-앱 화면은 한국어다. 이 문서는 설치 안내 번역이며 영어/중국어 UI를 제공한다는 뜻은 아니다. 독립적인 비공식 프로젝트다. Android 16을 대상으로 빌드했지만 0.9.0 게시 전 Android16 AVD 설치·시작·업데이트를 검사한다. 실제 휴대폰·음악 재생 검증은 별도다. [검증 범위](VALIDATION.md).
+**0.9.1 · Android 8.0 이상(API26+) · 패키지 `io.betterlyrics.mobile` · versionCode 19**
+앱 화면은 한국어다. 이 문서는 설치 안내 번역이며 영어/중국어 UI를 제공한다는 뜻은 아니다. 독립적인 비공식 프로젝트다. Android 16을 대상으로 빌드했지만 0.9.1 게시 전 Android16 AVD 설치·시작·업데이트를 검사한다. 실제 휴대폰·음악 재생 검증은 별도다. [검증 범위](VALIDATION.md).
 
 ## A. 다운로드와 확인
 
@@ -11,18 +11,18 @@
 2. **Releases** 메뉴를 선택한다.
 3. **Latest Release**를 연다. [최신 릴리스 바로가기](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest).
 4. 아래 **Assets**를 펼쳐 APK를 다운로드한다. `Source code.zip/tar.gz`는 설치 파일이 아니다.
-5. 이번 버전 파일명은 `BetterLyrics-Mobile-0.9.0.apk`다. 이후 버전은 해당 Release의 버전·파일명을 따른다.
+5. 이번 버전 파일명은 `BetterLyrics-Mobile-0.9.1.apk`다. 이후 버전은 해당 Release의 버전·파일명을 따른다.
 6. 가능하면 함께 제공하는 `SHA256SUMS`의 SHA-256과 실제 파일을 비교한다. 일치하지 않으면 설치하지 말고 다시 다운로드한다.
 
-[0.9.0 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.9.0/BetterLyrics-Mobile-0.9.0.apk) · [체크섬](../downloads/SHA256SUMS). Release가 일시적으로 열리지 않으면 [저장소 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.9.0.apk)를 사용한다. HTML 페이지나 ZIP의 확장자를 APK로 바꾸지 않는다.
+[0.9.1 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.9.1/BetterLyrics-Mobile-0.9.1.apk) · [체크섬](../downloads/SHA256SUMS). Release가 일시적으로 열리지 않으면 [저장소 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.9.1.apk)를 사용한다. HTML 페이지나 ZIP의 확장자를 APK로 바꾸지 않는다.
 
 컴퓨터에서 확인하는 방법:
 
 ```powershell
-Get-FileHash .\BetterLyrics-Mobile-0.9.0.apk -Algorithm SHA256
+Get-FileHash .\BetterLyrics-Mobile-0.9.1.apk -Algorithm SHA256
 ```
 
-Linux는 `sha256sum BetterLyrics-Mobile-0.9.0.apk`, macOS는 `shasum -a 256 BetterLyrics-Mobile-0.9.0.apk`를 쓴다. 체크섬과 서명 일치는 파일 식별이며 Google 보안 승인을 의미하지 않는다.
+Linux는 `sha256sum BetterLyrics-Mobile-0.9.1.apk`, macOS는 `shasum -a 256 BetterLyrics-Mobile-0.9.1.apk`를 쓴다. 체크섬과 서명 일치는 파일 식별이며 Google 보안 승인을 의미하지 않는다.
 
 ## B. Android 설치
 
@@ -42,6 +42,7 @@ Google Play Protect가 경고하면 문구와 원인을 확인한다. 악성 앱
 4. 실제 노래와 현재 강조 줄을 비교한다. 다른 버전의 가사면 **··· → 가사 직접 찾기**, **다시 검색**, 또는 **가사 파일 불러오기**를 사용한다. 시간 없는 일반 텍스트는 정확하게 자동 동기화되지 않는다.
 5. 일정하게 어긋나면 **이 곡의 가사 시간 보정**을 조절한다. `+`는 가사를 더 일찍, `−`는 더 늦게 표시한다. 탐색/일시정지 후도 확인한다.
 6. **··· → 화면 꾸미기**에서 원본 스타일/가사 집중/앨범 중심, 배치·정렬·글자 크기/굵기·여백·흐림·밝기·커버·색상·컨트롤을 바꾼다. 즉시 적용되어 저장된다. 프리셋 초기화는 곡별 시간 보정을 지우지 않는다. 플로팅 가사는 별도 모양이다.
+   기본 재생 컨트롤은 약 3.5초 동안 터치하지 않으면 아래로 숨겨진다. 화면을 터치하거나 아래 손잡이를 누르면 다시 나타난다. **재생 컨트롤 → 항상 표시**를 선택하면 숨기지 않는다.
 7. **사운드와 배경**에서 소리 반응/유체/정적 배경과 강도를 고른다. 소리 반응에는 **재생 소리에 연결**을 누르고 오디오 권한을 허용한다. 기본 방식이 안 되면 Android10 이상에서 **다른 방식으로 소리 연결**의 시스템 공유 동의를 사용할 수 있다.
 
 오디오 권한은 재생 소리 분석용이며 이 구현은 마이크 입력을 열지 않는다. 녹음 파일 저장/업로드도 하지 않는다. 음악 앱이 캡처를 제한하면 기본 그라데이션을 사용한다. 소리 연결은 가사 표시의 필수 조건이 아니며 앱 화면을 벗어나면 분석을 중단한다. 플로팅 가사를 사용할 때만 **다른 앱 위에 표시** 권한이 필요하다. 파일 가져오기는 사용자가 선택한 문서만 읽는다.
@@ -58,7 +59,7 @@ GitHub Releases에서 새 APK를 내려받아 기존 앱 위에 설치한다. **
 
 | 문제 | 확인 및 조치 |
 | --- | --- |
-| 0.4.0 APK 설치 실패 | 리소스 패키징 결함이 확인됐다. 0.9.0 APK를 새로 받는다. 기존 파일의 이름만 바꾸지 않는다 |
+| 0.4.0 APK 설치 실패 | 리소스 패키징 결함이 확인됐다. 0.9.1 APK를 새로 받는다. 기존 파일의 이름만 바꾸지 않는다 |
 | APK 설치 실패 | Android8 이상인지, 저장 공간, 전체 다운로드/해시, 올바른 APK인지 확인. 업데이트라면 서명과 버전도 확인 |
 | 앱 설치 차단 | 해당 파일을 여는 앱의 출처별 권한인지 확인. 회사/보호자 정책은 관리자에게 문의 |
 | Play Protect 경고 | 경고를 읽고 위험 판정이면 중단. 보안 기능 강제 해제 금지. 정확한 문구·버전 보고 |

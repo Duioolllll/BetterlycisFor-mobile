@@ -18,7 +18,9 @@
   let flowGroups = [], flowLayoutDirty = true, snapFollow = true;
   let seekPreview = null, pendingSeek = null;
   let lyricsVisible=true,volumeSeeking=false,lastVolumeSent=0;
-  let controlsUntil=performance.now()+3500,keyboardNavigation=false,controlsHidden=false;
+  const CONTROL_IDLE_MS=3500;
+  let controlsUntil=performance.now()+CONTROL_IDLE_MS,keyboardNavigation=false,controlsHidden=false;
+  const controlPointers=new Set();
   let seeking = false, lastVisual = 0, lastCover = '', lastSheet = null, toastTimer = 0, lastFocus = null;
   let wasPreview=false,audioStatusSignature='';
   let selectedLocal='',playlistTab='local',localTracks=[],localItems=[],localGroups={artists:[],albums:[]},localView='playlists',localReadOnly=false,pendingTrackRemoval=-1,localVisible=100,spotifyItems=[],spotifyListId='',spotifyLists=[],spotifyPlayPending=false;
@@ -76,7 +78,7 @@
     });
     if (!Array.isArray(state.lyrics.lines)) state.lyrics.lines=[];
     if (!Array.isArray(state.sources)) state.sources=[];
-    if (changed) { manualUntil=0; currentAnchor=-1; $('lyricsViewport').scrollTop=0; }
+    if (changed) { manualUntil=0; currentAnchor=-1; $('lyricsViewport').scrollTop=0; controlsUntil=performance.now()+CONTROL_IDLE_MS; }
     updateMetadata();
     updateSettings();
     if(incoming.audio)audioFrame(incoming.audio);
@@ -174,11 +176,11 @@
 
   function updateControlVisibility(now) {
     const mode=window.Appearance.get().controls;
-    const hidden=lyricsVisible && lineModels.length>0 && !lastSheet && !seeking && !volumeSeeking && !keyboardNavigation && (mode==='minimal'?now>=controlsUntil:mode==='auto'&&state.track.playing&&now>=controlsUntil);
-    if(hidden!==controlsHidden){controlsHidden=hidden;$('app').classList.toggle('controls-hidden',hidden);document.querySelector('.player').inert=hidden;document.querySelector('.player').setAttribute('aria-hidden',String(hidden));}
-    $('controlsToggle').setAttribute('aria-expanded',String(!hidden));
-    $('controlsToggle').setAttribute('aria-label',hidden?'재생 컨트롤 펼치기':'재생 컨트롤 숨기기');
-    $('controlsToggle').hidden=mode==='always'||!lyricsVisible||!lineModels.length;
+    const hidden=mode!=='always' && !lastSheet && !seeking && !volumeSeeking && !keyboardNavigation && controlPointers.size===0 && now>=controlsUntil;
+    if(hidden!==controlsHidden){const panel=$('playerControls');if(hidden&&panel.contains(document.activeElement))document.activeElement.blur();controlsHidden=hidden;$('app').classList.toggle('controls-hidden',hidden);panel.inert=hidden;panel.setAttribute('aria-hidden',String(hidden));}
+    const toggle=$('controlsToggle');if(!hidden&&document.activeElement===toggle){const focus=$('playButton').disabled?$('settingsButton'):$('playButton');focus.focus({preventScroll:true});}
+    toggle.setAttribute('aria-expanded',String(!hidden));toggle.setAttribute('aria-label',hidden?'재생 컨트롤 펼치기':'재생 컨트롤 숨기기');
+    toggle.setAttribute('aria-hidden',String(!hidden));toggle.tabIndex=hidden?0:-1;toggle.hidden=mode==='always';
   }
 
   function updateSettings() {
@@ -467,7 +469,7 @@
   function closeSheet() {
     if(!lastSheet)return false;$('app').inert=false;
     $(lastSheet).hidden=true;lastSheet=null;$('sheetBackdrop').hidden=true;document.body.classList.remove('sheet-open','appearance-open');
-    controlsUntil=performance.now()+3500;flowLayoutDirty=true;snapFollow=true;
+    controlsUntil=performance.now()+CONTROL_IDLE_MS;flowLayoutDirty=true;snapFollow=true;
     const focusTarget=lastFocus&&lastFocus.getClientRects().length?lastFocus:$('settingsButton');
     focusTarget.focus({preventScroll:true});return true;
   }
@@ -622,10 +624,16 @@
   function attachEvents() {
     window.Appearance.mount(next=>{state.settings.appearance=next;updateSettings();command('setAppearance',{appearance:next});});
     $('appearanceButton').addEventListener('click',()=>openSheet('appearanceSheet'));
-    $('controlsToggle').addEventListener('click',()=>{controlsUntil=controlsHidden?performance.now()+6000:0;updateControlVisibility(performance.now());});
-    document.addEventListener('pointerdown',()=>{keyboardNavigation=false;if(window.Appearance.get().controls==='auto')controlsUntil=performance.now()+3500;},{passive:true});
-    document.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&window.Appearance.get().controls==='auto')controlsUntil=performance.now()+3500;},{passive:true});
-    document.addEventListener('keydown',e=>{if(e.key==='Tab'){keyboardNavigation=true;controlsUntil=performance.now()+3500;}});
+    $('controlsToggle').addEventListener('click',()=>{controlsUntil=controlsHidden?performance.now()+CONTROL_IDLE_MS:0;updateControlVisibility(performance.now());});
+    document.addEventListener('pointerdown',e=>{
+      keyboardNavigation=false;if(e.target instanceof Element&&e.target.closest('#controlsToggle'))return;
+      controlPointers.add(e.pointerId);controlsUntil=performance.now()+CONTROL_IDLE_MS;updateControlVisibility(performance.now());
+    },{passive:true});
+    const releaseControlPointer=e=>{if(controlPointers.delete(e.pointerId))controlsUntil=performance.now()+CONTROL_IDLE_MS;};
+    window.addEventListener('pointerup',releaseControlPointer,{passive:true});window.addEventListener('pointercancel',releaseControlPointer,{passive:true});
+    document.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&window.Appearance.get().controls!=='always')controlsUntil=performance.now()+CONTROL_IDLE_MS;},{passive:true});
+    document.addEventListener('keydown',e=>{if(e.key==='Tab'){keyboardNavigation=true;controlsUntil=performance.now()+CONTROL_IDLE_MS;updateControlVisibility(performance.now());}});
+    window.addEventListener('blur',()=>controlPointers.clear());
     if(window.ResizeObserver)new ResizeObserver(()=>{flowLayoutDirty=true;snapFollow=true;}).observe($('lyricsViewport'));
     $('settingsButton').addEventListener('click',()=>openSheet('settingsSheet'));
     $('saveLyricCard').addEventListener('click',()=>command('saveLyricCard'));
@@ -716,7 +724,7 @@
     $('searchForm').addEventListener('submit',e=>{e.preventDefault();const title=$('searchTrack').value.trim(),artist=$('searchArtist').value.trim();if(!title){$('searchTrack').focus();return;}$('searchResults').replaceChildren();$('searchStatus').textContent='가사를 검색하고 있어요…';$('submitSearch').disabled=true;$('submitSearch').textContent='검색 중…';command('search',{title,artist});});
     window.addEventListener('resize',()=>{currentAnchor=-1;flowLayoutDirty=true;resizeAmbient();});
     if(document.fonts && document.fonts.ready){const changed=()=>{flowLayoutDirty=true;currentAnchor=-1;};document.fonts.ready.then(changed);if(document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',changed);}
-    document.addEventListener('visibilitychange',()=>{if(!document.hidden && native){try{receive(window.Android.getBootstrap());}catch(_){}if(lastSheet==='playlistSheet'&&playlistTab==='spotify')command('spotifyPlaylists');}});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){controlPointers.clear();return;}controlsUntil=performance.now()+CONTROL_IDLE_MS;updateControlVisibility(performance.now());if(native){try{receive(window.Android.getBootstrap());}catch(_){}if(lastSheet==='playlistSheet'&&playlistTab==='spotify')command('spotifyPlaylists');}});
   }
 
   function initAmbient(){window.ReactiveAmbient.init();}

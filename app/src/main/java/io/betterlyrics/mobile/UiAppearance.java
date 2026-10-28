@@ -14,6 +14,7 @@ public final class UiAppearance {
             choice(in,out,"align","left","left","center","right");
             choice(in,out,"font","system","system","serif","rounded","nanum-gothic","nanum-myeongjo","jua","nanum-pen");
             choice(in,out,"controls","auto","auto","always","minimal");
+            if("album".equals(out.optString("preset"))&&"always".equals(out.optString("controls")))out.put("controls","auto");
             choice(in,out,"flow","continuous","continuous","line");
             number(in,out,"weight",700,400,900);number(in,out,"lineHeight",135,110,180);
             number(in,out,"lineGap",18,4,40);number(in,out,"opacity",42,15,80);
