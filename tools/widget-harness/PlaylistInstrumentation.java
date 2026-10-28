@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.lang.reflect.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,11 +46,20 @@ public final class PlaylistInstrumentation extends Instrumentation {
             context.startActivity(new Intent().setClassName("io.betterlyrics.widgettest","io.betterlyrics.widgettest.GrantActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             Uri tree=DocumentsContract.buildTreeDocumentUri("io.betterlyrics.widgettest.documents","root"),file=DocumentsContract.buildDocumentUriUsingTree(tree,"playlist");
             waitFor(()->{try{context.getContentResolver().takePersistableUriPermission(file,Intent.FLAG_GRANT_READ_URI_PERMISSION);context.getContentResolver().takePersistableUriPermission(tree,Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);return true;}catch(SecurityException error){return false;}},"document grants");
+            AtomicBoolean pickerReturned=new AtomicBoolean();Thread watchdog=new Thread(()->{
+                try{Thread.sleep(3500);if(!pickerReturned.get())for(java.util.Map.Entry<Thread,StackTraceElement[]> entry:Thread.getAllStackTraces().entrySet())if(entry.getKey().getName().equals("main")){
+                    Log.i("PlaylistInstrumentation","Main thread while waiting for picker result:");for(StackTraceElement frame:entry.getValue())Log.i("PlaylistInstrumentation","  "+frame);
+                }}catch(InterruptedException ignored){}
+            },"picker-watchdog");watchdog.setDaemon(true);watchdog.start();
+            // A real picker returns after the source activity has transitioned back.
+            // Wait for the synthetic grant activity to finish that transition too.
+            waitForIdleSync();waitFor(()->{AtomicReference<Boolean> focused=new AtomicReference<>(false);runOnMainSync(()->focused.set(!activity.isDestroyed()&&activity.hasWindowFocus()));return focused.get();},"focus after document grant");
             Log.i("PlaylistInstrumentation","Importing M3U");
             Field pending=activity.getClass().getDeclaredField("pendingPlaylist");pending.setAccessible(true);
             runOnMainSync(()->{try{pending.set(activity,file);}catch(Exception error){throw new RuntimeException(error);}});
             Intent picked=new Intent().setData(tree).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
             mainCall(activity,"onActivityResult",new Class<?>[]{int.class,int.class,Intent.class},303,Activity.RESULT_OK,picked);
+            pickerReturned.set(true);
             ClassLoader targetLoader=activity.getClass().getClassLoader();Class<?> libraryClass=targetLoader.loadClass("io.betterlyrics.mobile.LocalLibrary");Method get=libraryClass.getDeclaredMethod("get",Context.class);get.setAccessible(true);Object library=get.invoke(null,context);
             try{waitFor(()->((JSONArray)call(library,"list",new Class<?>[]{})).length()==1,"M3U import");}
             catch(IllegalStateException timeout){
