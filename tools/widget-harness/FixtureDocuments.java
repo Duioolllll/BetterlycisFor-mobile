@@ -34,9 +34,9 @@ public final class FixtureDocuments extends DocumentsProvider {
     }
     private static void add(MatrixCursor cursor,MatrixCursor.RowBuilder row,String column,Object value){if(cursor.getColumnIndex(column)>=0)row.add(column,value);}
     @Override public boolean isChildDocument(String parent,String child){return parent.equals("root")&&(child.equals("album")||child.equals("playlist")||child.equals("one")||child.equals("two")||child.equals("lyrics"))||parent.equals("album")&&(child.equals("one")||child.equals("two")||child.equals("lyrics"));}
-    @Override public ParcelFileDescriptor openDocument(String id,String mode,CancellationSignal signal)throws FileNotFoundException{
+    @Override public synchronized ParcelFileDescriptor openDocument(String id,String mode,CancellationSignal signal)throws FileNotFoundException{
         if(!mode.equals("r")||!id.equals("playlist")&&!id.equals("one")&&!id.equals("two")&&!id.equals("lyrics"))throw new FileNotFoundException(id);
-        File file=new File(getContext().getCacheDir(),id);if(!file.isFile())try(FileOutputStream out=new FileOutputStream(file)){
+        File file=new File(getContext().getCacheDir(),id);if(!file.isFile())try(OutputStream out=new BufferedOutputStream(new FileOutputStream(file),16*1024)){
             if(id.equals("playlist"))out.write("#EXTM3U\n#EXTINF:20,Sample One\nAlbum/one.wav\nAlbum/two.wav\nAlbum/missing.wav\nhttps://example.invalid/stream\n".getBytes(StandardCharsets.UTF_8));
             else if(id.equals("lyrics"))out.write("[00:00.00]Fixture local lyric\n".getBytes(StandardCharsets.UTF_8));
             else writeWave(out,id.equals("one")?440:660);
