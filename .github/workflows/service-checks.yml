@@ -83,7 +83,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Exercise the signed APK and prior-version updates without publishing
-        run: bash tools/emulator-widget-ci.sh release
+        run: bash tools/emulator-widget-ci.sh install
       - name: Save release-candidate test evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

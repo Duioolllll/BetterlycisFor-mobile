@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-mode=${1:?Expected widget, playlist or release}
-case "$mode" in widget|playlist|release) ;; *) exit 2 ;; esac
+mode=${1:?Expected widget, playlist, install or release}
+case "$mode" in widget|playlist|install|release) ;; *) exit 2 ;; esac
 cd "$(dirname "$0")/.."
 export JAVA_HOME="$JAVA_HOME_17_X64"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
@@ -45,9 +45,10 @@ until [ "$(adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | t
   if [ "$SECONDS" -ge "$boot_deadline" ]; then exit 1; fi
   sleep 2
 done
-python3 tools/build.py --sdk "$ANDROID_HOME" --variant debug
-export BETTERLYRICS_EMULATOR_MODE="$mode"
-python3 - <<'PY'
+if [ "$mode" != install ]; then
+  python3 tools/build.py --sdk "$ANDROID_HOME" --variant debug
+  export BETTERLYRICS_EMULATOR_MODE="$mode"
+  python3 - <<'PY'
 import json, os, subprocess, sys
 from pathlib import Path
 apk=Path('dist')/json.loads(Path('dist/build-info-debug.json').read_text())['apk']
@@ -56,6 +57,7 @@ if os.environ['BETTERLYRICS_EMULATOR_MODE']!='playlist':
 if os.environ['BETTERLYRICS_EMULATOR_MODE']!='widget':
     subprocess.run([sys.executable,'tools/playlist-device-smoke.py','--serial','emulator-5554','--sdk',os.environ['ANDROID_HOME'],'--apk',str(apk),'--report',str(Path(os.environ['RUNNER_TEMP'])/'PLAYLIST_VALIDATION.json')],check=True)
 PY
-if [ "$mode" = release ]; then
+fi
+if [ "$mode" = release ] || [ "$mode" = install ]; then
   python3 tools/install-smoke.py --serial emulator-5554 --report "$RUNNER_TEMP/INSTALL_VALIDATION.json"
 fi
