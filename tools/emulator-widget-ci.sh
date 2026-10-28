@@ -25,7 +25,7 @@ cleanup(){
   if [ -n "$emulator_pid" ]; then timeout 10 adb -s emulator-5554 emu kill >/dev/null 2>&1 || kill "$emulator_pid" 2>/dev/null || true; fi
 }
 trap cleanup EXIT
-"$ANDROID_HOME/emulator/emulator" -avd betterlyrics_widget -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu software -memory 3072 -cores 2 > "$RUNNER_TEMP/emulator.log" 2>&1 &
+"$ANDROID_HOME/emulator/emulator" -avd betterlyrics_widget -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu software -feature -Vulkan -memory 3072 -cores 2 > "$RUNNER_TEMP/emulator.log" 2>&1 &
 emulator_pid=$!
 connection_deadline=$((SECONDS + 180))
 until [ "$(adb -s emulator-5554 get-state 2>/dev/null)" = device ]; do

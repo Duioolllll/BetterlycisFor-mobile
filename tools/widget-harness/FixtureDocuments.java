@@ -23,21 +23,22 @@ public final class FixtureDocuments extends DocumentsProvider {
     }
     @Override public Cursor queryChildDocuments(String parent,String[] projection,String sort)throws FileNotFoundException{
         MatrixCursor result=new MatrixCursor(projection==null?DOCS:projection);
-        if(parent.equals("root")){row(result,"album");row(result,"playlist");}else if(parent.equals("album")){row(result,"one");row(result,"two");}
+        if(parent.equals("root")){row(result,"album");row(result,"playlist");}else if(parent.equals("album")){row(result,"one");row(result,"two");row(result,"lyrics");}
         else throw new FileNotFoundException(parent);return result;
     }
     private void row(MatrixCursor result,String id)throws FileNotFoundException{
         String name,type;long size=0;
         switch(id){case "root":name="Test music";type=DocumentsContract.Document.MIME_TYPE_DIR;break;case "album":name="Album";type=DocumentsContract.Document.MIME_TYPE_DIR;break;
-            case "playlist":name="fixture.m3u";type="audio/x-mpegurl";size=128;break;case "one":name="one.wav";type="audio/wav";size=320044;break;case "two":name="two.wav";type="audio/wav";size=320044;break;default:throw new FileNotFoundException(id);}
+            case "playlist":name="fixture.m3u";type="audio/x-mpegurl";size=128;break;case "one":name="one.wav";type="audio/wav";size=320044;break;case "two":name="two.wav";type="audio/wav";size=320044;break;case "lyrics":name="one.lrc";type="text/plain";size=48;break;default:throw new FileNotFoundException(id);}
         MatrixCursor.RowBuilder row=result.newRow();add(result,row,DocumentsContract.Document.COLUMN_DOCUMENT_ID,id);add(result,row,DocumentsContract.Document.COLUMN_DISPLAY_NAME,name);add(result,row,DocumentsContract.Document.COLUMN_MIME_TYPE,type);add(result,row,DocumentsContract.Document.COLUMN_FLAGS,0);add(result,row,DocumentsContract.Document.COLUMN_SIZE,size);
     }
     private static void add(MatrixCursor cursor,MatrixCursor.RowBuilder row,String column,Object value){if(cursor.getColumnIndex(column)>=0)row.add(column,value);}
-    @Override public boolean isChildDocument(String parent,String child){return parent.equals("root")&&(child.equals("album")||child.equals("playlist")||child.equals("one")||child.equals("two"))||parent.equals("album")&&(child.equals("one")||child.equals("two"));}
+    @Override public boolean isChildDocument(String parent,String child){return parent.equals("root")&&(child.equals("album")||child.equals("playlist")||child.equals("one")||child.equals("two")||child.equals("lyrics"))||parent.equals("album")&&(child.equals("one")||child.equals("two")||child.equals("lyrics"));}
     @Override public ParcelFileDescriptor openDocument(String id,String mode,CancellationSignal signal)throws FileNotFoundException{
-        if(!mode.equals("r")||!id.equals("playlist")&&!id.equals("one")&&!id.equals("two"))throw new FileNotFoundException(id);
+        if(!mode.equals("r")||!id.equals("playlist")&&!id.equals("one")&&!id.equals("two")&&!id.equals("lyrics"))throw new FileNotFoundException(id);
         File file=new File(getContext().getCacheDir(),id);if(!file.isFile())try(FileOutputStream out=new FileOutputStream(file)){
             if(id.equals("playlist"))out.write("#EXTM3U\n#EXTINF:20,Sample One\nAlbum/one.wav\nAlbum/two.wav\nAlbum/missing.wav\nhttps://example.invalid/stream\n".getBytes(StandardCharsets.UTF_8));
+            else if(id.equals("lyrics"))out.write("[00:00.00]Fixture local lyric\n".getBytes(StandardCharsets.UTF_8));
             else writeWave(out,id.equals("one")?440:660);
         }catch(IOException error){throw new FileNotFoundException(error.toString());}
         return ParcelFileDescriptor.open(file,ParcelFileDescriptor.MODE_READ_ONLY);

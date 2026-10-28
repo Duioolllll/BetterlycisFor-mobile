@@ -38,6 +38,7 @@ public final class MainActivity extends Activity {
     private Future<?> pendingMusicImport;
     private final ExecutorService musicImports=Executors.newSingleThreadExecutor();
     private Uri pendingPlaylist;
+    private String pendingMusicTarget="";
     private volatile String bootstrap="{}";
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final Runnable publishTask=()->{publishQueued=false;publish();};
@@ -46,7 +47,7 @@ public final class MainActivity extends Activity {
     private final Runnable audioTicker=new Runnable(){public void run(){if(!active||!ready)return;state.audio.playing(state.playing());send("audio",state.audio.packet());handler.postDelayed(this,50);}};
     @Override public void onCreate(Bundle saved){
         super.onCreate(saved);setVolumeControlStream(AudioManager.STREAM_MUSIC);state=AppState.get(this);bootstrap=state.snapshot().toString();
-        if(saved!=null)pendingPlaylist=saved.getParcelable("pendingPlaylist");
+        if(saved!=null){pendingPlaylist=saved.getParcelable("pendingPlaylist");pendingMusicTarget=saved.getString("pendingMusicTarget","");}
         FrameLayout root=new FrameLayout(this);root.setBackgroundColor(Color.rgb(16,18,23));setContentView(root);
         if(Build.VERSION.SDK_INT>=30)getWindow().setDecorFitsSystemWindows(false);
         root.setOnApplyWindowInsetsListener((v,insets)->{if(Build.VERSION.SDK_INT>=30){android.graphics.Insets p=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout()|WindowInsets.Type.ime());v.setPadding(p.left,p.top,p.right,p.bottom);}else v.setPadding(insets.getSystemWindowInsetLeft(),insets.getSystemWindowInsetTop(),insets.getSystemWindowInsetRight(),insets.getSystemWindowInsetBottom());return insets;});
@@ -62,7 +63,7 @@ public final class MainActivity extends Activity {
     }
     @Override protected void onResume(){super.onResume();active=true;if(state!=null){if(!state.listeners.contains(observer))state.listeners.add(observer);LyricsListener.refresh(this);reconcileAudio();publish();}if(web!=null)web.onResume();handler.removeCallbacks(ticker);handler.post(ticker);handler.removeCallbacks(audioTicker);handler.post(audioTicker);}
     @Override protected void onPause(){active=false;handler.removeCallbacks(ticker);handler.removeCallbacks(audioTicker);handler.removeCallbacks(publishTask);publishQueued=false;if(state!=null){state.listeners.remove(observer);state.audio.suspend();}if(web!=null)web.onPause();super.onPause();}
-    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);if(pendingPlaylist!=null)out.putParcelable("pendingPlaylist",pendingPlaylist);}
+    @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);if(pendingPlaylist!=null)out.putParcelable("pendingPlaylist",pendingPlaylist);out.putString("pendingMusicTarget",pendingMusicTarget);}
     @Override protected void onDestroy(){handler.removeCallbacksAndMessages(null);if(state!=null){state.listeners.remove(observer);state.cancelWork(pendingFileRead);}if(pendingMusicImport!=null)pendingMusicImport.cancel(true);musicImports.shutdownNow();if(web!=null){web.removeJavascriptInterface("Android");web.stopLoading();web.destroy();web=null;}super.onDestroy();}
     @Override public void onBackPressed(){handleBack();}
     private void handleBack(){if(web==null||!ready){finish();return;}web.evaluateJavascript("window.App&&App.handleBack?App.handleBack():false",result->{if(!"true".equals(result))finish();});}
@@ -119,6 +120,7 @@ public final class MainActivity extends Activity {
             case "openPlayer":openPlayer();break;
             case "getPlaylists":sendPlaylists(data.optString("id",""));break;
             case "importMusic":{
+                pendingMusicTarget=data.optString("id","");
                 Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("audio/*").putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true);
                 pick.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);startActivityForResult(pick,301);break;
             }
@@ -130,6 +132,10 @@ public final class MainActivity extends Activity {
             case "removePlaylist":{
                 String id=data.optString("id","");if(LocalLibrary.get(this).remove(id)){LocalPlaybackService.removeIfPlaying(id);sendPlaylists("");}break;
             }
+            case "removeLocalTrack":{
+                String id=data.optString("id","");if(LocalLibrary.get(this).removeTrack(id,data.optInt("index",-1))){LocalPlaybackService.libraryChanged(this,id);sendPlaylists(id);}break;
+            }
+            case "stopLocal":LocalPlaybackService.removeIfPlaying(data.optString("id",""));sendPlaylists(data.optString("id",""));break;
             case "localMode":LocalPlaybackService.setMode(this,data.optString("mode","all"));sendPlaylists(data.optString("id",""));break;
             case "spotifyConnect":{
                 send("spotify",new JSONObject().put("view","connecting"));SpotifyClient.get(this).connect(this,spotifyCallback());break;
@@ -177,7 +183,7 @@ public final class MainActivity extends Activity {
         try{startActivity(intent);}catch(ActivityNotFoundException e){toast("스포티파이·유튜브 뮤직 등 음악 앱에서 노래를 재생해 주세요.");}
     }
     private void sendPlaylists(String selected){
-        try{LocalLibrary library=LocalLibrary.get(this);send("playlists",new JSONObject().put("items",library.list()).put("selected",library.detail(selected)).put("mode",LocalPlaybackService.mode(this)));}
+        try{LocalLibrary library=LocalLibrary.get(this);send("playlists",new JSONObject().put("items",library.list()).put("selected",library.detail(selected)).put("mode",LocalPlaybackService.mode(this)).put("activeId",LocalPlaybackService.currentPlaylist()));}
         catch(JSONException ignored){}
     }
     private SpotifyClient.Callback spotifyCallback(){
@@ -190,12 +196,12 @@ public final class MainActivity extends Activity {
         try{startActivity(intent);}catch(ActivityNotFoundException error){try{startActivity(new Intent(Intent.ACTION_VIEW,uri));}catch(ActivityNotFoundException missing){toast("Spotify를 열 수 없습니다.");}}
     }
     private boolean persistRead(Uri uri){try{getContentResolver().takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION);return true;}catch(SecurityException error){return false;}}
-    private void importLocal(Uri playlist,Uri folder,List<Uri> files){
+    private void importLocal(Uri playlist,Uri folder,List<Uri> files,String target){
         if(pendingMusicImport!=null)pendingMusicImport.cancel(true);
         pendingMusicImport=musicImports.submit(()->{
             try{
-                LocalLibrary.ImportResult result=playlist==null?LocalLibrary.get(this).importFiles(files):LocalLibrary.get(this).importM3u(playlist,folder);
-                handler.post(()->{if(isDestroyed())return;sendPlaylists(result.playlist.id);String message=result.playlist.tracks.size()+"곡을 불러왔습니다.";int skipped=result.missing+result.unsupported;if(skipped>0)message+=" "+skipped+"곡은 찾지 못했습니다.";toast(message);});
+                LocalLibrary.ImportResult result=playlist==null?LocalLibrary.get(this).importFiles(files,target):LocalLibrary.get(this).importM3u(playlist,folder);
+                handler.post(()->{if(isDestroyed())return;LocalPlaybackService.libraryChanged(this,result.playlist.id);sendPlaylists(result.playlist.id);String message=result.added+"곡을 불러왔습니다.";int skipped=result.missing+result.unsupported;if(skipped>0)message+=" "+skipped+"곡은 찾지 못했습니다.";toast(message);});
             }catch(Exception error){if(Thread.currentThread().isInterrupted())return;handler.post(()->{if(!isDestroyed())toast(error.getMessage()==null?"재생목록을 읽지 못했습니다.":error.getMessage());});}
         });
     }
@@ -209,14 +215,14 @@ public final class MainActivity extends Activity {
                 if(data.getClipData()!=null)for(int i=0;i<data.getClipData().getItemCount();i++){Uri uri=data.getClipData().getItemAt(i).getUri();if(uri!=null){if(persistRead(uri))files.add(uri);else unavailable++;}}
                 else if(data.getData()!=null){if(persistRead(data.getData()))files.add(data.getData());else unavailable++;}
                 if(files.isEmpty()){toast("음악 파일 접근 권한을 저장할 수 없습니다.");return;}
-                if(unavailable>0)toast(unavailable+"개 파일의 접근 권한을 저장할 수 없습니다.");importLocal(null,null,files);
+                if(unavailable>0)toast(unavailable+"개 파일의 접근 권한을 저장할 수 없습니다.");String target=pendingMusicTarget;pendingMusicTarget="";importLocal(null,null,files,target);
             }else if(request==302&&data.getData()!=null){
                 pendingPlaylist=data.getData();persistRead(pendingPlaylist);
                 try{Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);toast("음악이 저장된 폴더를 선택해 주세요.");startActivityForResult(pick,303);}
                 catch(ActivityNotFoundException error){pendingPlaylist=null;toast("음악 폴더 선택을 열 수 없습니다.");}
             }else if(request==303&&data.getData()!=null&&pendingPlaylist!=null){
                 Uri file=pendingPlaylist;pendingPlaylist=null;Uri folder=data.getData();
-                if(!persistRead(folder)){toast("음악 폴더 접근 권한을 저장할 수 없습니다.");return;}importLocal(file,folder,null);
+                if(!persistRead(folder)){toast("음악 폴더 접근 권한을 저장할 수 없습니다.");return;}importLocal(file,folder,null,"");
             }
             return;
         }

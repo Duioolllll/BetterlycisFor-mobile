@@ -145,7 +145,7 @@ final class SpotifyClient {
             synchronized(this){expires=0;}return request("https://api.spotify.com/v1"+path,"GET",accessToken(),null);
         }
     }
-    void playlists(Callback callback){int ticket=epoch;if(!connected()){callback.done(object("view","disconnected","connected",false));return;}worker.execute(()->loadPlaylists(ticket,callback));}
+    void playlists(Callback callback){int ticket=epoch;if(connecting){callback.done(object("view","connecting","connected",false));return;}if(!connected()){callback.done(object("view","disconnected","connected",false));return;}worker.execute(()->loadPlaylists(ticket,callback));}
     private void loadPlaylists(int ticket,Callback callback){
         try{
             JSONArray result=new JSONArray();

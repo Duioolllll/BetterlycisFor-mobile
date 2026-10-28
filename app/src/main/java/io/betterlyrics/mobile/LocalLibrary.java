@@ -14,7 +14,10 @@ import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,9 +35,9 @@ final class LocalLibrary {
         return result;
     }
     static final class Track {
-        final String uri,title,artist,album;final long duration;
-        Track(String uri,String title,String artist,String album,long duration){this.uri=uri;this.title=title;this.artist=artist;this.album=album;this.duration=duration;}
-        JSONObject json(){return object("uri",uri,"title",title,"artist",artist,"album",album,"duration",duration);}
+        final String uri,title,artist,album,lyricUri;final long duration;
+        Track(String uri,String title,String artist,String album,long duration,String lyricUri){this.uri=uri;this.title=title;this.artist=artist;this.album=album;this.duration=duration;this.lyricUri=lyricUri;}
+        JSONObject json(){return object("uri",uri,"title",title,"artist",artist,"album",album,"duration",duration,"lyricUri",lyricUri);}
         JSONObject display(){return object("title",title,"artist",artist,"album",album,"duration",duration);}
     }
     static final class Playlist {
@@ -42,8 +45,8 @@ final class LocalLibrary {
         Playlist(String id,String name,List<Track> tracks){this.id=id;this.name=name;this.tracks=new ArrayList<>(tracks);}
     }
     static final class ImportResult {
-        final Playlist playlist;final int missing,unsupported;
-        ImportResult(Playlist playlist,int missing,int unsupported){this.playlist=playlist;this.missing=missing;this.unsupported=unsupported;}
+        final Playlist playlist;final int added,missing,unsupported;
+        ImportResult(Playlist playlist,int added,int missing,int unsupported){this.playlist=playlist;this.added=added;this.missing=missing;this.unsupported=unsupported;}
     }
     private final Context context;
     private final ArrayList<Playlist> playlists=new ArrayList<>();
@@ -58,7 +61,8 @@ final class LocalLibrary {
                 for(int j=0;j<Math.min(rows.length(),MAX_TRACKS);j++){
                     JSONObject row=rows.optJSONObject(j);if(row==null)continue;String uri=row.optString("uri");
                     if(!"content".equalsIgnoreCase(Uri.parse(uri).getScheme()))continue;
-                    tracks.add(new Track(uri,row.optString("title"),row.optString("artist"),row.optString("album"),Math.max(0,row.optLong("duration"))));
+                    String lyric=row.optString("lyricUri");if(!lyric.isEmpty()&&!"content".equalsIgnoreCase(Uri.parse(lyric).getScheme()))lyric="";
+                    tracks.add(new Track(uri,row.optString("title"),row.optString("artist"),row.optString("album"),Math.max(0,row.optLong("duration")),lyric));
                 }
                 String id=item.optString("id"),name=item.optString("name");if(!id.isEmpty()&&!tracks.isEmpty())playlists.add(new Playlist(id,name,tracks));
             }
@@ -80,30 +84,56 @@ final class LocalLibrary {
     synchronized boolean remove(String id){
         boolean removed=playlists.removeIf(item->item.id.equals(id));if(removed)save();return removed;
     }
+    synchronized boolean removeTrack(String id,int index){
+        for(int i=0;i<playlists.size();i++){
+            Playlist old=playlists.get(i);if(!old.id.equals(id))continue;if(index<0||index>=old.tracks.size())return false;
+            ArrayList<Track> tracks=new ArrayList<>(old.tracks);tracks.remove(index);
+            if(tracks.isEmpty())playlists.remove(i);else playlists.set(i,new Playlist(old.id,old.name,tracks));save();return true;
+        }
+        return false;
+    }
     private synchronized Playlist add(String name,List<Track> tracks){
         if(tracks.isEmpty())throw new IllegalArgumentException("불러올 수 있는 곡이 없습니다.");
         if(playlists.size()>=100)throw new IllegalArgumentException("재생목록은 최대 100개까지 저장할 수 있습니다.");
         Playlist item=new Playlist(UUID.randomUUID().toString(),name,tracks);playlists.add(item);save();return item;
     }
-    ImportResult importFiles(List<Uri> uris)throws IOException {
+    private synchronized Playlist append(String id,List<Track> added){
+        for(int i=0;i<playlists.size();i++){
+            Playlist old=playlists.get(i);if(!old.id.equals(id))continue;
+            ArrayList<Track> tracks=new ArrayList<>(old.tracks);Set<String> seen=new HashSet<>();for(Track track:tracks)seen.add(track.uri);
+            for(Track track:added)if(seen.add(track.uri))tracks.add(track);
+            if(tracks.size()==old.tracks.size())throw new IllegalArgumentException("이미 추가된 음악입니다.");
+            if(tracks.size()>MAX_TRACKS)throw new IllegalArgumentException("재생목록은 최대 5,000곡까지 저장할 수 있습니다.");
+            Playlist updated=new Playlist(old.id,old.name,tracks);playlists.set(i,updated);save();return updated;
+        }
+        throw new IllegalArgumentException("재생목록을 찾을 수 없습니다.");
+    }
+    ImportResult importFiles(List<Uri> uris,String target)throws IOException {
         if(uris.size()>MAX_TRACKS)throw new IOException("재생목록은 최대 5,000곡까지 불러올 수 있습니다.");
         ArrayList<Track> tracks=new ArrayList<>();Set<String> seen=new HashSet<>();
-        for(Uri uri:uris){IoSupport.checkInterrupted();if(uri==null||!"content".equalsIgnoreCase(uri.getScheme())||!seen.add(uri.toString()))continue;tracks.add(metadata(uri,displayName(uri),"",0));}
-        return new ImportResult(add("내 음악",tracks),0,0);
+        for(Uri uri:uris){IoSupport.checkInterrupted();if(uri==null||!"content".equalsIgnoreCase(uri.getScheme())||!seen.add(uri.toString()))continue;tracks.add(metadata(uri,displayName(uri),"",0,""));}
+        IoSupport.checkInterrupted();Playlist previous=target.isEmpty()?null:get(target);int before=previous==null?0:previous.tracks.size();
+        Playlist saved=target.isEmpty()?add("내 음악",tracks):append(target,tracks);
+        return new ImportResult(saved,saved.tracks.size()-before,0,0);
     }
     ImportResult importM3u(Uri file,Uri tree)throws Exception {
         ContentResolver resolver=context.getContentResolver();byte[] bytes;
         try(InputStream in=resolver.openInputStream(file)){bytes=IoSupport.read(in,2*1024*1024,20000);}
         M3uPlaylist.Result parsed=M3uPlaylist.parse(M3uPlaylist.decode(bytes));
-        List<M3uPlaylist.Document> documents=scan(tree);M3uPlaylist.Matcher matcher=new M3uPlaylist.Matcher(documents);
+        List<M3uPlaylist.Document> documents=scan(tree),audio=new ArrayList<>();Map<String,String> lyrics=new HashMap<>();
+        for(M3uPlaylist.Document document:documents){
+            if(document.path.matches("(?i).*\\.lrc$")){String key=lyricKey(document.path);if(lyrics.containsKey(key))lyrics.put(key,"");else lyrics.put(key,document.uri);}
+            else audio.add(document);
+        }
+        M3uPlaylist.Matcher matcher=new M3uPlaylist.Matcher(audio);
         ArrayList<Track> tracks=new ArrayList<>();int missing=0;
         for(M3uPlaylist.Entry entry:parsed.entries){
             IoSupport.checkInterrupted();M3uPlaylist.Document document=matcher.match(entry);
             if(document==null){missing++;continue;}
-            Uri uri=Uri.parse(document.uri);tracks.add(metadata(uri,document.path,entry.title,entry.durationMs));
+            Uri uri=Uri.parse(document.uri);tracks.add(metadata(uri,document.path,entry.title,entry.durationMs,lyrics.getOrDefault(lyricKey(document.path),"")));
         }
-        String name=displayName(file).replaceFirst("(?i)\\.m3u8?$","").trim();if(name.isEmpty())name="재생목록";
-        return new ImportResult(add(name,tracks),missing,parsed.unsupported);
+        IoSupport.checkInterrupted();String name=displayName(file).replaceFirst("(?i)\\.m3u8?$","").trim();if(name.isEmpty())name="재생목록";
+        return new ImportResult(add(name,tracks),tracks.size(),missing,parsed.unsupported);
     }
     private String displayName(Uri uri){
         try(Cursor c=context.getContentResolver().query(uri,new String[]{OpenableColumns.DISPLAY_NAME},null,null,null)){
@@ -111,7 +141,8 @@ final class LocalLibrary {
         }catch(Exception ignored){}
         return uri.getLastPathSegment()==null?"음악":uri.getLastPathSegment();
     }
-    private Track metadata(Uri uri,String fallback,String label,long duration){
+    private String lyricKey(String path){return java.text.Normalizer.normalize(path.replaceFirst("\\.[^.]+$",""),java.text.Normalizer.Form.NFC).toLowerCase(Locale.ROOT);}
+    private Track metadata(Uri uri,String fallback,String label,long duration,String lyricUri){
         String path=fallback.replace('\\','/');String name=path.substring(path.lastIndexOf('/')+1).replaceFirst("\\.[^.]+$","");
         String title=label.isEmpty()?name:label,artist="",album="";long ms=Math.max(0,duration);
         MediaMetadataRetriever reader=new MediaMetadataRetriever();
@@ -122,7 +153,7 @@ final class LocalLibrary {
             try{long n=Long.parseLong(d);if(n>0&&n<=86400000)ms=n;}catch(Exception ignored){}
         }catch(Exception ignored){}finally{try{reader.release();}catch(Exception ignored){}}
         if(title.trim().isEmpty())title="제목 없음";
-        return new Track(uri.toString(),title,artist,album,ms);
+        return new Track(uri.toString(),title,artist,album,ms,lyricUri);
     }
     private List<M3uPlaylist.Document> scan(Uri tree)throws IOException {
         if(tree==null||!"content".equalsIgnoreCase(tree.getScheme())||!DocumentsContract.isTreeUri(tree))throw new IOException("음악 폴더를 다시 선택해 주세요.");
@@ -141,7 +172,7 @@ final class LocalLibrary {
                     String path=folder.path.isEmpty()?name:folder.path+"/"+name;
                     if(DocumentsContract.Document.MIME_TYPE_DIR.equals(type)){
                         if(folder.depth>=20)throw new IOException("음악 폴더가 너무 깊습니다.");queue.addLast(new Folder(id,path,folder.depth+1));
-                    }else if((type!=null&&type.startsWith("audio/"))||name.matches("(?i).*\\.(mp3|m4a|aac|wav|flac|ogg|opus|oga|wma|3gp|amr|aiff|aif)$")){
+                    }else if((type!=null&&type.startsWith("audio/"))||name.matches("(?i).*\\.(lrc|mp3|m4a|aac|wav|flac|ogg|opus|oga|wma|3gp|amr|aiff|aif)$")){
                         files.add(new M3uPlaylist.Document(path,DocumentsContract.buildDocumentUriUsingTree(tree,id).toString()));
                     }
                 }

@@ -28,12 +28,14 @@ const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,pos
   await page.locator('#playlistList button').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='getPlaylists'&&c.data.id==='local-1')));
   await page.evaluate(()=>App.playlists({items:[{id:'local-1',name:'내 음악',count:2}],selected:{id:'local-1',name:'내 음악',tracks:[{title:'첫 곡',artist:'가수'},{title:'둘째 곡'}]},mode:'all'}));
   await page.locator('#playlistOrder').selectOption('shuffle');assert(await page.evaluate(()=>commands.some(c=>c.action==='localMode'&&c.data.mode==='shuffle')));
-  await page.locator('#playlistTracks button').nth(1).click();assert(await page.evaluate(()=>commands.some(c=>c.action==='playLocal'&&c.data.id==='local-1'&&c.data.index===1)));assert(await page.locator('#playlistSheet').isHidden());
+  await page.locator('#playlistSearch').fill('둘째');assert.equal(await page.locator('#playlistTracks .playlist-track').count(),1);await page.locator('#playlistTracks .playlist-track').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='playLocal'&&c.data.id==='local-1'&&c.data.index===1)));assert(await page.locator('#playlistSheet').isHidden());
   result.checks.push('playlist text is escaped, selection and shuffle are sent to Android','selected track starts and closes the sheet');
   await page.locator('#playlistButton').click();await page.evaluate(()=>App.playlists({items:[{id:'local-1',name:'내 음악',count:2}],selected:{id:'local-1',name:'내 음악',tracks:[{title:'첫 곡'}]},mode:'all'}));
+  await page.locator('#playlistSearch').fill('');await page.locator('#playlistTracks .playlist-track-remove').click();assert(await page.locator('#trackRemoveConfirm').isVisible());await page.locator('#trackRemoveYes').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='removeLocalTrack'&&c.data.index===0)));
+  await page.locator('#importMusic').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='importMusic'&&c.data.id==='local-1')));
   await page.locator('#playlistRemove').click();assert(await page.locator('#playlistRemoveConfirm').isVisible());await page.locator('#playlistRemoveNo').click();assert(await page.locator('#playlistRemoveConfirm').isHidden());
   await page.locator('#playlistRemove').click();await page.locator('#playlistRemoveYes').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='removePlaylist'&&c.data.id==='local-1')));
-  result.checks.push('playlist deletion requires confirmation');
+  result.checks.push('playlist and track removal require confirmation; files append to the selected list');
   await page.locator('#spotifyTab').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='spotifyPlaylists')));
   assert(await page.locator('.spotify-brand img').evaluate(el=>el.complete&&el.naturalWidth>0));
   await page.evaluate(()=>App.spotify({view:'disconnected'}));await page.locator('#spotifyContent button').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='spotifyConnect')));

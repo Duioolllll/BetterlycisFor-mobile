@@ -50,6 +50,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Class<?> stateClass=Class.forName("io.betterlyrics.mobile.AppState");Object app=stateClass.getMethod("get",Context.class).invoke(null,context);
             Method track=stateClass.getMethod("track");
             waitFor(()->{JSONObject t=(JSONObject)track.invoke(app);return t.optBoolean("playing")&&t.optString("title").equals("Sample One");},"local audio starts");
+            Method snapshot=stateClass.getMethod("snapshot");waitFor(()->{JSONObject lyrics=((JSONObject)snapshot.invoke(app)).optJSONObject("lyrics");return lyrics!=null&&lyrics.optJSONArray("lines")!=null&&lyrics.optJSONArray("lines").length()>0&&lyrics.optJSONArray("lines").optJSONObject(0).optString("text").equals("Fixture local lyric");},"sidecar lyric");
             JSONObject started=(JSONObject)track.invoke(app);long first=started.optLong("position");
             waitFor(()->((JSONObject)track.invoke(app)).optLong("position")>first+300,"audio position advances");
             Field controllerField=stateClass.getDeclaredField("controller");controllerField.setAccessible(true);MediaController controller=(MediaController)controllerField.get(app);
@@ -58,6 +59,12 @@ public final class PlaylistInstrumentation extends Instrumentation {
             controller.getTransportControls().seekTo(4000);waitFor(()->{PlaybackState p=controller.getPlaybackState();return p!=null&&p.getPosition()>=3900;},"seek");
             controller.getTransportControls().skipToNext();waitFor(()->{JSONObject t=(JSONObject)track.invoke(app);return t.optBoolean("playing")&&t.optString("title").equals("two");},"next song");
             if(context.getSystemService(android.app.NotificationManager.class).getActiveNotifications().length==0)throw new IllegalStateException("playback notification missing");
+            mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"removeLocalTrack",new JSONObject().put("id",id).put("index",0));
+            detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);
+            if(detail.getJSONArray("tracks").length()!=1||!((JSONObject)track.invoke(app)).optString("title").equals("two"))throw new IllegalStateException("removing an earlier track interrupted playback");
+            Uri firstTrack=DocumentsContract.buildDocumentUriUsingTree(tree,"one");
+            call(library,"importFiles",new Class<?>[]{java.util.List.class,String.class},java.util.Collections.singletonList(firstTrack),id);
+            detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);if(detail.getJSONArray("tracks").length()!=2)throw new IllegalStateException("append failed");
             output.putString("local","ok");
 
             Class<?> clientClass=Class.forName("io.betterlyrics.mobile.SpotifyClient");Constructor<?> ctor=clientClass.getDeclaredConstructor(Context.class);ctor.setAccessible(true);Object client=ctor.newInstance(context);
@@ -75,7 +82,9 @@ public final class PlaylistInstrumentation extends Instrumentation {
             if(listener.isAlive()||callbackError.get()!=null||callback.get()==null)throw new IllegalStateException("loopback callback failed",callbackError.get());
             Field code=callback.get().getClass().getDeclaredField("code");code.setAccessible(true);if(!"good".equals(code.get(callback.get())))throw new IllegalStateException("OAuth state was not enforced");
             output.putString("spotifyLoopback","ok");
-            Class<?> player=Class.forName("io.betterlyrics.mobile.LocalPlaybackService");Method stop=player.getDeclaredMethod("removeIfPlaying",String.class);stop.setAccessible(true);runOnMainSync(()->{try{stop.invoke(null,id);}catch(Exception error){throw new RuntimeException(error);}});
+            mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"stopLocal",new JSONObject().put("id",id));
+            Class<?> player=Class.forName("io.betterlyrics.mobile.LocalPlaybackService");Method current=player.getDeclaredMethod("currentPlaylist");current.setAccessible(true);
+            waitFor(()->"".equals(current.invoke(null)),"local player stops");
             result=Activity.RESULT_OK;
         }catch(Throwable error){Log.e("PlaylistInstrumentation","Playlist test failed",error);output.putString("error",error.toString());}
         finish(result,output);

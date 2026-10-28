@@ -21,7 +21,7 @@
   let controlsUntil=performance.now()+3500,keyboardNavigation=false,controlsHidden=false;
   let seeking = false, lastVisual = 0, lastCover = '', lastSheet = null, toastTimer = 0, lastFocus = null;
   let wasPreview=false,audioStatusSignature='';
-  let selectedLocal='',playlistTab='local';
+  let selectedLocal='',playlistTab='local',localTracks=[],pendingTrackRemoval=-1;
   let demoTime = performance.now(), demoPosition = 14500, demoPlaying = true;
 
   function position(now = performance.now()) {
@@ -487,8 +487,10 @@
     let data;try{data=typeof input==='string'?JSON.parse(input):input;}catch(_){return;}
     if(!data||typeof data!=='object')return;
     const items=Array.isArray(data.items)?data.items:[],selected=data.selected&&Array.isArray(data.selected.tracks)?data.selected:null;
-    selectedLocal=selected?String(selected.id):'';
+    const previous=selectedLocal;selectedLocal=selected?String(selected.id):'';if(previous!==selectedLocal)$('playlistSearch').value='';
+    localTracks=selected?selected.tracks:[];pendingTrackRemoval=-1;$('trackRemoveConfirm').hidden=true;
     $('playlistOrder').value=['all','one','shuffle'].includes(data.mode)?data.mode:'all';
+    $('localStop').hidden=!selectedLocal||data.activeId!==selectedLocal;
     $('localBrowse').hidden=!!selected;$('localDetail').hidden=!selected;$('playlistRemoveConfirm').hidden=true;
     $('localStatus').textContent=items.length?'':'저장된 플레이리스트가 없습니다.';
     const root=$('playlistList');root.replaceChildren();
@@ -499,11 +501,18 @@
     }
     if(!selected)return;
     $('playlistName').textContent=String(selected.name||'재생목록');
-    const tracks=$('playlistTracks');tracks.replaceChildren();
-    selected.tracks.forEach((item,index)=>{
-      const button=document.createElement('button'),position=document.createElement('span'),box=document.createElement('div'),title=document.createElement('strong'),sub=document.createElement('small');
-      button.className='playlist-track';position.textContent=String(index+1);position.setAttribute('aria-hidden','true');title.textContent=String(item.title||'제목 없음');sub.textContent=[item.artist,item.album].filter(Boolean).join(' · ');
-      box.append(title,sub);button.append(position,box);button.addEventListener('click',()=>{command('playLocal',{id:selectedLocal,index});closeSheet();});tracks.append(button);
+    renderLocalTracks();
+  }
+
+  function renderLocalTracks(){
+    const tracks=$('playlistTracks'),query=$('playlistSearch').value.trim().toLocaleLowerCase();tracks.replaceChildren();
+    localTracks.forEach((item,index)=>{
+      if(query&&![item.title,item.artist,item.album].some(value=>String(value||'').toLocaleLowerCase().includes(query)))return;
+      const row=document.createElement('div'),button=document.createElement('button'),remove=document.createElement('button'),position=document.createElement('span'),box=document.createElement('div'),title=document.createElement('strong'),sub=document.createElement('small');
+      row.className='playlist-track-row';button.className='playlist-track';remove.className='playlist-track-remove';position.textContent=String(index+1);position.setAttribute('aria-hidden','true');title.textContent=String(item.title||'제목 없음');sub.textContent=[item.artist,item.album].filter(Boolean).join(' · ');
+      box.append(title,sub);button.append(position,box);button.addEventListener('click',()=>{command('playLocal',{id:selectedLocal,index});closeSheet();});
+      remove.textContent='빼기';remove.setAttribute('aria-label',String(item.title||'곡')+' 재생목록에서 빼기');remove.addEventListener('click',()=>{pendingTrackRemoval=index;$('trackRemoveName').textContent=String(item.title||'곡')+' 빼기';$('trackRemoveConfirm').hidden=false;$('trackRemoveYes').focus();});
+      row.append(button,remove);tracks.append(row);
     });
   }
 
@@ -572,10 +581,14 @@
     $('playlistButton').addEventListener('click',()=>openSheet('playlistSheet'));
     $('localTab').addEventListener('click',()=>showPlaylistTab('local'));
     $('spotifyTab').addEventListener('click',()=>showPlaylistTab('spotify'));
-    $('importMusic').addEventListener('click',()=>command('importMusic'));
+    $('importMusic').addEventListener('click',()=>command('importMusic',{id:selectedLocal}));
     $('importPlaylist').addEventListener('click',()=>command('importPlaylist'));
-    $('playlistBack').addEventListener('click',()=>command('getPlaylists',{id:''}));
+    $('playlistBack').addEventListener('click',()=>{$('playlistSearch').value='';command('getPlaylists',{id:''});});
+    $('playlistSearch').addEventListener('input',renderLocalTracks);
+    $('trackRemoveNo').addEventListener('click',()=>{$('trackRemoveConfirm').hidden=true;pendingTrackRemoval=-1;});
+    $('trackRemoveYes').addEventListener('click',()=>{if(pendingTrackRemoval>=0)command('removeLocalTrack',{id:selectedLocal,index:pendingTrackRemoval});});
     $('playlistOrder').addEventListener('change',()=>command('localMode',{id:selectedLocal,mode:$('playlistOrder').value}));
+    $('localStop').addEventListener('click',()=>command('stopLocal',{id:selectedLocal}));
     $('playlistRemove').addEventListener('click',()=>{$('playlistRemoveConfirm').hidden=false;$('playlistRemoveYes').focus();});
     $('playlistRemoveNo').addEventListener('click',()=>{$('playlistRemoveConfirm').hidden=true;$('playlistRemove').focus();});
     $('playlistRemoveYes').addEventListener('click',()=>command('removePlaylist',{id:selectedLocal}));

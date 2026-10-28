@@ -28,8 +28,8 @@ try:
         assert 'INSTRUMENTATION_RESULT: '+name+'=ok' in output,output
     assert 'INSTRUMENTATION_CODE: -1' in output,output
     report['checks']=[
-        'persisted document-tree grants and ordered M3U import with missing files',
-        'local foreground audio playback, position, pause, seek, next and media notification',
+        'persisted document-tree grants, M3U import, sidecar lyrics, append and removal',
+        'local foreground audio playback, position, pause, seek, next, stop and media notification',
         'Spotify tokens encrypted by Android Keystore and reloaded',
         'Spotify loopback callback rejects wrong state and accepts the expected state',
     ]

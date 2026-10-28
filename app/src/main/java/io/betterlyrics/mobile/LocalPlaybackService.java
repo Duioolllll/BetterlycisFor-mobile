@@ -10,6 +10,7 @@ import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.*;
 import android.widget.Toast;
+import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +33,9 @@ public final class LocalPlaybackService extends Service {
     private final ArrayDeque<Integer> history=new ArrayDeque<>();
     private final Random random=new Random();
     private final ExecutorService artwork=Executors.newSingleThreadExecutor();
+    private final ExecutorService lyricFiles=Executors.newSingleThreadExecutor();
     private Future<?> artworkTask;private int artworkGeneration;private Bitmap cover;
+    private Future<?> lyricTask;private int lyricGeneration;
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final Runnable widgetTick=new Runnable(){public void run(){
         AppState state=AppState.get(LocalPlaybackService.this);
@@ -46,6 +49,17 @@ public final class LocalPlaybackService extends Service {
         context.startForegroundService(intent);
     }
     static void removeIfPlaying(String id){LocalPlaybackService service=live;if(service!=null&&service.playlist!=null&&service.playlist.id.equals(id))service.stopPlayback();}
+    static String currentPlaylist(){LocalPlaybackService service=live;return service!=null&&service.playlist!=null?service.playlist.id:"";}
+    static void libraryChanged(Context context,String id){
+        LocalPlaybackService service=live;if(service==null||service.playlist==null||!service.playlist.id.equals(id))return;
+        LocalLibrary.Playlist updated=LocalLibrary.get(context).get(id);if(updated==null){service.stopPlayback();return;}
+        String current=service.playlist.tracks.get(service.index).uri;int replacement=-1;
+        if(service.index<updated.tracks.size()&&updated.tracks.get(service.index).uri.equals(current))replacement=service.index;
+        else for(int i=0;i<updated.tracks.size();i++)if(updated.tracks.get(i).uri.equals(current)){replacement=i;break;}
+        boolean wasPlaying=service.playWhenReady;service.playlist=updated;service.history.clear();
+        if(replacement<0){service.index=Math.min(service.index,updated.tracks.size()-1);service.load(wasPlaying);}
+        else {service.index=replacement;service.session.setMetadata(service.metadata(updated.tracks.get(replacement),service.duration));service.publish(true);}
+    }
     static boolean refreshWidget(){
         LocalPlaybackService service=live;if(service==null||service.session==null)return false;
         AppState state=AppState.get(service);if(state.controller==null||!state.controller.getSessionToken().equals(service.session.getSessionToken()))return false;
@@ -69,6 +83,7 @@ public final class LocalPlaybackService extends Service {
             @Override public void onSkipToPrevious(){step(-1,false);}
             @Override public void onSeekTo(long value){seek(value);}
             @Override public void onStop(){stopPlayback();}
+            @Override public void onCustomAction(String action,Bundle extras){if(STOP.equals(action))stopPlayback();}
         });
         session.setSessionActivity(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE));
         session.setActive(true);
@@ -109,10 +124,11 @@ public final class LocalPlaybackService extends Service {
         releasePlayer();playWhenReady=start;resumeAfterFocus=false;
         LocalLibrary.Track track=playlist.tracks.get(index);duration=track.duration;cover=null;loadArtwork(track);
         session.setMetadata(metadata(track,duration));publish(true);
+        loadLyrics(track);
         try{
             MediaPlayer created=new MediaPlayer();player=created;created.setAudioAttributes(attributes());created.setDataSource(this,Uri.parse(track.uri));
             created.setOnPreparedListener(p->{if(p!=player)return;prepared=true;try{duration=p.getDuration();}catch(IllegalStateException ignored){}
-                session.setMetadata(metadata(track,duration));if(playWhenReady){if(requestFocus())p.start();else{playWhenReady=false;toast("다른 앱에서 오디오를 사용 중입니다.");}}publish(true);
+                session.setMetadata(metadata(track,duration));if(playWhenReady){if(requestFocus())try{p.start();}catch(IllegalStateException error){playWhenReady=false;abandonFocus();toast("음악 파일을 재생할 수 없습니다.");}else{playWhenReady=false;toast("다른 앱에서 오디오를 사용 중입니다.");}}publish(true);
             });
             created.setOnSeekCompleteListener(p->{if(p==player)publish(false);});
             created.setOnCompletionListener(p->{if(p==player){playWhenReady=false;step(1,true);}});
@@ -138,6 +154,16 @@ public final class LocalPlaybackService extends Service {
             }catch(Exception|OutOfMemoryError ignored){}finally{try{reader.release();}catch(Exception ignored){}}
             if(bitmap==null)return;Bitmap image=bitmap;
             handler.post(()->{if(ticket!=artworkGeneration||live!=this||playlist==null){image.recycle();return;}cover=image;session.setMetadata(metadata(track,duration));publish(true);});
+        });
+    }
+    private void loadLyrics(LocalLibrary.Track track){
+        int ticket=++lyricGeneration;if(lyricTask!=null)lyricTask.cancel(true);if(track.lyricUri.isEmpty())return;
+        AppState state=AppState.get(this);int stateGeneration=state.generation;String key=state.song.key;
+        lyricTask=lyricFiles.submit(()->{
+            try(InputStream in=getContentResolver().openInputStream(Uri.parse(track.lyricUri))){
+                String text=LyricParser.decodeBytes(IoSupport.read(in,2*1024*1024,20000));IoSupport.checkInterrupted();
+                handler.post(()->{if(ticket==lyricGeneration&&live==this&&state.generation==stateGeneration&&key.equals(state.song.key))state.importLyrics(text);});
+            }catch(Exception ignored){}
         });
     }
     private void resume(){
@@ -168,11 +194,11 @@ public final class LocalPlaybackService extends Service {
         if(prepared&&player!=null)try{position=player.getCurrentPosition();playing=player.isPlaying();}catch(IllegalStateException ignored){}
         int status=playing?PlaybackState.STATE_PLAYING:!prepared&&playWhenReady?PlaybackState.STATE_BUFFERING:PlaybackState.STATE_PAUSED;
         long actions=PlaybackState.ACTION_PLAY|PlaybackState.ACTION_PAUSE|PlaybackState.ACTION_PLAY_PAUSE|PlaybackState.ACTION_SKIP_TO_NEXT|PlaybackState.ACTION_SKIP_TO_PREVIOUS|PlaybackState.ACTION_SEEK_TO|PlaybackState.ACTION_STOP;
-        PlaybackState playback=new PlaybackState.Builder().setActions(actions).setState(status,position,playing?1f:0f,SystemClock.elapsedRealtime()).build();
+        PlaybackState playback=new PlaybackState.Builder().setActions(actions).addCustomAction(STOP,"재생 중지",android.R.drawable.ic_menu_close_clear_cancel).setState(status,position,playing?1f:0f,SystemClock.elapsedRealtime()).build();
         session.setPlaybackState(playback);
         getSystemService(NotificationManager.class).notify(NOTIFICATION,notification());
         AppState state=AppState.get(this);
-        if(playing||state.controller==null||state.controller.getSessionToken().equals(session.getSessionToken()))state.accept(session.getController(),playback,metadataChanged,false);
+        if(playWhenReady||state.controller==null||state.controller.getSessionToken().equals(session.getSessionToken()))state.accept(session.getController(),playback,metadataChanged,false);
         LyricsListener.refresh(this);
     }
     private PendingIntent action(String action,int request){return PendingIntent.getService(this,request,new Intent(this,LocalPlaybackService.class).setAction(action),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);}
@@ -185,12 +211,13 @@ public final class LocalPlaybackService extends Service {
             .addAction(new Notification.Action.Builder(android.R.drawable.ic_media_previous,"이전 곡",action(PREVIOUS,1)).build())
             .addAction(new Notification.Action.Builder(playing?android.R.drawable.ic_media_pause:android.R.drawable.ic_media_play,playing?"일시정지":"재생",action(playing?PAUSE:PLAY,2)).build())
             .addAction(new Notification.Action.Builder(android.R.drawable.ic_media_next,"다음 곡",action(NEXT,3)).build())
+            .addAction(new Notification.Action.Builder(android.R.drawable.ic_menu_close_clear_cancel,"재생 중지",action(STOP,4)).build())
             .setStyle(new Notification.MediaStyle().setMediaSession(session.getSessionToken()).setShowActionsInCompactView(0,1,2)).build();
     }
     private void toast(String text){Toast.makeText(this,text,Toast.LENGTH_SHORT).show();}
-    private void stopPlayback(){playWhenReady=false;releasePlayer();abandonFocus();stopForeground(true);stopSelf();}
+    private void stopPlayback(){playWhenReady=false;lyricGeneration++;artworkGeneration++;if(lyricTask!=null)lyricTask.cancel(true);if(artworkTask!=null)artworkTask.cancel(true);releasePlayer();abandonFocus();playlist=null;stopForeground(true);stopSelf();}
     @Override public void onDestroy(){
-        if(live==this)live=null;artworkGeneration++;if(artworkTask!=null)artworkTask.cancel(true);artwork.shutdownNow();handler.removeCallbacksAndMessages(null);try{unregisterReceiver(noisy);}catch(Exception ignored){}releasePlayer();abandonFocus();
+        if(live==this)live=null;artworkGeneration++;lyricGeneration++;if(artworkTask!=null)artworkTask.cancel(true);if(lyricTask!=null)lyricTask.cancel(true);artwork.shutdownNow();lyricFiles.shutdownNow();handler.removeCallbacksAndMessages(null);try{unregisterReceiver(noisy);}catch(Exception ignored){}releasePlayer();abandonFocus();
         AppState state=AppState.get(this);if(state.controller!=null&&session!=null&&state.controller.getSessionToken().equals(session.getSessionToken()))state.reset();
         if(session!=null){session.setActive(false);session.release();session=null;}LyricsListener.refresh(this);super.onDestroy();
     }
