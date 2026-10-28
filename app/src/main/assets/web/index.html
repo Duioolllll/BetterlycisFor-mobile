@@ -123,7 +123,8 @@
       <div id="localPanel" role="tabpanel" aria-labelledby="localTab">
         <div class="playlist-tools"><button id="importMusic" class="secondary-button">음악 파일 추가</button><button id="importPlaylist" class="secondary-button">M3U 불러오기</button></div>
         <div id="localBrowse"><p id="localStatus" class="playlist-status" role="status"></p><div id="playlistList"></div></div>
-        <div id="localDetail" hidden><div class="playlist-detail-header"><button id="playlistBack" class="mini-button">‹ 목록</button><h3 id="playlistName"></h3><button id="playlistRemove" class="mini-button">삭제</button></div>
+        <div id="localDetail" hidden><div class="playlist-detail-header"><button id="playlistBack" class="mini-button">‹ 목록</button><h3 id="playlistName"></h3><button id="playlistRename" class="mini-button">이름 변경</button><button id="playlistRemove" class="mini-button">삭제</button></div>
+          <form id="playlistRenameForm" class="playlist-rename" hidden><label class="sr-only" for="playlistRenameInput">재생목록 이름</label><input id="playlistRenameInput" maxlength="80" autocomplete="off"><button type="submit">저장</button><button id="playlistRenameCancel" type="button">취소</button></form>
           <div id="playlistRemoveConfirm" class="playlist-confirm" hidden><span>이 재생목록을 삭제할까요?</span><button id="playlistRemoveYes">삭제</button><button id="playlistRemoveNo">취소</button></div>
           <div class="playlist-order"><label for="playlistOrder">재생 순서</label><select id="playlistOrder"><option value="all">전체 반복</option><option value="one">한 곡 반복</option><option value="shuffle">무작위</option></select><button id="localStop" class="mini-button" hidden>재생 중지</button></div>
           <label class="sr-only" for="playlistSearch">곡 검색</label><input id="playlistSearch" class="playlist-search" type="search" placeholder="곡 검색" autocomplete="off">

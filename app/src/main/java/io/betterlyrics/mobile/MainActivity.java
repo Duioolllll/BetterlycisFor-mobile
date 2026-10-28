@@ -135,6 +135,9 @@ public final class MainActivity extends Activity {
             case "removeLocalTrack":{
                 String id=data.optString("id","");if(LocalLibrary.get(this).removeTrack(id,data.optInt("index",-1))){LocalPlaybackService.libraryChanged(this,id);sendPlaylists(id);}break;
             }
+            case "renamePlaylist":{
+                String id=data.optString("id",""),name=data.optString("name","");if(LocalLibrary.get(this).rename(id,name)){LocalPlaybackService.libraryChanged(this,id);sendPlaylists(id);}else toast("재생목록 이름을 확인해 주세요.");break;
+            }
             case "stopLocal":LocalPlaybackService.removeIfPlaying(data.optString("id",""));sendPlaylists(data.optString("id",""));break;
             case "localMode":LocalPlaybackService.setMode(this,data.optString("mode","all"));sendPlaylists(data.optString("id",""));break;
             case "spotifyConnect":{

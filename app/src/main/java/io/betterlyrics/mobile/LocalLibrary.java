@@ -84,6 +84,11 @@ final class LocalLibrary {
     synchronized boolean remove(String id){
         boolean removed=playlists.removeIf(item->item.id.equals(id));if(removed)save();return removed;
     }
+    synchronized boolean rename(String id,String name){
+        String clean=name.trim();if(clean.isEmpty()||clean.length()>80)return false;
+        for(int i=0;i<playlists.size();i++){Playlist old=playlists.get(i);if(old.id.equals(id)){playlists.set(i,new Playlist(old.id,clean,old.tracks));save();return true;}}
+        return false;
+    }
     synchronized boolean removeTrack(String id,int index){
         for(int i=0;i<playlists.size();i++){
             Playlist old=playlists.get(i);if(!old.id.equals(id))continue;if(index<0||index>=old.tracks.size())return false;

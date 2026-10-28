@@ -32,7 +32,8 @@ public final class PlaylistInstrumentation extends Instrumentation {
         Bundle output=new Bundle();int result=Activity.RESULT_CANCELED;
         try{
             Log.i("PlaylistInstrumentation","Starting activity");
-            Context context=getTargetContext();Intent launch=new Intent(Intent.ACTION_MAIN).setClassName("io.betterlyrics.mobile","io.betterlyrics.mobile.MainActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Context context=getTargetContext();context.getSharedPreferences("settings",0).edit().putString("backgroundMode","static").apply();
+            Intent launch=new Intent(Intent.ACTION_MAIN).setClassName("io.betterlyrics.mobile","io.betterlyrics.mobile.MainActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Activity activity=startActivitySync(launch);waitForIdleSync();
             Log.i("PlaylistInstrumentation","Requesting fixture document grants");
             context.startActivity(new Intent().setClassName("io.betterlyrics.widgettest","io.betterlyrics.widgettest.GrantActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -43,31 +44,39 @@ public final class PlaylistInstrumentation extends Instrumentation {
             runOnMainSync(()->{try{pending.set(activity,file);}catch(Exception error){throw new RuntimeException(error);}});
             Intent picked=new Intent().setData(tree).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
             mainCall(activity,"onActivityResult",new Class<?>[]{int.class,int.class,Intent.class},303,Activity.RESULT_OK,picked);
-            Class<?> libraryClass=Class.forName("io.betterlyrics.mobile.LocalLibrary");Method get=libraryClass.getDeclaredMethod("get",Context.class);get.setAccessible(true);Object library=get.invoke(null,context);
+            ClassLoader targetLoader=activity.getClass().getClassLoader();Class<?> libraryClass=targetLoader.loadClass("io.betterlyrics.mobile.LocalLibrary");Method get=libraryClass.getDeclaredMethod("get",Context.class);get.setAccessible(true);Object library=get.invoke(null,context);
             try{waitFor(()->((JSONArray)call(library,"list",new Class<?>[]{})).length()==1,"M3U import");}
             catch(IllegalStateException timeout){
+                Log.i("PlaylistInstrumentation","Retrying import directly for diagnosis; activity destroyed="+activity.isDestroyed());
                 try{call(library,"importM3u",new Class<?>[]{Uri.class,Uri.class},file,tree);}
                 catch(InvocationTargetException failure){throw new IllegalStateException("Direct M3U import failed",failure.getCause());}
                 throw new IllegalStateException("Activity M3U import timed out although direct import succeeded",timeout);
             }
             JSONObject summary=((JSONArray)call(library,"list",new Class<?>[]{})).getJSONObject(0);String id=summary.getString("id");JSONObject detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);
             if(detail.getJSONArray("tracks").length()!=2||!detail.getJSONArray("tracks").getJSONObject(0).getString("title").equals("Sample One"))throw new IllegalStateException("M3U path resolution or order failed");
+            mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"renamePlaylist",new JSONObject().put("id",id).put("name","Saved playlist"));
+            detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);if(!detail.optString("name").equals("Saved playlist"))throw new IllegalStateException("playlist rename failed");
             Constructor<?> fresh=libraryClass.getDeclaredConstructor(Context.class);fresh.setAccessible(true);Object restored=fresh.newInstance(context);
             if(((JSONArray)call(restored,"list",new Class<?>[]{})).length()!=1)throw new IllegalStateException("playlist did not persist");
             Log.i("PlaylistInstrumentation","Starting local audio");
             mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"playLocal",new JSONObject().put("id",id).put("index",0));
-            Class<?> stateClass=Class.forName("io.betterlyrics.mobile.AppState");Object app=stateClass.getMethod("get",Context.class).invoke(null,context);
+            Class<?> stateClass=targetLoader.loadClass("io.betterlyrics.mobile.AppState");Object app=stateClass.getMethod("get",Context.class).invoke(null,context);
             Method track=stateClass.getMethod("track");
             waitFor(()->{JSONObject t=(JSONObject)track.invoke(app);return t.optBoolean("playing")&&t.optString("title").equals("Sample One");},"local audio starts");
             Log.i("PlaylistInstrumentation","Verifying playback controls and lyrics");
             Method snapshot=stateClass.getMethod("snapshot");waitFor(()->{JSONObject lyrics=((JSONObject)snapshot.invoke(app)).optJSONObject("lyrics");return lyrics!=null&&lyrics.optJSONArray("lines")!=null&&lyrics.optJSONArray("lines").length()>0&&lyrics.optJSONArray("lines").optJSONObject(0).optString("text").equals("Fixture local lyric");},"sidecar lyric");
+            Log.i("PlaylistInstrumentation","Local lyric loaded");
             JSONObject started=(JSONObject)track.invoke(app);long first=started.optLong("position");
             waitFor(()->((JSONObject)track.invoke(app)).optLong("position")>first+300,"audio position advances");
+            Log.i("PlaylistInstrumentation","Playback position advances");
             Field controllerField=stateClass.getDeclaredField("controller");controllerField.setAccessible(true);MediaController controller=(MediaController)controllerField.get(app);
             if(controller==null)throw new IllegalStateException("media controller unavailable");
             controller.getTransportControls().pause();waitFor(()->{PlaybackState p=controller.getPlaybackState();return p!=null&&p.getState()==PlaybackState.STATE_PAUSED;},"pause");
+            Log.i("PlaylistInstrumentation","Pause succeeded");
             controller.getTransportControls().seekTo(4000);waitFor(()->{PlaybackState p=controller.getPlaybackState();return p!=null&&p.getPosition()>=3900;},"seek");
+            Log.i("PlaylistInstrumentation","Seek succeeded");
             controller.getTransportControls().skipToNext();waitFor(()->{JSONObject t=(JSONObject)track.invoke(app);return t.optBoolean("playing")&&t.optString("title").equals("two");},"next song");
+            Log.i("PlaylistInstrumentation","Next succeeded");
             if(context.getSystemService(android.app.NotificationManager.class).getActiveNotifications().length==0)throw new IllegalStateException("playback notification missing");
             mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"removeLocalTrack",new JSONObject().put("id",id).put("index",0));
             detail=(JSONObject)call(library,"detail",new Class<?>[]{String.class},id);
@@ -78,7 +87,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
             output.putString("local","ok");
             Log.i("PlaylistInstrumentation","Verifying encrypted Spotify credentials");
 
-            Class<?> clientClass=Class.forName("io.betterlyrics.mobile.SpotifyClient");Constructor<?> ctor=clientClass.getDeclaredConstructor(Context.class);ctor.setAccessible(true);Object client=ctor.newInstance(context);
+            Class<?> clientClass=targetLoader.loadClass("io.betterlyrics.mobile.SpotifyClient");Constructor<?> ctor=clientClass.getDeclaredConstructor(Context.class);ctor.setAccessible(true);Object client=ctor.newInstance(context);
             JSONObject tokens=new JSONObject().put("access_token","synthetic-access-only").put("refresh_token","synthetic-refresh-only").put("expires_in",3600);
             call(client,"storeTokens",new Class<?>[]{JSONObject.class,boolean.class},tokens,false);
             String stored=context.getSharedPreferences("spotify_auth",0).getString("token","");
@@ -97,7 +106,7 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Field code=callback.get().getClass().getDeclaredField("code");code.setAccessible(true);if(!"good".equals(code.get(callback.get())))throw new IllegalStateException("OAuth state was not enforced");
             output.putString("spotifyLoopback","ok");
             mainCall(activity,"dispatch",new Class<?>[]{String.class,JSONObject.class},"stopLocal",new JSONObject().put("id",id));
-            Class<?> player=Class.forName("io.betterlyrics.mobile.LocalPlaybackService");Method current=player.getDeclaredMethod("currentPlaylist");current.setAccessible(true);
+            Class<?> player=targetLoader.loadClass("io.betterlyrics.mobile.LocalPlaybackService");Method current=player.getDeclaredMethod("currentPlaylist");current.setAccessible(true);
             waitFor(()->"".equals(current.invoke(null)),"local player stops");
             Log.i("PlaylistInstrumentation","Playlist checks completed");
             result=Activity.RESULT_OK;

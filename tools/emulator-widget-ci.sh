@@ -7,12 +7,18 @@ export JAVA_HOME="$JAVA_HOME_17_X64"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
 sudo apt-get update -qq
 sudo apt-get install -y --no-install-recommends libpulse0 libasound2t64 libnss3 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxi6 libxtst6 libxrandr2 libgbm1 libglu1-mesa libvulkan1
-if [ ! -x "$ANDROID_HOME/emulator/emulator" ]; then
-  "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "emulator"
-fi
+# Pinned stable emulator 36.4.10: the newer 37.2.12 host process has
+# intermittently crashed under headless graphics while running WebView/audio.
+emulator_archive="$RUNNER_TEMP/betterlyrics-emulator.zip"
+emulator_root="$RUNNER_TEMP/betterlyrics-emulator"
+curl --fail --location --silent --show-error --retry 3 --max-time 240 https://dl.google.com/android/repository/emulator-linux_x64-15004761.zip --output "$emulator_archive"
+printf '%s  %s\n' '58bfdf0572f06ec007a7287154cdc6b2ebfea947d07a1e26a0f6b5e1a39e9191' "$emulator_archive" | sha256sum -c -
+mkdir -p "$emulator_root"
+unzip -q "$emulator_archive" -d "$emulator_root"
+emulator_binary="$emulator_root/emulator/emulator"
 test -c /dev/kvm
 sudo chown "$(id -u)" /dev/kvm
-"$ANDROID_HOME/emulator/emulator" -accel-check
+"$emulator_binary" -accel-check
 "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" "platform-tools" "system-images;android-36;google_apis;x86_64"
 export ANDROID_AVD_HOME="$RUNNER_TEMP/betterlyrics-avd"
 mkdir -p "$ANDROID_AVD_HOME"
@@ -25,7 +31,7 @@ cleanup(){
   if [ -n "$emulator_pid" ]; then timeout 10 adb -s emulator-5554 emu kill >/dev/null 2>&1 || kill "$emulator_pid" 2>/dev/null || true; fi
 }
 trap cleanup EXIT
-"$ANDROID_HOME/emulator/emulator" -avd betterlyrics_widget -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader -feature -Vulkan -memory 3072 -cores 2 > "$RUNNER_TEMP/emulator.log" 2>&1 &
+"$emulator_binary" -avd betterlyrics_widget -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader -feature -Vulkan -memory 3072 -cores 2 > "$RUNNER_TEMP/emulator.log" 2>&1 &
 emulator_pid=$!
 connection_deadline=$((SECONDS + 180))
 until [ "$(adb -s emulator-5554 get-state 2>/dev/null)" = device ]; do

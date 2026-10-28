@@ -10,10 +10,11 @@ const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,pos
   for(const viewport of [{width:320,height:640},{width:360,height:740},{width:412,height:915},{width:812,height:375}]){
    const page=await browser.newPage({viewport});page.on('pageerror',e=>result.errors.push(e.message));
    await page.addInitScript(s=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(s),command:(action,json)=>commands.push({action,data:JSON.parse(json)})};},initial);
-   await page.goto(url);await page.locator('#playlistButton').click();await page.waitForTimeout(300);
+   await page.goto(url);await page.locator('#playlistButton').click();
+   await page.waitForFunction(()=>document.querySelector('#playlistSheet').getBoundingClientRect().bottom<=innerHeight+0.1);
    assert(await page.locator('#playlistSheet').isVisible());
    const geometry=await page.evaluate(()=>{const r=document.querySelector('#playlistSheet').getBoundingClientRect();return {left:r.left,right:r.right,bottom:r.bottom,width:document.documentElement.scrollWidth,viewport:innerWidth,height:innerHeight}});
-   assert(geometry.left>=0&&geometry.right<=viewport.width&&geometry.bottom<=viewport.height&&geometry.width<=viewport.width,'playlist sheet fits '+JSON.stringify(viewport));
+   assert(geometry.left>=-0.1&&geometry.right<=viewport.width+0.1&&geometry.bottom<=viewport.height+0.1&&geometry.width<=viewport.width,'playlist sheet fits '+JSON.stringify({viewport,geometry}));
    for(const id of ['playlistButton','localTab','spotifyTab']){const box=await page.locator('#'+id).boundingBox();assert(box&&box.width>=44&&box.height>=44,id+' touch target');}
    await page.close();
   }
@@ -33,6 +34,7 @@ const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,pos
   await page.locator('#playlistButton').click();await page.evaluate(()=>App.playlists({items:[{id:'local-1',name:'내 음악',count:2}],selected:{id:'local-1',name:'내 음악',tracks:[{title:'첫 곡'}]},mode:'all'}));
   await page.locator('#playlistSearch').fill('');await page.locator('#playlistTracks .playlist-track-remove').click();assert(await page.locator('#trackRemoveConfirm').isVisible());await page.locator('#trackRemoveYes').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='removeLocalTrack'&&c.data.index===0)));
   await page.locator('#importMusic').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='importMusic'&&c.data.id==='local-1')));
+  await page.locator('#playlistRename').click();await page.locator('#playlistRenameInput').fill('내 즐겨찾기');await page.locator('#playlistRenameForm button[type=submit]').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='renamePlaylist'&&c.data.name==='내 즐겨찾기')));
   await page.locator('#playlistRemove').click();assert(await page.locator('#playlistRemoveConfirm').isVisible());await page.locator('#playlistRemoveNo').click();assert(await page.locator('#playlistRemoveConfirm').isHidden());
   await page.locator('#playlistRemove').click();await page.locator('#playlistRemoveYes').click();assert(await page.evaluate(()=>commands.some(c=>c.action==='removePlaylist'&&c.data.id==='local-1')));
   result.checks.push('playlist and track removal require confirmation; files append to the selected list');

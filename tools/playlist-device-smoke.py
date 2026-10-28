@@ -14,7 +14,7 @@ log_process=None;log_file=None
 report={'passed':False,'serial':args.serial,'api':36,'physicalDeviceTested':False,'spotifyAccountTested':False,'checks':[]}
 def run(*cmd,required=True,timeout=150):
     result=subprocess.run(list(map(str,cmd)),capture_output=True,text=True,timeout=timeout)
-    if required and result.returncode:raise RuntimeError('Command failed ('+str(result.returncode)+'): '+(result.stderr or result.stdout)[-1500:])
+    if required and result.returncode:raise RuntimeError('Command failed ('+str(result.returncode)+'): '+(result.stdout+'\n'+result.stderr)[-1500:].strip())
     return result.stdout
 def adb(*cmd,**kwargs):return run('adb','-s',args.serial,*cmd,**kwargs)
 try:

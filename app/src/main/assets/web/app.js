@@ -491,7 +491,7 @@
     localTracks=selected?selected.tracks:[];pendingTrackRemoval=-1;$('trackRemoveConfirm').hidden=true;
     $('playlistOrder').value=['all','one','shuffle'].includes(data.mode)?data.mode:'all';
     $('localStop').hidden=!selectedLocal||data.activeId!==selectedLocal;
-    $('localBrowse').hidden=!!selected;$('localDetail').hidden=!selected;$('playlistRemoveConfirm').hidden=true;
+    $('localBrowse').hidden=!!selected;$('localDetail').hidden=!selected;$('playlistRemoveConfirm').hidden=true;$('playlistRenameForm').hidden=true;
     $('localStatus').textContent=items.length?'':'저장된 플레이리스트가 없습니다.';
     const root=$('playlistList');root.replaceChildren();
     for(const item of items){
@@ -602,6 +602,9 @@
     $('playlistOrder').addEventListener('change',()=>command('localMode',{id:selectedLocal,mode:$('playlistOrder').value}));
     $('localStop').addEventListener('click',()=>command('stopLocal',{id:selectedLocal}));
     $('playlistRemove').addEventListener('click',()=>{$('playlistRemoveConfirm').hidden=false;$('playlistRemoveYes').focus();});
+    $('playlistRename').addEventListener('click',()=>{$('playlistRenameInput').value=$('playlistName').textContent;$('playlistRenameForm').hidden=false;$('playlistRenameInput').focus();});
+    $('playlistRenameCancel').addEventListener('click',()=>{$('playlistRenameForm').hidden=true;$('playlistRename').focus();});
+    $('playlistRenameForm').addEventListener('submit',event=>{event.preventDefault();const name=$('playlistRenameInput').value.trim();if(name)command('renamePlaylist',{id:selectedLocal,name});else $('playlistRenameInput').focus();});
     $('playlistRemoveNo').addEventListener('click',()=>{$('playlistRemoveConfirm').hidden=true;$('playlistRemove').focus();});
     $('playlistRemoveYes').addEventListener('click',()=>command('removePlaylist',{id:selectedLocal}));
     $('searchButton').addEventListener('click',()=>openSheet('searchSheet'));
