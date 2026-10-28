@@ -21,7 +21,7 @@ The app lets you import and play music from your phone's local music folders and
 
 Lyrics can be searched through LRCLIB, NetEase, and Kugou, or imported from local files. Additional features include lyric timing adjustments, saving lyric cards, appearance customization, floating lyrics, and home screen widgets. Listening history is stored locally on your device.
 
-**Android 8.0 or later is required.** Download the latest APK from [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest). For detailed instructions, see the [Installation Guide](docs/INSTALL_en.md) and [Playlist Guide](docs/PLAYLISTS.md).
+**Android 8.0 or later is required.** Download the latest APK from [GitHub Releases](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest). For detailed instructions, see the [Installation Guide](docs/INSTALL_EN.md) and [Playlist Guide](docs/PLAYLISTS.md).
 
 Not all features from the original BetterLyrics project have been implemented. For details on currently supported features and remaining work, see the [Feature Compatibility Status](docs/PARITY.md).
 
