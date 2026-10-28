@@ -20,6 +20,8 @@
 
 로그인은 Spotify의 Authorization Code with PKCE를 사용합니다. 앱 비밀번호나 Client Secret은 받지 않습니다. 사용자 토큰은 Android Keystore의 키로 암호화해 앱 내부에 저장하고, **Spotify 연결 해제** 시 삭제합니다. 곡·플레이리스트 정보는 Spotify로 연결되는 화면에만 표시합니다.
 
+Spotify 개발자 앱의 Redirect URI에는 `http://127.0.0.1:43123/callback`을 정확히 등록해야 합니다. 앱이 이 주소의 포트를 사용할 수 없으면 연결을 취소하고 다시 시도합니다. `redirect_uri: Not matching configuration`이 표시되면 등록된 Client ID와 주소, 포트 및 경로를 확인합니다.
+
 Spotify 실제 계정 로그인과 제3자 음악 앱은 사용자 기기에서 별도 확인이 필요합니다. 이 프로젝트의 Android 자동 검사에는 합성 문서와 오디오, 가짜 토큰, 인증 콜백이 사용됩니다.
 
 ## 출처

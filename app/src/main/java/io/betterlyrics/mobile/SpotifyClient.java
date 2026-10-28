@@ -51,8 +51,9 @@ final class SpotifyClient {
         synchronized(this){
             if(connecting){callback.done(failure("Spotify 연결을 진행 중입니다."));return;}
             ticket=++epoch;connecting=true;
-            try{server=new ServerSocket();server.bind(new InetSocketAddress(InetAddress.getByName("127.0.0.1"),0),4);server.setSoTimeout(1500);callbackServer=server;redirect="http://127.0.0.1:"+server.getLocalPort()+"/callback";}
-            catch(Exception error){connecting=false;callback.done(failure("Spotify 로그인 연결을 열지 못했습니다."));return;}
+            ServerSocket opened=null;
+            try{opened=new ServerSocket();opened.setReuseAddress(true);opened.bind(new InetSocketAddress(InetAddress.getByName("127.0.0.1"),SpotifyProtocol.CALLBACK_PORT),4);opened.setSoTimeout(1500);server=opened;callbackServer=server;redirect=SpotifyProtocol.REDIRECT_URI;}
+            catch(Exception error){if(opened!=null)try{opened.close();}catch(IOException ignored){}connecting=false;callback.done(failure("Spotify 로그인 연결을 열지 못했습니다. 잠시 후 다시 시도해 주세요."));return;}
         }
         try{activity.startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(SpotifyProtocol.authorize(CLIENT_ID,redirect,state,verifier))));}
         catch(Exception error){synchronized(this){connecting=false;closeServer();}callback.done(failure("브라우저를 열지 못했습니다."));return;}

@@ -16,6 +16,8 @@ import org.json.JSONObject;
 /** Small, independently testable OAuth PKCE and callback primitives. */
 public final class SpotifyProtocol {
     public static final int MAX_ITEMS=10000;
+    public static final int CALLBACK_PORT=43123;
+    public static final String REDIRECT_URI="http://127.0.0.1:"+CALLBACK_PORT+"/callback";
     private SpotifyProtocol(){}
     public static String random(){byte[] bytes=new byte[48];new SecureRandom().nextBytes(bytes);return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);}
     public static String challenge(String verifier){try{return Base64.getUrlEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));}catch(Exception e){throw new IllegalStateException(e);}}

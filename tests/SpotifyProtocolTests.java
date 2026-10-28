@@ -8,8 +8,9 @@ public final class SpotifyProtocolTests {
         String verifier="dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
         ok(SpotifyProtocol.challenge(verifier).equals("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"),"RFC 7636 S256 vector");
         String one=SpotifyProtocol.random(),two=SpotifyProtocol.random();ok(one.length()>=43&&!one.equals(two)&&one.matches("[A-Za-z0-9_-]+"),"random URL-safe verifiers");
-        String url=SpotifyProtocol.authorize("client","http://127.0.0.1:1234/callback","state",verifier);
+        String url=SpotifyProtocol.authorize("client",SpotifyProtocol.REDIRECT_URI,"state",verifier);
         ok(url.startsWith("https://accounts.spotify.com/authorize?")&&url.contains("code_challenge_method=S256")&&url.contains("playlist-read-private"),"official PKCE authorization URL");
+        ok(SpotifyProtocol.CALLBACK_PORT==43123&&SpotifyProtocol.REDIRECT_URI.equals("http://127.0.0.1:43123/callback")&&url.contains("redirect_uri=http%3A%2F%2F127.0.0.1%3A43123%2Fcallback"),"authorization URI exactly matches the registered fixed loopback address");
         ok(SpotifyProtocol.callback("/callback?code=a%2Bb&state=expected","expected").code.equals("a+b"),"encoded authorization code");
         ok(SpotifyProtocol.callback("/callback?error=access_denied&state=expected","expected").error.equals("access_denied"),"user denial");
         rejected("/callback?code=abc&state=wrong","expected");
