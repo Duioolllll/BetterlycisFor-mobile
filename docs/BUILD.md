@@ -149,6 +149,6 @@ The CI release gate uses a dedicated disposable API36 emulator and `python3 tool
 python3 tools/release-preflight.py --sdk /path/to/Android/Sdk --report build/RELEASE_VALIDATION.json
 ```
 
-현재 `downloads/release.json`에 지정한 APK로 261개 JVM 검사, 2073프레임 출력 동등성, 5개 패키징 검사, checksum/웹 자산/서명/기존 인증서/버전·SDK/공개 파일 검사를 실행한다. 별도 SDK/JDK와 org.json 테스트 JAR이 필요하며, 테스트 JAR은 누락 시 checksum을 검증해 내려받는다. 개인 서명 키는 필요 없다. GitHub release workflow는 Manifest의 버전/파일명에 맞게 동작하며 SDK 경로를 명시적으로 전달하고, 전용 Android16 AVD 설치 검증을 통과한 뒤 APK·SHA256SUMS·소스/브라우저/위젯/플레이리스트/설치 검증 JSON을 게시한다. 이미 게시한 같은 태그의 자산을 자동 교체하지 않는다.
+현재 `downloads/release.json`에 지정한 APK로 281개 JVM 검사, 2073프레임 출력 동등성, 5개 패키징 검사, checksum/웹 자산/서명/기존 인증서/버전·SDK/공개 파일 검사를 실행한다. 별도 SDK/JDK와 org.json 테스트 JAR이 필요하며, 테스트 JAR은 누락 시 checksum을 검증해 내려받는다. 개인 서명 키는 필요 없다. GitHub release workflow는 Manifest의 버전/파일명에 맞게 동작하며 SDK 경로를 명시적으로 전달하고, 전용 Android16 AVD 설치 검증을 통과한 뒤 APK·SHA256SUMS·소스/브라우저/위젯/플레이리스트/설치 검증 JSON을 게시한다. 이미 게시한 같은 태그의 자산을 자동 교체하지 않는다.
 
 0.9.0에서는 HTTP 미리보기를 실행한 뒤 `ui`, `flow`, `player`, `appearance`, `review`, `customization`, `playlist` 브라우저 smoke를 실행합니다. 각 명령에 `BETTERLYRICS_PREVIEW_URL=http://127.0.0.1:4173/`를 지정하면 관리형 브라우저의 file URL 제한을 피할 수 있습니다. 게시 워크플로는 일곱 suite의 결과를 `UI_VALIDATION.json`으로 첨부하며 Android16 설치·업데이트 검사 전에 모두 통과해야 합니다.
