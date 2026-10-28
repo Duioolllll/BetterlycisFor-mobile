@@ -503,6 +503,11 @@
     $('playlistName').textContent=String(selected.name||'재생목록');
     renderLocalTracks();
   }
+  function playlistBusy(input){
+    let data;try{data=typeof input==='string'?JSON.parse(input):input;}catch(_){return;}
+    const busy=!!(data&&data.busy);$('importMusic').disabled=busy;$('importPlaylist').disabled=busy;
+    $('localImportStatus').hidden=!busy;$('localImportStatus').textContent=busy?'불러오는 중':'';
+  }
 
   function renderLocalTracks(){
     const tracks=$('playlistTracks'),query=$('playlistSearch').value.trim().toLocaleLowerCase();tracks.replaceChildren();
@@ -542,6 +547,7 @@
         title.textContent=String(item.name||'재생목록');sub.textContent=[item.owner,number(item.count,-1)>=0?number(item.count)+'곡':''].filter(Boolean).join(' · ');box.append(title,sub);itemButton.append(box);
         itemButton.addEventListener('click',()=>{status('불러오는 중');command('spotifyTracks',{id:String(item.id),name:String(item.name||'재생목록')});});row.append(itemButton,external);root.append(row);
       }
+      if(data.truncated)status('최대 10,000개까지 표시됩니다.');
       if(data.more||view==='listsError'){const more=button(view==='listsError'?'다시 시도':'더 보기',()=>{more.disabled=true;command('spotifyPlaylists',{offset:view==='listsError'?number(data.offset):number(data.nextOffset)});});root.append(more);}
     }else if(view==='tracks'||view==='tracksError'){
       if(view==='tracks'){
@@ -557,6 +563,7 @@
         row.className='playlist-track';position.textContent=String(index+1);position.setAttribute('aria-hidden','true');title.textContent=String(item.title||'제목 없음');sub.textContent=String(item.artist||'');box.append(title,sub);row.append(position,box);
         const type=item.type==='episode'?'episode':'track';row.disabled=!item.id;row.addEventListener('click',()=>open(type,String(item.id)));root.append(row);
       });
+      if(data.truncated)status('최대 10,000개까지 표시됩니다.');
       if(data.more||view==='tracksError'&&number(data.offset)>0){const more=button(view==='tracksError'?'다시 시도':'더 보기',()=>{more.disabled=true;command('spotifyTracks',{id:String(data.id),name:String(data.name||''),offset:view==='tracksError'?number(data.offset):number(data.nextOffset)});});root.append(more);}
     }
     if(data.connected){const disconnect=button('Spotify 연결 해제',()=>command('spotifyDisconnect'));disconnect.classList.add('spotify-logout');root.append(disconnect);}
@@ -692,7 +699,7 @@
     else if(action!=='setSetting')toast('Android 앱에서 사용할 수 있는 기능이에요.');
   }
 
-  window.App={receive,audio:audioFrame,searchResults,playlists,spotify,toast,back:closeSheet,handleBack:closeSheet,position:()=>position(),getState:()=>state};
+  window.App={receive,audio:audioFrame,searchResults,playlists,playlistBusy,spotify,toast,back:closeSheet,handleBack:closeSheet,position:()=>position(),getState:()=>state};
   attachEvents();initAmbient();
   if(native){try{receive(window.Android.getBootstrap());}catch(_){updateSettings();updateEmpty();toast('음악 연결 정보를 읽지 못했어요. 설정에서 음악 감지를 확인해 주세요.');}}
   else {document.body.classList.add('demo-mode');$('demoBanner').hidden=false;const demo=demoState();try{demo.settings={appearance:window.Appearance.sanitize(JSON.parse(localStorage.getItem('betterlyrics.appearance.v1')||'null'))};}catch(_){}receive(demo);}

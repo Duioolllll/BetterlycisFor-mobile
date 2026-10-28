@@ -23,6 +23,7 @@ const initial={track:{key:'qa',title:'노래',artist:'가수',duration:60000,pos
   await page.addInitScript(s=>{window.commands=[];window.Android={getBootstrap:()=>JSON.stringify(s),command:(action,json)=>commands.push({action,data:JSON.parse(json)})};},initial);
   await page.goto(url);await page.locator('#playlistButton').click();await page.locator('#importMusic').click();await page.locator('#importPlaylist').click();
   assert(await page.evaluate(()=>['getPlaylists','importMusic','importPlaylist'].every(a=>commands.some(c=>c.action===a))));
+  await page.evaluate(()=>App.playlistBusy({busy:true}));assert(await page.locator('#importMusic').isDisabled());assert(await page.locator('#localImportStatus').isVisible());await page.evaluate(()=>App.playlistBusy({busy:false}));assert(await page.locator('#importMusic').isEnabled());
   result.checks.push('music-file and M3U picker actions');
   await page.evaluate(()=>App.playlists({items:[{id:'local-1',name:'<img src=x onerror=alert(1)>',count:2}],selected:{},mode:'all'}));
   assert.equal(await page.locator('#playlistList img').count(),0);assert((await page.locator('#playlistList').textContent()).includes('<img'));

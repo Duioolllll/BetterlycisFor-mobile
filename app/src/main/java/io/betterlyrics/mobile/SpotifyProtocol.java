@@ -9,13 +9,18 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /** Small, independently testable OAuth PKCE and callback primitives. */
 public final class SpotifyProtocol {
+    public static final int MAX_ITEMS=10000;
     private SpotifyProtocol(){}
     public static String random(){byte[] bytes=new byte[48];new SecureRandom().nextBytes(bytes);return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);}
     public static String challenge(String verifier){try{return Base64.getUrlEncoder().withoutPadding().encodeToString(MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII)));}catch(Exception e){throw new IllegalStateException(e);}}
     public static String encode(String value){try{return URLEncoder.encode(value,"UTF-8");}catch(Exception e){throw new IllegalStateException(e);}}
+    public static boolean validId(String id){return id!=null&&id.matches("[A-Za-z0-9]{22}");}
     public static String authorize(String clientId,String redirect,String state,String verifier){
         return "https://accounts.spotify.com/authorize?response_type=code&client_id="+encode(clientId)+"&redirect_uri="+encode(redirect)+"&scope="+encode("playlist-read-private playlist-read-collaborative")+"&state="+encode(state)+"&code_challenge_method=S256&code_challenge="+encode(challenge(verifier));
     }
@@ -35,5 +40,29 @@ public final class SpotifyProtocol {
             if((code==null||code.isEmpty())==(error==null||error.isEmpty())||code!=null&&code.length()>4096)throw new IllegalArgumentException("invalid result");
             return new Callback(code,error);
         }catch(IllegalArgumentException e){throw e;}catch(Exception e){throw new IllegalArgumentException("invalid callback",e);}
+    }
+    private static JSONObject page(JSONArray items,JSONObject response,int offset,int count)throws JSONException{
+        int next=offset+count;boolean hasNext=count>0&&response.has("next")&&!response.isNull("next");
+        return new JSONObject().put("items",items).put("offset",offset).put("nextOffset",next).put("more",hasNext&&next<MAX_ITEMS).put("truncated",hasNext&&next>=MAX_ITEMS);
+    }
+    /** Maps only the Spotify fields displayed by the app; never follows response URLs. */
+    public static JSONObject playlistsPage(JSONObject response,int offset)throws JSONException{
+        JSONArray output=new JSONArray(),items=response.optJSONArray("items");if(items==null)items=new JSONArray();
+        for(int i=0;i<items.length();i++){
+            JSONObject item=items.optJSONObject(i);if(item==null)continue;String id=item.optString("id");if(!validId(id))continue;
+            JSONObject owner=item.optJSONObject("owner"),tracks=item.optJSONObject("items");if(tracks==null)tracks=item.optJSONObject("tracks");
+            output.put(new JSONObject().put("id",id).put("name",item.optString("name","재생목록")).put("owner",owner==null?"":owner.optString("display_name")).put("count",tracks==null?-1:tracks.optInt("total",-1)));
+        }
+        return page(output,response,offset,items.length());
+    }
+    public static JSONObject tracksPage(JSONObject response,int offset)throws JSONException{
+        JSONArray output=new JSONArray(),items=response.optJSONArray("items");if(items==null)items=new JSONArray();
+        for(int i=0;i<items.length();i++){
+            JSONObject row=items.optJSONObject(i);if(row==null)continue;JSONObject track=row.optJSONObject("item");if(track==null)track=row.optJSONObject("track");if(track==null)continue;
+            String type=track.optString("type","track"),id=track.optString("id");StringBuilder artist=new StringBuilder();JSONArray artists=track.optJSONArray("artists");
+            if(artists!=null)for(int j=0;j<artists.length();j++){JSONObject a=artists.optJSONObject(j);String name=a==null?"":a.optString("name");if(!name.isEmpty()){if(artist.length()>0)artist.append(", ");artist.append(name);}}
+            output.put(new JSONObject().put("id",validId(id)&&(type.equals("track")||type.equals("episode"))?id:"").put("type",type).put("title",track.optString("name","제목 없음")).put("artist",artist.toString()).put("duration",track.optLong("duration_ms",0)));
+        }
+        return page(output,response,offset,items.length());
     }
 }

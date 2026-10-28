@@ -4,7 +4,7 @@ public final class SpotifyProtocolTests {
     private static int checks;
     private static void ok(boolean value,String name){checks++;if(!value)throw new AssertionError(name);}
     private static void rejected(String target,String state){try{SpotifyProtocol.callback(target,state);throw new AssertionError("unsafe callback accepted");}catch(IllegalArgumentException expected){checks++;}}
-    public static void main(String[] args){
+    public static void main(String[] args)throws Exception{
         String verifier="dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
         ok(SpotifyProtocol.challenge(verifier).equals("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"),"RFC 7636 S256 vector");
         String one=SpotifyProtocol.random(),two=SpotifyProtocol.random();ok(one.length()>=43&&!one.equals(two)&&one.matches("[A-Za-z0-9_-]+"),"random URL-safe verifiers");
@@ -16,6 +16,14 @@ public final class SpotifyProtocolTests {
         rejected("/callback?code=abc&state=expected&state=expected","expected");
         rejected("/other?code=abc&state=expected","expected");
         rejected("/callback?code=abc&error=access_denied&state=expected","expected");
+        String id="0123456789ABCDEFGHIJKL";
+        org.json.JSONObject list=new org.json.JSONObject().put("next","https://untrusted.invalid/").put("items",new org.json.JSONArray().put(new org.json.JSONObject().put("id",id).put("name","목록").put("owner",new org.json.JSONObject().put("display_name","사용자")).put("items",new org.json.JSONObject().put("total",2))).put(new org.json.JSONObject().put("id","invalid")));
+        org.json.JSONObject mapped=SpotifyProtocol.playlistsPage(list,50);ok(mapped.getJSONArray("items").length()==1&&mapped.getJSONArray("items").getJSONObject(0).getInt("count")==2&&mapped.getInt("nextOffset")==52&&mapped.getBoolean("more"),"Spotify playlist pages preserve API offsets and filter invalid IDs");
+        org.json.JSONObject song=new org.json.JSONObject().put("id",id).put("type","track").put("name","노래").put("artists",new org.json.JSONArray().put(new org.json.JSONObject().put("name","하나")).put(new org.json.JSONObject().put("name","둘")));
+        org.json.JSONObject unknown=new org.json.JSONObject().put("id",id).put("type","new-kind").put("name","새 항목");
+        org.json.JSONObject trackPage=SpotifyProtocol.tracksPage(new org.json.JSONObject().put("items",new org.json.JSONArray().put(new org.json.JSONObject().put("item",song)).put(new org.json.JSONObject().put("track",unknown)).put(org.json.JSONObject.NULL)).put("next",org.json.JSONObject.NULL),0);
+        ok(trackPage.getJSONArray("items").length()==2&&trackPage.getJSONArray("items").getJSONObject(0).getString("artist").equals("하나, 둘")&&trackPage.getJSONArray("items").getJSONObject(1).getString("id").isEmpty()&&!trackPage.getBoolean("more"),"Spotify items, legacy field, unknown types and terminal page");
+        org.json.JSONObject capped=SpotifyProtocol.playlistsPage(list,9999);ok(capped.getBoolean("truncated")&&!capped.getBoolean("more"),"Spotify pagination reports the safety limit");
         System.out.println("SpotifyProtocolTests: "+checks+" checks passed");
     }
 }

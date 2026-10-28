@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.*;
 import java.net.*;
@@ -145,36 +144,23 @@ final class SpotifyClient {
             synchronized(this){expires=0;}return request("https://api.spotify.com/v1"+path,"GET",accessToken(),null);
         }
     }
-    void playlists(int offset,Callback callback){int ticket=epoch;if(connecting){callback.done(object("view","connecting","connected",false));return;}if(!connected()){callback.done(object("view","disconnected","connected",false));return;}if(offset<0||offset>=5000){callback.done(failure("잘못된 Spotify 요청입니다."));return;}worker.execute(()->loadPlaylists(ticket,offset,callback));}
+    void playlists(int offset,Callback callback){int ticket=epoch;if(connecting){callback.done(object("view","connecting","connected",false));return;}if(!connected()){callback.done(object("view","disconnected","connected",false));return;}if(offset<0||offset>=SpotifyProtocol.MAX_ITEMS){callback.done(failure("잘못된 Spotify 요청입니다."));return;}worker.execute(()->loadPlaylists(ticket,offset,callback));}
     private void loadPlaylists(int ticket,int offset,Callback callback){
         try{
-            JSONArray result=new JSONArray();JSONObject page=api("/me/playlists?limit=50&offset="+offset);JSONArray items=page.optJSONArray("items");if(items==null)items=new JSONArray();
-            for(int i=0;i<items.length();i++){JSONObject item=items.optJSONObject(i);if(item==null)continue;String id=item.optString("id");if(!validId(id))continue;
-                JSONObject owner=item.optJSONObject("owner"),tracks=item.optJSONObject("items");if(tracks==null)tracks=item.optJSONObject("tracks");
-                result.put(object("id",id,"name",item.optString("name","재생목록"),"owner",owner==null?"":owner.optString("display_name"),"count",tracks==null?-1:tracks.optInt("total",-1)));
-            }
-            int nextOffset=offset+items.length();boolean more=items.length()>0&&page.has("next")&&!page.isNull("next")&&nextOffset<5000;
-            deliver(ticket,callback,object("view","lists","connected",true,"items",result,"offset",offset,"nextOffset",nextOffset,"more",more));
+            JSONObject result=SpotifyProtocol.playlistsPage(api("/me/playlists?limit=50&offset="+offset),offset).put("view","lists").put("connected",true);
+            deliver(ticket,callback,result);
         }catch(Exception error){deliver(ticket,callback,offset==0?failure(safeMessage(error)):object("view","listsError","connected",connected(),"offset",offset,"message",safeMessage(error)));}
     }
     void tracks(String id,String name,int offset,Callback callback){
-        int ticket=epoch;if(!validId(id)||offset<0||offset>=5000){callback.done(failure("잘못된 Spotify 재생목록입니다."));return;}
+        int ticket=epoch;if(!validId(id)||offset<0||offset>=SpotifyProtocol.MAX_ITEMS){callback.done(failure("잘못된 Spotify 재생목록입니다."));return;}
         worker.execute(()->{
             try{
-                JSONArray result=new JSONArray();
-                JSONObject page=api("/playlists/"+id+"/items?limit=50&offset="+offset+"&additional_types=track%2Cepisode");JSONArray items=page.optJSONArray("items");if(items==null)items=new JSONArray();
-                for(int i=0;i<items.length();i++){
-                    JSONObject row=items.optJSONObject(i);if(row==null)continue;JSONObject track=row.optJSONObject("item");if(track==null)track=row.optJSONObject("track");if(track==null)continue;
-                    String type=track.optString("type","track"),trackId=track.optString("id"),artist="";JSONArray artists=track.optJSONArray("artists");
-                    if(artists!=null)for(int j=0;j<artists.length();j++){JSONObject a=artists.optJSONObject(j);if(a!=null&&!a.optString("name").isEmpty())artist+=(artist.isEmpty()?"":", ")+a.optString("name");}
-                    result.put(object("id",validId(trackId)&&(type.equals("track")||type.equals("episode"))?trackId:"","type",type,"title",track.optString("name","제목 없음"),"artist",artist,"duration",track.optLong("duration_ms",0)));
-                }
-                int nextOffset=offset+items.length();boolean more=items.length()>0&&page.has("next")&&!page.isNull("next")&&nextOffset<5000;
-                deliver(ticket,callback,object("view","tracks","connected",true,"id",id,"name",name,"items",result,"offset",offset,"nextOffset",nextOffset,"more",more));
+                JSONObject result=SpotifyProtocol.tracksPage(api("/playlists/"+id+"/items?limit=50&offset="+offset+"&additional_types=track%2Cepisode"),offset).put("view","tracks").put("connected",true).put("id",id).put("name",name);
+                deliver(ticket,callback,result);
             }catch(Exception error){deliver(ticket,callback,object("view","tracksError","connected",connected(),"id",id,"name",name,"offset",offset,"message",safeMessage(error)));}
         });
     }
-    static boolean validId(String id){return id!=null&&id.matches("[A-Za-z0-9]{22}");}
+    static boolean validId(String id){return SpotifyProtocol.validId(id);}
     private String safeMessage(Exception error){
         if(error instanceof StatusException){int code=((StatusException)error).status;
             if(code==401)return "Spotify 연결이 만료되었습니다. 다시 연결해 주세요.";

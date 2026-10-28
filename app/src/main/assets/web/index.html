@@ -122,6 +122,7 @@
       <div class="playlist-tabs" role="tablist" aria-label="플레이리스트 종류"><button id="localTab" role="tab" aria-selected="true" aria-controls="localPanel">내 음악</button><button id="spotifyTab" role="tab" aria-selected="false" aria-controls="spotifyPanel">Spotify</button></div>
       <div id="localPanel" role="tabpanel" aria-labelledby="localTab">
         <div class="playlist-tools"><button id="importMusic" class="secondary-button">음악 파일 추가</button><button id="importPlaylist" class="secondary-button">M3U 불러오기</button></div>
+        <p id="localImportStatus" class="playlist-status" role="status" hidden></p>
         <div id="localBrowse"><p id="localStatus" class="playlist-status" role="status"></p><div id="playlistList"></div></div>
         <div id="localDetail" hidden><div class="playlist-detail-header"><button id="playlistBack" class="mini-button">‹ 목록</button><h3 id="playlistName"></h3><button id="playlistRename" class="mini-button">이름 변경</button><button id="playlistRemove" class="mini-button">삭제</button></div>
           <form id="playlistRenameForm" class="playlist-rename" hidden><label class="sr-only" for="playlistRenameInput">재생목록 이름</label><input id="playlistRenameInput" maxlength="80" autocomplete="off"><button type="submit">저장</button><button id="playlistRenameCancel" type="button">취소</button></form>

@@ -39,6 +39,8 @@ public final class MainActivity extends Activity {
     private final ExecutorService musicImports=Executors.newSingleThreadExecutor();
     private Uri pendingPlaylist;
     private String pendingMusicTarget="";
+    private boolean musicImportBusy;
+    private int musicImportGeneration;
     private volatile String bootstrap="{}";
     private final Handler handler=new Handler(Looper.getMainLooper());
     private final Runnable publishTask=()->{publishQueued=false;publish();};
@@ -56,12 +58,12 @@ public final class MainActivity extends Activity {
         WebSettings settings=web.getSettings();settings.setJavaScriptEnabled(true);settings.setDomStorageEnabled(false);settings.setAllowFileAccess(false);settings.setAllowContentAccess(false);settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);settings.setMediaPlaybackRequiresUserGesture(true);settings.setSupportMultipleWindows(false);settings.setTextZoom(100);
         web.addJavascriptInterface(new Bridge(),"Android");web.setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView view,WebResourceRequest request){return true;}
-            @Override public void onPageFinished(WebView view,String url){if(!url.equals("file:///android_asset/web/index.html"))return;ready=true;publish();handler.removeCallbacks(ticker);handler.removeCallbacks(audioTicker);if(active){handler.post(ticker);handler.post(audioTicker);}}
+            @Override public void onPageFinished(WebView view,String url){if(!url.equals("file:///android_asset/web/index.html"))return;ready=true;publish();sendImportBusy();handler.removeCallbacks(ticker);handler.removeCallbacks(audioTicker);if(active){handler.post(ticker);handler.post(audioTicker);}}
         });
         root.addView(web,new FrameLayout.LayoutParams(-1,-1));web.loadUrl("file:///android_asset/web/index.html");
         if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,this::handleBack);
     }
-    @Override protected void onResume(){super.onResume();active=true;if(state!=null){if(!state.listeners.contains(observer))state.listeners.add(observer);LyricsListener.refresh(this);reconcileAudio();publish();}if(web!=null)web.onResume();handler.removeCallbacks(ticker);handler.post(ticker);handler.removeCallbacks(audioTicker);handler.post(audioTicker);}
+    @Override protected void onResume(){super.onResume();active=true;if(state!=null){if(!state.listeners.contains(observer))state.listeners.add(observer);LyricsListener.refresh(this);reconcileAudio();publish();}if(web!=null)web.onResume();sendImportBusy();handler.removeCallbacks(ticker);handler.post(ticker);handler.removeCallbacks(audioTicker);handler.post(audioTicker);}
     @Override protected void onPause(){active=false;handler.removeCallbacks(ticker);handler.removeCallbacks(audioTicker);handler.removeCallbacks(publishTask);publishQueued=false;if(state!=null){state.listeners.remove(observer);state.audio.suspend();}if(web!=null)web.onPause();super.onPause();}
     @Override protected void onSaveInstanceState(Bundle out){super.onSaveInstanceState(out);if(pendingPlaylist!=null)out.putParcelable("pendingPlaylist",pendingPlaylist);out.putString("pendingMusicTarget",pendingMusicTarget);}
     @Override protected void onDestroy(){handler.removeCallbacksAndMessages(null);if(state!=null){state.listeners.remove(observer);state.cancelWork(pendingFileRead);}if(pendingMusicImport!=null)pendingMusicImport.cancel(true);musicImports.shutdownNow();if(web!=null){web.removeJavascriptInterface("Android");web.stopLoading();web.destroy();web=null;}super.onDestroy();}
@@ -201,13 +203,15 @@ public final class MainActivity extends Activity {
     private boolean persistRead(Uri uri){try{getContentResolver().takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION);return true;}catch(SecurityException error){return false;}}
     private void importLocal(Uri playlist,Uri folder,List<Uri> files,String target){
         if(pendingMusicImport!=null)pendingMusicImport.cancel(true);
+        int ticket=++musicImportGeneration;musicImportBusy=true;sendImportBusy();
         pendingMusicImport=musicImports.submit(()->{
             try{
                 LocalLibrary.ImportResult result=playlist==null?LocalLibrary.get(this).importFiles(files,target):LocalLibrary.get(this).importM3u(playlist,folder);
-                handler.post(()->{if(isDestroyed())return;LocalPlaybackService.libraryChanged(this,result.playlist.id);sendPlaylists(result.playlist.id);String message=result.added+"곡을 불러왔습니다.";int skipped=result.missing+result.unsupported;if(skipped>0)message+=" "+skipped+"곡은 찾지 못했습니다.";toast(message);});
-            }catch(Exception error){if(Thread.currentThread().isInterrupted())return;handler.post(()->{if(!isDestroyed())toast(error.getMessage()==null?"재생목록을 읽지 못했습니다.":error.getMessage());});}
+                handler.post(()->{if(isDestroyed()||ticket!=musicImportGeneration)return;musicImportBusy=false;sendImportBusy();LocalPlaybackService.libraryChanged(this,result.playlist.id);sendPlaylists(result.playlist.id);String message=result.added+"곡을 불러왔습니다.";int skipped=result.missing+result.unsupported;if(skipped>0)message+=" "+skipped+"곡은 찾지 못했습니다.";toast(message);});
+            }catch(Exception error){if(Thread.currentThread().isInterrupted())return;handler.post(()->{if(!isDestroyed()&&ticket==musicImportGeneration){musicImportBusy=false;sendImportBusy();toast(error.getMessage()==null?"재생목록을 읽지 못했습니다.":error.getMessage());}});}
         });
     }
+    private void sendImportBusy(){try{send("playlistBusy",new JSONObject().put("busy",musicImportBusy));}catch(JSONException ignored){}}
     @Override protected void onActivityResult(int request,int result,Intent data){
         if(request==202){super.onActivityResult(request,result,data);projectionPending=false;if(result==RESULT_OK&&data!=null)state.audio.startCapture(result,data);else{state.audio.stop();toast("기본 그라데이션으로 사용할게요.");}publish();return;}
         if(request==301||request==302||request==303){
