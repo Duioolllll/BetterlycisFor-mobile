@@ -59,7 +59,7 @@ try:
     adb('shell', 'logcat', '-c')
     launch_and_check()
     report['checks'].append('MainActivity launch and process still alive after 3 seconds')
-    for previous in ['0.3.0', '0.4.1', '0.4.3', '0.4.4', '0.5.0']:
+    for previous in ['0.3.0', '0.4.1', '0.4.3', '0.4.4', '0.5.0', '0.6.0']:
         adb('uninstall', package)
         adb('install', '--no-streaming', root/('downloads/BetterLyrics-Mobile-'+previous+'.apk'))
         adb('install', '--no-streaming', '-r', root/'downloads'/meta['apk'])

@@ -56,7 +56,7 @@ jobs:
             }
           })().catch(error=>{console.error(error);process.exit(1);});
           JS
-          for suite in ui flow player appearance review customization; do node "tools/$suite-smoke.cjs"; done
+          for suite in ui flow player appearance review customization playlist; do node "tools/$suite-smoke.cjs"; done
           python3 - <<'PY_UI'
           import json, os
           from pathlib import Path
@@ -68,6 +68,7 @@ jobs:
                   'appearance': 'build/ui-qa/appearance-results.json',
                   'review': 'build/review-qa/results.json',
                   'customization': 'build/customization-qa/results.json',
+                  'playlist': 'build/playlist-qa/results.json',
               }.items()
           }
           assert all(result['passed'] and not result['errors'] for result in suites.values())
@@ -88,7 +89,7 @@ jobs:
             echo "Release already exists; refusing to replace published assets."
             exit 1
           fi
-          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/INSTALL_VALIDATION.json" "$RUNNER_TEMP/UI_VALIDATION.json" "$RUNNER_TEMP/WIDGET_VALIDATION.json" --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
+          gh release create "$tag" "downloads/$RELEASE_APK" downloads/SHA256SUMS "$RUNNER_TEMP/RELEASE_VALIDATION.json" "$RUNNER_TEMP/INSTALL_VALIDATION.json" "$RUNNER_TEMP/UI_VALIDATION.json" "$RUNNER_TEMP/WIDGET_VALIDATION.json" "$RUNNER_TEMP/PLAYLIST_VALIDATION.json" --target "$GITHUB_SHA" --title "BetterLyrics Mobile $RELEASE_VERSION" --notes-file "changelog/$RELEASE_VERSION.md" --draft
           gh release edit "$tag" --draft=false --latest
           curl --fail --location --retry 3 --retry-delay 2 --output "$RUNNER_TEMP/published.apk" "https://github.com/${GH_REPO}/releases/download/${tag}/${RELEASE_APK}"
           python3 - "$RUNNER_TEMP/published.apk" <<'PY_HASH'

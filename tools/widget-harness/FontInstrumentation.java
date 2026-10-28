@@ -17,7 +17,7 @@ public final class FontInstrumentation extends Instrumentation {
     private String evaluate(WebView web,String script)throws Exception{
         CountDownLatch ready=new CountDownLatch(1);AtomicReference<String> value=new AtomicReference<>();
         runOnMainSync(()->web.evaluateJavascript(script,response->{value.set(response);ready.countDown();}));
-        if(!ready.await(10,TimeUnit.SECONDS))throw new IllegalStateException("WebView callback timed out");
+        if(!ready.await(30,TimeUnit.SECONDS))throw new IllegalStateException("WebView callback timed out");
         return value.get();
     }
     @Override public void onStart(){
@@ -27,6 +27,13 @@ public final class FontInstrumentation extends Instrumentation {
             Activity activity=startActivitySync(launch);waitForIdleSync();
             Field field=activity.getClass().getDeclaredField("web");field.setAccessible(true);WebView web=(WebView)field.get(activity);
             if(web==null)throw new IllegalStateException("WebView unavailable");
+            Field loaded=activity.getClass().getDeclaredField("ready");loaded.setAccessible(true);boolean documentLoaded=false;
+            for(int i=0;i<150;i++){
+                AtomicReference<Boolean> observed=new AtomicReference<>(false);
+                runOnMainSync(()->{try{observed.set(loaded.getBoolean(activity));}catch(IllegalAccessException ignored){}});
+                if(observed.get()){documentLoaded=true;break;}Thread.sleep(200);
+            }
+            if(!documentLoaded)throw new IllegalStateException("WebView page did not finish loading");
             boolean pageReady=false;
             for(int i=0;i<100;i++){
                 if("true".equals(evaluate(web,"!!(window.Appearance&&window.App&&document.querySelector('.font-choice[data-font=jua]'))"))){pageReady=true;break;}

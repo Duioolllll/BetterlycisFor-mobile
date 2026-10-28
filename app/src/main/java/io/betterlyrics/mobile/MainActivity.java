@@ -141,7 +141,7 @@ public final class MainActivity extends Activity {
                 send("spotify",new JSONObject().put("view","connecting"));SpotifyClient.get(this).connect(this,spotifyCallback());break;
             }
             case "spotifyPlaylists":SpotifyClient.get(this).playlists(spotifyCallback());break;
-            case "spotifyTracks":SpotifyClient.get(this).tracks(data.optString("id",""),data.optString("name",""),spotifyCallback());break;
+            case "spotifyTracks":SpotifyClient.get(this).tracks(data.optString("id",""),data.optString("name",""),data.optInt("offset",0),spotifyCallback());break;
             case "spotifyDisconnect":SpotifyClient.get(this).disconnect();send("spotify",new JSONObject().put("view","disconnected").put("connected",false));break;
             case "spotifyOpen":openSpotify(data.optString("type",""),data.optString("id",""));break;
             case "about":new AlertDialog.Builder(this).setTitle("BetterLyrics Mobile "+getPackageManager().getPackageInfo(getPackageName(),0).versionName).setMessage("독립 비공식 앱\n원작: Zhe Fang / BetterLyrics contributors\nGPL-3.0").setPositiveButton("확인",null).show();break;

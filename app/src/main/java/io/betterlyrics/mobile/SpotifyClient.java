@@ -160,23 +160,21 @@ final class SpotifyClient {
             deliver(ticket,callback,object("view","lists","connected",true,"items",result));
         }catch(Exception error){deliver(ticket,callback,failure(safeMessage(error)));}
     }
-    void tracks(String id,String name,Callback callback){
-        int ticket=epoch;if(!validId(id)){callback.done(failure("잘못된 Spotify 재생목록입니다."));return;}
+    void tracks(String id,String name,int offset,Callback callback){
+        int ticket=epoch;if(!validId(id)||offset<0||offset>=5000){callback.done(failure("잘못된 Spotify 재생목록입니다."));return;}
         worker.execute(()->{
             try{
                 JSONArray result=new JSONArray();
-                for(int offset=0;offset<5000;offset+=50){
-                    JSONObject page=api("/playlists/"+id+"/items?limit=50&offset="+offset+"&additional_types=track%2Cepisode");JSONArray items=page.optJSONArray("items");if(items==null)break;
-                    for(int i=0;i<items.length();i++){
-                        JSONObject row=items.optJSONObject(i);if(row==null)continue;JSONObject track=row.optJSONObject("item");if(track==null)track=row.optJSONObject("track");if(track==null)continue;
-                        String type=track.optString("type","track"),trackId=track.optString("id"),artist="";JSONArray artists=track.optJSONArray("artists");
-                        if(artists!=null)for(int j=0;j<artists.length();j++){JSONObject a=artists.optJSONObject(j);if(a!=null&&!a.optString("name").isEmpty())artist+=(artist.isEmpty()?"":", ")+a.optString("name");}
-                        result.put(object("id",validId(trackId)?trackId:"","type",type,"title",track.optString("name","제목 없음"),"artist",artist,"duration",track.optLong("duration_ms",0)));
-                    }
-                    if(items.length()==0||page.isNull("next")||!page.has("next"))break;
+                JSONObject page=api("/playlists/"+id+"/items?limit=50&offset="+offset+"&additional_types=track%2Cepisode");JSONArray items=page.optJSONArray("items");if(items==null)items=new JSONArray();
+                for(int i=0;i<items.length();i++){
+                    JSONObject row=items.optJSONObject(i);if(row==null)continue;JSONObject track=row.optJSONObject("item");if(track==null)track=row.optJSONObject("track");if(track==null)continue;
+                    String type=track.optString("type","track"),trackId=track.optString("id"),artist="";JSONArray artists=track.optJSONArray("artists");
+                    if(artists!=null)for(int j=0;j<artists.length();j++){JSONObject a=artists.optJSONObject(j);if(a!=null&&!a.optString("name").isEmpty())artist+=(artist.isEmpty()?"":", ")+a.optString("name");}
+                    result.put(object("id",validId(trackId)&&(type.equals("track")||type.equals("episode"))?trackId:"","type",type,"title",track.optString("name","제목 없음"),"artist",artist,"duration",track.optLong("duration_ms",0)));
                 }
-                deliver(ticket,callback,object("view","tracks","connected",true,"id",id,"name",name,"items",result));
-            }catch(Exception error){deliver(ticket,callback,object("view","tracksError","connected",connected(),"id",id,"name",name,"message",safeMessage(error)));}
+                int nextOffset=offset+items.length();boolean more=items.length()>0&&page.has("next")&&!page.isNull("next")&&nextOffset<5000;
+                deliver(ticket,callback,object("view","tracks","connected",true,"id",id,"name",name,"items",result,"offset",offset,"nextOffset",nextOffset,"more",more));
+            }catch(Exception error){deliver(ticket,callback,object("view","tracksError","connected",connected(),"id",id,"name",name,"offset",offset,"message",safeMessage(error)));}
         });
     }
     static boolean validId(String id){return id!=null&&id.matches("[A-Za-z0-9]{22}");}

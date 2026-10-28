@@ -126,7 +126,7 @@ public final class LocalPlaybackService extends Service {
         session.setMetadata(metadata(track,duration));publish(true);
         loadLyrics(track);
         try{
-            MediaPlayer created=new MediaPlayer();player=created;created.setAudioAttributes(attributes());created.setDataSource(this,Uri.parse(track.uri));
+            MediaPlayer created=new MediaPlayer();player=created;created.setAudioAttributes(attributes());created.setWakeMode(this,PowerManager.PARTIAL_WAKE_LOCK);created.setDataSource(this,Uri.parse(track.uri));
             created.setOnPreparedListener(p->{if(p!=player)return;prepared=true;try{duration=p.getDuration();}catch(IllegalStateException ignored){}
                 session.setMetadata(metadata(track,duration));if(playWhenReady){if(requestFocus())try{p.start();}catch(IllegalStateException error){playWhenReady=false;abandonFocus();toast("음악 파일을 재생할 수 없습니다.");}else{playWhenReady=false;toast("다른 앱에서 오디오를 사용 중입니다.");}}publish(true);
             });
