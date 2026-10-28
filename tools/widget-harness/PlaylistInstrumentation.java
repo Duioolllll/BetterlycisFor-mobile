@@ -52,7 +52,8 @@ public final class PlaylistInstrumentation extends Instrumentation {
             Activity activity=startActivitySync(launch);waitForIdleSync();
             waitFor(()->"true".equals(webValue(activity,"!!(window.App&&document.getElementById('app').classList.contains('controls-hidden')&&document.getElementById('playerControls').inert)")),"idle playback controls hide in WebView");
             long now=android.os.SystemClock.uptimeMillis();android.view.MotionEvent down=android.view.MotionEvent.obtain(now,now,android.view.MotionEvent.ACTION_DOWN,10,200,0),up=android.view.MotionEvent.obtain(now,now+40,android.view.MotionEvent.ACTION_UP,10,200,0);
-            try{sendPointerSync(down);sendPointerSync(up);}finally{down.recycle();up.recycle();}
+            down.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);up.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);
+            try{runOnMainSync(()->{activity.dispatchTouchEvent(down);activity.dispatchTouchEvent(up);});}finally{down.recycle();up.recycle();}
             waitFor(()->"true".equals(webValue(activity,"!!(window.App&&!document.getElementById('app').classList.contains('controls-hidden')&&!document.getElementById('playerControls').inert)")),"touch reveals playback controls");output.putString("controls","ok");
             Log.i("PlaylistInstrumentation","Requesting fixture document grants");
             context.startActivity(new Intent().setClassName("io.betterlyrics.widgettest","io.betterlyrics.widgettest.GrantActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));

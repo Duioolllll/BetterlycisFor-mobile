@@ -38,7 +38,7 @@ try:
         'folder import, deduplicated artist/album groups, ordered M3U export and live playlist reordering',
         'current lyric card renders as a 1080px PNG through the Android document provider',
         'observed playback accrues private listening time and can be cleared',
-        'idle playback controls hide and a real touch reveals them in Android WebView',
+        'idle playback controls hide and Android touch events reveal them in WebView',
         'local foreground audio playback, position, pause, seek, next, stop and media notification',
         'Spotify authorization opens the exact configured loopback URI, enforces state, reuses the port and reports port conflicts',
         'Spotify tokens encrypted by Android Keystore and reloaded',
