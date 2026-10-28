@@ -1,3 +1,9 @@
+# 0.8.0 — 2026-10-28
+
+261 JVM checks cover Spotify playback scopes, playlist context and original positions. Seven browser suites cover 70 groups, including local/Spotify play, reauthorization and missing-device feedback. Android release checks use synthetic documents, audio, tokens and a simulated Spotify HTTP transport to exercise playlist playback requests, token refresh and errors, as well as signed APK updates from previous versions. Published reports contain the actual results. Real Spotify account playback and physical-device behavior remain unverified. [Playlist guide](PLAYLISTS.md) · [Release notes](../changelog/0.8.0.md).
+
+---
+
 # 0.7.1 — 2026-10-28
 
 257 JVM checks include a fixed Spotify redirect URI regression. The Android release gate checks the actual authorization request, callback state, port reuse and port conflicts with synthetic credentials, as well as playlists, playback, widgets and installation/update from 0.7.0. Its published reports contain the actual results. Real Spotify account login and physical-device behavior remain unverified. [Spotify setup](PLAYLISTS.md) · [Release notes](../changelog/0.7.1.md).

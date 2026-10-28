@@ -7,13 +7,13 @@
 An Android lyric companion that follows playback in your music app.<br>
 Large lyrics, album-color gradients and a layout you can make your own.
 
-[![Release 0.7.1](https://img.shields.io/badge/release-0.7.1-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.7.1)
+[![Release 0.8.0](https://img.shields.io/badge/release-0.8.0-8b7cf8?style=flat-square)](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/tag/v0.8.0)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square)](docs/INSTALL_EN.md)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
 
-### [↓ Download Android APK · v0.7.1](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/BetterLyrics-Mobile-0.7.1.apk)
+### [↓ Download Android APK · v0.8.0](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/BetterLyrics-Mobile-0.8.0.apk)
 
-**Released October 28, 2026** · Android 8.0+ · 2.3 MiB · versionCode 16
+**Released October 28, 2026** · Android 8.0+ · 2.3 MiB · versionCode 17
 
 [Release / Assets](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [Installation](docs/INSTALL_EN.md) · [Changelog](changelog/README.md) · [한국어](README.md) · [简体中文安装](docs/INSTALL_ZH.md)
 
@@ -21,7 +21,7 @@ Large lyrics, album-color gradients and a layout you can make your own.
 
 </div>
 
-> **Installing for the first time?** Choose **Download Android APK** above. The source ZIP is not an Android installer. If the download is unavailable, use the [repository fallback](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.7.1.apk).
+> **Installing for the first time?** Choose **Download Android APK** above. The source ZIP is not an Android installer. If the download is unavailable, use the [repository fallback](https://github.com/Duioolllll/BetterlycisFor-mobile/raw/refs/heads/main/downloads/BetterLyrics-Mobile-0.8.0.apk).
 
 ## Lyrics that follow your music
 
@@ -40,7 +40,7 @@ LRCLIB / NetEase search, manual candidate selection, local lyric import/cache an
 
 - **Lyrics:** LRC / Enhanced LRC / ESLRC / TTML, decoded QRC·KRC·YRC and binary KRC import; scrub preview, return to current lyrics and per-song timing offsets.
 - **Appearance:** default / focus / album presets; saved type weight, blur, brightness, cover, colors and auto-hiding playback controls.
-- **Playlists:** import phone music and M3U playlists, play local files, and browse Spotify playlists and open them in Spotify.
+- **Playlists:** import and play phone music and M3U playlists, and start Spotify playlists or tracks on an active Spotify device.
 - **Widget:** home-screen lyrics and playback controls with appearance settings.
 - **Background:** default album-color gradient; optional actual-audio response, intensity controls, reduced motion and a fallback when WebGL is unavailable.
 - **Music apps:** a compatible MediaSession is required. Artwork, lyrics, seeking and audio sharing depend on the source app and provider.
@@ -51,7 +51,7 @@ Screenshots show the actual bundled web UI with synthetic track metadata and ori
 
 ## Get started in three steps
 
-1. **[Download v0.7.1 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/BetterLyrics-Mobile-0.7.1.apk)** and open it. If prompted, allow installation only for the browser or file app opening this file.
+1. **[Download v0.8.0 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/BetterLyrics-Mobile-0.8.0.apk)** and open it. If prompted, allow installation only for the browser or file app opening this file.
 2. Launch → **··· → 음악 감지** (music detection) → allow notification access. Play a song in your music app and return.
 3. Open **··· → 화면 꾸미기** (appearance) to choose lyrics, background and layout. Audio response and floating lyrics are optional.
 
@@ -59,35 +59,35 @@ Screenshots show the actual bundled web UI with synthetic track metadata and ori
 
 Read Play Protect warnings and stop if the app is identified as harmful. You can revoke the install-source permission afterward. Updates require the same package and signature; uninstalling may remove settings and lyric caches. The installation guides explain permissions and common failures.
 
-## In this release · 0.7.1
+## In this release · 0.8.0
 
-- **Spotify connection:** a fixed loopback redirect URI can be registered exactly in the Spotify Developer Dashboard.
-- **Existing features:** import phone music and M3U playlists, play local files, browse Spotify playlists, and use lyrics and widgets.
+- **Play local playlists:** after importing phone music or an M3U playlist, select **전체 재생** (play all) or a track.
+- **Spotify playback:** start the whole playlist or a selected track on your active Spotify device. Existing connections need to reconnect and approve playback control.
 
-Add `http://127.0.0.1:43123/callback` to the Spotify developer app's Redirect URIs. [Playlist guide](docs/PLAYLISTS.md) · [0.7.1 release notes](changelog/0.7.1.md) · [Original-feature parity](docs/PARITY.md)
+Spotify playback requires the listening account to have Premium and an active Spotify app or Spotify Connect device. [Playlist guide](docs/PLAYLISTS.md) · [0.8.0 release notes](changelog/0.8.0.md) · [Original-feature parity](docs/PARITY.md)
 
-0.4.0 has a confirmed installation defect. **Use the current 0.7.1 download.** 0.4.2 was committed as source only and has no separate public APK release.
+0.4.0 has a confirmed installation defect. **Use the current 0.8.0 download.** 0.4.2 was committed as source only and has no separate public APK release.
 
 <details>
 <summary><strong>Download details · SHA-256 · actual verification</strong></summary>
 
 | Item | Value / result |
 | --- | --- |
-| File | `BetterLyrics-Mobile-0.7.1.apk` · 2,419,799 bytes |
-| Package / version | `io.betterlyrics.mobile` · 0.7.1 (16) |
+| File | `BetterLyrics-Mobile-0.8.0.apk` · 2,419,799 bytes |
+| Package / version | `io.betterlyrics.mobile` · 0.8.0 (17) |
 | Android | Minimum 8.0 (API 26) · compile / target 16 (API 36) |
 | APK | Universal · no native `.so` |
-| Offline checks | 257 passed · 2,073 bit-identical baseline audio frames · 5 packaging cases passed |
+| Offline checks | 261 passed · 2,073 bit-identical baseline audio frames · 5 packaging cases passed |
 | Signing / builds | v2/v3 · previous certificate match · ZIP alignment · two byte-identical same-environment builds |
 | Browser UI | Seven suites · 70 check groups passed |
 | Android 16 AVD | Widget, fonts, playlist, install and update gates; see attached reports |
 | Public file | Post-publication APK download and SHA-256 verification step |
 
 ```text
-f29c0759f87ce4a22f08cb1e4aa8f0dae74ea651956d0ab58f62b0319ff69a2e
+3a63c496678c40d70b4a335ab8f769c4804e66df5004d7f8a280cdf390647333
 ```
 
-[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/RELEASE_VALIDATION.json) · [UI_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/UI_VALIDATION.json) · [WIDGET_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/WIDGET_VALIDATION.json) · [PLAYLIST_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/PLAYLIST_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/INSTALL_VALIDATION.json) · [Workflow run](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [Validation scope](docs/VALIDATION.md)
+[SHA256SUMS](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/SHA256SUMS) · [RELEASE_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/RELEASE_VALIDATION.json) · [UI_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/UI_VALIDATION.json) · [WIDGET_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/WIDGET_VALIDATION.json) · [PLAYLIST_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/PLAYLIST_VALIDATION.json) · [INSTALL_VALIDATION.json](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/INSTALL_VALIDATION.json) · [Workflow run](https://github.com/Duioolllll/BetterlycisFor-mobile/actions/workflows/release.yml) · [Validation scope](docs/VALIDATION.md)
 
 </details>
 
@@ -116,7 +116,7 @@ Debug builds do not require the private release key. Release builds require an e
 
 - **Hardware:** physical phones, other Android versions, real-player Korean sync/artwork/capture, power-saving/reconnection and long-term stability remain unverified for this build. Linux JVM measurements are not phone-performance or battery measurements.
 - **Providers:** NetEase is unofficial and usage/distribution terms are unresolved. Intermittent LRCLIB HTTP 503 was observed. Missing source words and timestamps are not invented.
-- **Spotify:** development mode requires the app owner to have Premium and limits access to registered users. Actual account login requires separate verification.
+- **Spotify:** development mode requires the app owner to have Premium and limits access to registered users. Actual account login and Spotify playback control require separate verification.
 - **Scope:** QQ / Kugou / Apple Music online lyrics, encrypted QRC, Windows plug-ins, Wallpaper Engine and Sing vocal removal are excluded.
 - **Validation:** the previous development-certificate lineage is retained; this is not Google review or Play Protect approval. 70 browser check groups passed in Chromium using a synthetic Android bridge.
 

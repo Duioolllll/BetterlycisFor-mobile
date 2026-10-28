@@ -1,13 +1,13 @@
 # APK downloads
 
-Current version: **0.7.1**, versionCode16, package `io.betterlyrics.mobile`, Android8.0+(API26), target Android16(API36).
+Current version: **0.8.0**, versionCode17, package `io.betterlyrics.mobile`, Android8.0+(API26), target Android16(API36).
 
-[Latest Release](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [0.7.1 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.7.1/BetterLyrics-Mobile-0.7.1.apk) · [Repository fallback](BetterLyrics-Mobile-0.7.1.apk) · [SHA256SUMS](SHA256SUMS)
+[Latest Release](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/latest) · [0.8.0 APK](https://github.com/Duioolllll/BetterlycisFor-mobile/releases/download/v0.8.0/BetterLyrics-Mobile-0.8.0.apk) · [Repository fallback](BetterLyrics-Mobile-0.8.0.apk) · [SHA256SUMS](SHA256SUMS)
 
-Size:2,419,799 bytes. SHA-256:`f29c0759f87ce4a22f08cb1e4aa8f0dae74ea651956d0ab58f62b0319ff69a2e`.
+Size:2,419,799 bytes. SHA-256:`3a63c496678c40d70b4a335ab8f769c4804e66df5004d7f8a280cdf390647333`.
 
-Signing certificate SHA-256:`5e017fe5163897e92ca83aa9a8b921ade3ccf065b2a6d53071c4369da74b8010`. The original development-certificate lineage is retained for updates. No private key is included. A matching hash/certificate identifies this distribution; it is not Play Protect approval. Physical-device installation remains unverified. Publishing0.7.1 requires Android16 emulator install/launch/update checks; see RELEASE_VALIDATION.json and INSTALL_VALIDATION.json in its Release.
+Signing certificate SHA-256:`5e017fe5163897e92ca83aa9a8b921ade3ccf065b2a6d53071c4369da74b8010`. The original development-certificate lineage is retained for updates. No private key is included. A matching hash/certificate identifies this distribution; it is not Play Protect approval. Physical-device installation remains unverified. Publishing0.8.0 requires Android16 emulator install/launch/update checks; see RELEASE_VALIDATION.json and INSTALL_VALIDATION.json in its Release.
 
-[한국어](../docs/INSTALL_KO.md) · [English](../docs/INSTALL_EN.md) · [简体中文](../docs/INSTALL_ZH.md) · [Release notes](../changelog/0.7.1.md)
+[한국어](../docs/INSTALL_KO.md) · [English](../docs/INSTALL_EN.md) · [简体中文](../docs/INSTALL_ZH.md) · [Release notes](../changelog/0.8.0.md)
 
-0.3.0 and the defective0.4.0 remain for regression/history. Use0.7.1 or later for installation. Source-code ZIPs are not APK installers.
+0.3.0 and the defective0.4.0 remain for regression/history. Use0.8.0 or later for installation. Source-code ZIPs are not APK installers.
