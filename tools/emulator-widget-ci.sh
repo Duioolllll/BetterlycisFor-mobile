@@ -31,11 +31,11 @@ cleanup(){
   if [ -n "$emulator_pid" ]; then timeout 10 adb -s emulator-5554 emu kill >/dev/null 2>&1 || kill "$emulator_pid" 2>/dev/null || true; fi
 }
 trap cleanup EXIT
-# The host SwiftShader GLES translator intermittently segfaults while the
-# playlist test exercises WebView and media. Use the supported ANGLE backend
-# for those runs; widget and install checks keep their established renderer.
-gpu_mode=swiftshader
-if [ "$mode" = playlist ] || [ "$mode" = release ]; then gpu_mode=swangle; fi
+# The host SwiftShader GLES translator can segfault when WebView opens in the
+# playlist or widget/font checks. Use the software ANGLE backend for those
+# tests; installation checks do not open WebView and keep the older renderer.
+gpu_mode=swangle
+if [ "$mode" = install ]; then gpu_mode=swiftshader; fi
 "$emulator_binary" -avd betterlyrics_widget -port 5554 -no-window -no-audio -no-boot-anim -no-snapshot -gpu "$gpu_mode" -feature -Vulkan -memory 3072 -cores 2 > "$RUNNER_TEMP/emulator.log" 2>&1 &
 emulator_pid=$!
 connection_deadline=$((SECONDS + 180))
